@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { Cuisine, DietaryPreference, Location, Persona } from '../data/restaurants';
-import { generateSentence, getColorClass } from '../utils/sentence';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
+import { getColorClass } from '../utils/sentence';
+import { Card, CardContent } from '@/components/ui/card';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from '@/components/ui/select';
 
 interface FoodSelectorProps {
   onSelectionChange: (persona?: Persona, cuisine?: Cuisine, dietary?: DietaryPreference, location?: Location) => void;
@@ -18,7 +21,6 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
   const [cuisine, setCuisine] = useState<Cuisine | undefined>(undefined);
   const [dietary, setDietary] = useState<DietaryPreference | undefined>(undefined);
   const [location, setLocation] = useState<Location | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState('who');
 
   // Amsterdam locations
   const locations: Location[] = [
@@ -30,152 +32,119 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
   ];
 
   // Handle selection changes and propagate to parent
-  const handlePersonaChange = (selected: Persona | undefined) => {
+  const handlePersonaChange = (value: string) => {
+    const selected = value as Persona;
     setPersona(selected);
     onSelectionChange(selected, cuisine, dietary, location);
   };
 
-  const handleCuisineChange = (selected: Cuisine | undefined) => {
+  const handleCuisineChange = (value: string) => {
+    const selected = value as Cuisine;
     setCuisine(selected);
     onSelectionChange(persona, selected, dietary, location);
   };
 
-  const handleDietaryChange = (selected: DietaryPreference | undefined) => {
+  const handleDietaryChange = (value: string) => {
+    const selected = value === 'none' ? undefined : value as DietaryPreference;
     setDietary(selected);
     onSelectionChange(persona, cuisine, selected, location);
   };
 
-  const handleLocationChange = (selected: Location | undefined) => {
+  const handleLocationChange = (value: string) => {
+    const selected = value as Location;
     setLocation(selected);
     onSelectionChange(persona, cuisine, dietary, selected);
   };
 
-  const resetAll = () => {
-    setPersona(undefined);
-    setCuisine(undefined);
-    setDietary(undefined);
-    setLocation(undefined);
-    onSelectionChange(undefined, undefined, undefined, undefined);
-  };
-
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Find Your Food</CardTitle>
-          <Button variant="ghost" size="sm" onClick={resetAll}>Reset</Button>
+    <Card className="w-full shadow-sm">
+      <CardContent className="pt-6 pb-6">
+        <div className="flex flex-wrap items-center justify-center text-xl font-medium gap-2">
+          <Select onValueChange={handlePersonaChange}>
+            <SelectTrigger 
+              className={`w-auto border-none px-1 focus:ring-0 ${persona ? getColorClass('persona', persona) : 'text-muted-foreground'}`} 
+              style={persona ? {backgroundColor: 'transparent'} : {}}
+            >
+              <SelectValue placeholder="Who" />
+            </SelectTrigger>
+            <SelectContent>
+              {['drerrie', 'tourist', 'foodie'].map(option => (
+                <SelectItem 
+                  key={option} 
+                  value={option}
+                  className={getColorClass('persona', option as Persona)}
+                >
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <span>eats</span>
+          
+          <Select onValueChange={handleCuisineChange}>
+            <SelectTrigger 
+              className={`w-auto border-none px-1 focus:ring-0 ${cuisine ? getColorClass('cuisine', cuisine) : 'text-muted-foreground'}`}
+              style={cuisine ? {backgroundColor: 'transparent'} : {}}
+            >
+              <SelectValue placeholder="what" />
+            </SelectTrigger>
+            <SelectContent>
+              {['turkish', 'indonesian', 'korean', 'japanese'].map(option => (
+                <SelectItem 
+                  key={option} 
+                  value={option}
+                  className={getColorClass('cuisine', option as Cuisine)}
+                >
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select onValueChange={handleDietaryChange}>
+            <SelectTrigger 
+              className={`w-auto border-none px-1 focus:ring-0 ${dietary ? getColorClass('dietary', dietary) : 'text-muted-foreground'}`}
+              style={dietary ? {backgroundColor: 'transparent'} : {}}
+            >
+              <SelectValue placeholder="diet" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">no preference</SelectItem>
+              <SelectItem 
+                value="halal"
+                className={getColorClass('dietary', 'halal')}
+              >
+                halal
+              </SelectItem>
+              <SelectItem 
+                value="vegetarian"
+                className={getColorClass('dietary', 'vegetarian')}
+              >
+                vegetarian
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <span>food in</span>
+          
+          <Select onValueChange={handleLocationChange}>
+            <SelectTrigger 
+              className={`w-auto border-none px-1 focus:ring-0 ${location ? getColorClass('location', location) : 'text-muted-foreground'}`}
+              style={location ? {backgroundColor: 'transparent'} : {}}
+            >
+              <SelectValue placeholder="where" />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map(option => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </CardHeader>
-
-      <CardContent>
-        {/* Current sentence display */}
-        <div className="text-xl mb-6 font-medium p-4 bg-muted rounded-lg">
-          <span className={getColorClass('persona', persona)}>{persona || '______'}</span>
-          <span className="text-foreground"> eats </span>
-          <span className={getColorClass('cuisine', cuisine)}>{cuisine || '______'}</span>
-          {dietary && dietary !== 'none' && (
-            <>
-              <span className="text-foreground"> </span>
-              <span className={getColorClass('dietary', dietary)}>{dietary}</span>
-            </>
-          )}
-          <span className="text-foreground"> food in </span>
-          <span className={getColorClass('location', location)}>{location || '______'}</span>
-        </div>
-
-        <Tabs 
-          defaultValue="who" 
-          value={activeTab}
-          onValueChange={setActiveTab} 
-          className="w-full"
-        >
-          <TabsList className="grid grid-cols-4 mb-6">
-            <TabsTrigger value="who">Who</TabsTrigger>
-            <TabsTrigger value="what">What</TabsTrigger>
-            <TabsTrigger value="diet">Diet</TabsTrigger>
-            <TabsTrigger value="where">Where</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="who" className="space-y-4">
-            <h3 className="text-sm font-medium mb-2">Who is eating?</h3>
-            <div className="flex flex-wrap gap-2">
-              {['drerrie', 'tourist', 'foodie'].map((option) => (
-                <Button
-                  key={option}
-                  onClick={() => handlePersonaChange(option as Persona)}
-                  variant={persona === option ? "default" : "outline"}
-                  className={persona === option ? "" : "bg-secondary"}
-                  style={persona === option ? { backgroundColor: `hsl(var(--${option}))` } : {}}
-                >
-                  {option}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="what" className="space-y-4">
-            <h3 className="text-sm font-medium mb-2">What kind of food?</h3>
-            <div className="flex flex-wrap gap-2">
-              {['turkish', 'indonesian', 'korean', 'japanese'].map((option) => (
-                <Button
-                  key={option}
-                  onClick={() => handleCuisineChange(option as Cuisine)}
-                  variant={cuisine === option ? "default" : "outline"}
-                  className={cuisine === option ? "" : "bg-secondary"}
-                  style={cuisine === option ? { backgroundColor: `hsl(var(--${option}))` } : {}}
-                >
-                  {option}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="diet" className="space-y-4">
-            <h3 className="text-sm font-medium mb-2">Dietary preferences (optional)</h3>
-            <div className="flex flex-wrap gap-2">
-              {['halal', 'vegetarian', 'none'].map((option) => (
-                <Button
-                  key={option}
-                  onClick={() => handleDietaryChange(option as DietaryPreference)}
-                  variant={dietary === option ? (option !== 'none' ? "default" : "secondary") : "outline"}
-                  className={dietary === option && option === 'none' ? "bg-secondary" : ""}
-                  style={dietary === option && option !== 'none' ? { backgroundColor: `hsl(var(--${option}))` } : {}}
-                >
-                  {option === 'none' ? 'no preference' : option}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="where" className="space-y-4">
-            <h3 className="text-sm font-medium mb-2">Location</h3>
-            <div className="flex flex-wrap gap-2">
-              {locations.map((option) => (
-                <Button
-                  key={option}
-                  onClick={() => handleLocationChange(option)}
-                  variant={location === option ? "default" : "outline"}
-                  className={location === option ? "" : "bg-secondary"}
-                >
-                  {option}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
       </CardContent>
-
-      <CardFooter>
-        <div className="flex gap-2 w-full">
-          {persona && <Badge variant="outline" className={getColorClass('persona', persona)}>{persona}</Badge>}
-          {cuisine && <Badge variant="outline" className={getColorClass('cuisine', cuisine)}>{cuisine}</Badge>}
-          {dietary && dietary !== 'none' && <Badge variant="outline" className={getColorClass('dietary', dietary)}>{dietary}</Badge>}
-          {location && <Badge variant="outline" className={getColorClass('location', location)}>{location}</Badge>}
-          {!persona && !cuisine && !dietary && !location && (
-            <span className="text-muted-foreground text-sm">Select options to find restaurants</span>
-          )}
-        </div>
-      </CardFooter>
     </Card>
   );
 } 

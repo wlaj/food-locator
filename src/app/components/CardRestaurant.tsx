@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Restaurant, Persona } from '../data/restaurants';
 import { getColorClass } from '../utils/sentence';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Separator } from '@/components/ui/separator';
@@ -36,7 +36,7 @@ export default function CardRestaurant({ restaurant, selectedPersona }: CardRest
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300">
-      <div className="w-full">
+      <div className="relative">
         <AspectRatio ratio={16/9}>
           <Image
             src={imageUrl}
@@ -46,22 +46,22 @@ export default function CardRestaurant({ restaurant, selectedPersona }: CardRest
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </AspectRatio>
-      </div>
-      
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <h3 className="text-xl font-semibold">{name}</h3>
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-muted-foreground">{ratingScore.toFixed(1)}</span>
-            <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+        
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+          <div className="flex justify-between items-end">
+            <h3 className="text-lg font-semibold text-white">{name}</h3>
+            <div className="flex items-center gap-1 bg-white/90 px-2 py-0.5 rounded-full text-sm">
+              <span>{ratingScore.toFixed(1)}</span>
+              <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
           </div>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent>
-        <div className="flex flex-wrap gap-2 mb-3">
+      <CardContent className="p-4">
+        <div className="flex flex-wrap gap-1.5 mb-3">
           <Badge 
             variant="outline" 
             className={getColorClass('cuisine', cuisine)}
@@ -81,7 +81,7 @@ export default function CardRestaurant({ restaurant, selectedPersona }: CardRest
             )
           )}
           
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="ml-auto">
             {location}
           </Badge>
           
@@ -107,9 +107,9 @@ export default function CardRestaurant({ restaurant, selectedPersona }: CardRest
           </div>
         )}
         
-        <Separator className="my-2" />
+        <Separator className="my-3" />
         
-        <p className="text-sm text-muted-foreground line-clamp-3 mt-2">{description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
       </CardContent>
     </Card>
   );

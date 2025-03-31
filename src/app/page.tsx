@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Cuisine, DietaryPreference, Location, Persona, getFilteredRestaurants } from './data/restaurants';
 import FoodSelector from './components/FoodSelector';
 import CardRestaurant from './components/CardRestaurant';
-import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export default function Home() {
@@ -31,54 +30,50 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-center mb-6">Amsterdam Food Locator</h1>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Find the best restaurants in Amsterdam based on your preferences. Select who is eating, what type of food, dietary preferences, and location.
-        </p>
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold mb-2">Amsterdam Food Locator</h1>
+          <p className="text-muted-foreground">
+            Find the best restaurants in Amsterdam based on your preferences
+          </p>
+        </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Food selection sidebar */}
-          <div className="lg:col-span-1">
-            <FoodSelector onSelectionChange={handleSelectionChange} />
+        {/* Food selector at the top */}
+        <div className="mb-12">
+          <FoodSelector onSelectionChange={handleSelectionChange} />
+        </div>
+        
+        {/* Restaurant listings below */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
+              {filteredRestaurants.length} Restaurant{filteredRestaurants.length !== 1 ? 's' : ''} Found
+            </h2>
+            {(persona || cuisine || dietary || location) && (
+              <p className="text-sm text-muted-foreground">
+                Filtered based on your selections
+              </p>
+            )}
           </div>
           
-          {/* Restaurant listings */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {filteredRestaurants.length} Restaurant{filteredRestaurants.length !== 1 ? 's' : ''} Found
-                </CardTitle>
-                {(persona || cuisine || dietary || location) && (
-                  <CardDescription>
-                    Showing results based on your preferences
-                  </CardDescription>
-                )}
-              </CardHeader>
-              
-              <CardContent>
-                {filteredRestaurants.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-6">
-                    {filteredRestaurants.map((restaurant) => (
-                      <CardRestaurant
-                        key={restaurant.id}
-                        restaurant={restaurant}
-                        selectedPersona={persona}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-10">
-                    <h3 className="text-xl font-medium mb-2">No restaurants found</h3>
-                    <p className="text-muted-foreground">
-                      Try adjusting your filters to find more restaurants
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          {filteredRestaurants.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredRestaurants.map((restaurant) => (
+                <CardRestaurant
+                  key={restaurant.id}
+                  restaurant={restaurant}
+                  selectedPersona={persona}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-10 bg-card rounded-lg border">
+              <h3 className="text-xl font-medium mb-2">No restaurants found</h3>
+              <p className="text-muted-foreground">
+                Try adjusting your selections to find more restaurants
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </main>
