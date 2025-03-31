@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Cuisine, DietaryPreference, Location, Persona, getFilteredRestaurants } from './data/restaurants';
 import FoodSelector from './components/FoodSelector';
 import CardRestaurant from './components/CardRestaurant';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export default function Home() {
   const [persona, setPersona] = useState<Persona | undefined>(undefined);

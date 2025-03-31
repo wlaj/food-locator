@@ -79,15 +79,6 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
 .select-content {
   max-height: 300px;
   overflow-y: auto;
