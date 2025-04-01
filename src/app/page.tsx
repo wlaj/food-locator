@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Cuisine,
   DietaryPreference,
@@ -10,6 +10,7 @@ import {
 } from "./data/restaurants";
 import FoodSelector from "./components/FoodSelector";
 import CardRestaurant from "./components/CardRestaurant";
+import { animate } from "@motionone/dom";
 
 export default function Home() {
   const [persona, setPersona] = useState<Persona | undefined>(undefined);
@@ -18,6 +19,59 @@ export default function Home() {
     undefined
   );
   const [location, setLocation] = useState<Location | undefined>(undefined);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  
+  // Animation on initial load
+  useEffect(() => {
+    // Animate title and subtitle
+    if (titleRef.current) {
+      animate(
+        titleRef.current,
+        {
+          y: [50, 0],
+          opacity: [0, 1],
+        },
+        {
+          duration: 0.8,
+          easing: [0.22, 0.03, 0.26, 1],
+        }
+      );
+    }
+    
+    if (subtitleRef.current) {
+      animate(
+        subtitleRef.current,
+        {
+          y: [50, 0],
+          opacity: [0, 1],
+        },
+        {
+          duration: 0.8,
+          delay: 0.2,
+          easing: [0.22, 0.03, 0.26, 1],
+        }
+      );
+    }
+    
+    // Animate results section
+    if (resultsRef.current) {
+      animate(
+        resultsRef.current,
+        {
+          y: [50, 0],
+          opacity: [0, 1],
+        },
+        {
+          duration: 0.8,
+          delay: 0.6,
+          easing: [0.22, 0.03, 0.26, 1],
+        }
+      );
+    }
+  }, []);
 
   // Get filtered restaurants based on selections
   const filteredRestaurants = getFilteredRestaurants(
@@ -43,9 +97,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="text-center flex justify-between items-center mb-12">
-          <h1 className="text-2xl font-boldonse font-bold mb-2">Fastchaps</h1>
-          <p className="text-muted-foreground">
+        <div ref={headerRef} className="text-center flex justify-between items-center mb-12">
+          <h1 ref={titleRef} className="text-2xl font-boldonse font-bold mb-2 opacity-0">Fastchaps</h1>
+          <p ref={subtitleRef} className="text-muted-foreground opacity-0">
             Find the best restaurants in Amsterdam based on your preferences
           </p>
         </div>
@@ -56,7 +110,7 @@ export default function Home() {
         </div>
 
         {/* Restaurant listings below */}
-        <div className="space-y-4">
+        <div ref={resultsRef} className="space-y-4 opacity-0">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">
               {filteredRestaurants.length} Restaurant
@@ -71,11 +125,12 @@ export default function Home() {
 
           {filteredRestaurants.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredRestaurants.map((restaurant) => (
+              {filteredRestaurants.map((restaurant, index) => (
                 <CardRestaurant
                   key={restaurant.id}
                   restaurant={restaurant}
                   selectedPersona={persona}
+                  index={index}
                 />
               ))}
             </div>
