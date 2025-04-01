@@ -25,38 +25,38 @@ export interface Restaurant {
 export const restaurants: Restaurant[] = [
   {
     id: '1',
-    name: 'Dürümcü',
+    name: 'Erol Döner',
     cuisine: 'turkish',
     dietary: ['halal'],
-    location: 'Amsterdam Oost',
-    ratingScore: 4.7,
-    price: 2,
-    authenticity: 5,
+    location: 'Amsterdam West',
+    ratingScore: 4.0,
+    price: 1,
+    authenticity: 3,
     atmosphere: 3,
     personaScores: {
       drerrie: 5,
       tourist: 3,
-      foodie: 4
+      foodie: 2
     },
-    imageUrl: 'https://images.unsplash.com/photo-1532636875304-0c89119d9b4d?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    description: 'Authentic Turkish grill serving the best döner and dürüm in Amsterdam Oost. Popular with locals and always busy in evenings.'
+    imageUrl: '/images/erol-doner.png',
+    description: 'Authentic Turkish grill serving the best döner and dürüm in Amsterdam West. Popular with locals and always busy in evenings.'
   },
   {
     id: '2',
-    name: 'Istanbul Döner',
+    name: 'Çan’s Buns',
     cuisine: 'turkish',
     dietary: ['halal'],
     location: 'Amsterdam West',
-    ratingScore: 4.5,
+    ratingScore: 4.1,
     price: 1,
-    authenticity: 4,
-    atmosphere: 3,
+    authenticity: 3,
+    atmosphere: 2,
     personaScores: {
       drerrie: 5,
       tourist: 2,
-      foodie: 3
+      foodie: 2
     },
-    imageUrl: 'https://source.unsplash.com/random/900×700/?doner',
+    imageUrl: '/images/cans-buns.jpg',
     description: 'Late-night spot serving authentic Turkish döner and kebabs. No-frills place with amazing value for money.'
   },
   {
