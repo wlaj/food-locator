@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +8,20 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const boldonse = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Boldonse-Regular.ttf",
+      weight: "500",
+    },
+  ],
+  variable: "--font-boldonse",
+});
+
 export const metadata: Metadata = {
-  title: "Amsterdam Food Locator",
-  description: "Find the best restaurants in Amsterdam based on your preferences",
+  title: "Fastchaps",
+  description:
+    "Find the best restaurants in Amsterdam based on your preferences",
 };
 
 export default function RootLayout({
@@ -19,7 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${boldonse.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }

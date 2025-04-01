@@ -38,7 +38,7 @@ export const restaurants: Restaurant[] = [
       tourist: 3,
       foodie: 4
     },
-    imageUrl: 'https://source.unsplash.com/random/900×700/?turkish-food',
+    imageUrl: 'https://images.unsplash.com/photo-1532636875304-0c89119d9b4d?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     description: 'Authentic Turkish grill serving the best döner and dürüm in Amsterdam Oost. Popular with locals and always busy in evenings.'
   },
   {

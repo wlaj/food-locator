@@ -58,11 +58,11 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
 
   return (
     <Card className="w-full shadow-sm">
-      <CardContent className="pt-6 pb-6">
+      <CardContent className="pt-3 pb-3">
         <div className="flex flex-wrap items-center justify-center text-xl font-medium gap-2">
           <Select onValueChange={handlePersonaChange}>
             <SelectTrigger 
-              className={`w-auto border-none px-1 focus:ring-0 ${persona ? getColorClass('persona', persona) : 'text-muted-foreground'}`} 
+              className={`w-auto text-xl border-none px-1 focus:ring-0 ${persona ? getColorClass('persona', persona) : 'text-muted-foreground'}`} 
               style={persona ? {backgroundColor: 'transparent'} : {}}
             >
               <SelectValue placeholder="Who" />
@@ -84,7 +84,7 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
           
           <Select onValueChange={handleCuisineChange}>
             <SelectTrigger 
-              className={`w-auto border-none px-1 focus:ring-0 ${cuisine ? getColorClass('cuisine', cuisine) : 'text-muted-foreground'}`}
+              className={`w-auto text-xl border-none px-1 focus:ring-0 ${cuisine ? getColorClass('cuisine', cuisine) : 'text-muted-foreground'}`}
               style={cuisine ? {backgroundColor: 'transparent'} : {}}
             >
               <SelectValue placeholder="what" />
@@ -104,7 +104,7 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
           
           <Select onValueChange={handleDietaryChange}>
             <SelectTrigger 
-              className={`w-auto border-none px-1 focus:ring-0 ${dietary ? getColorClass('dietary', dietary) : 'text-muted-foreground'}`}
+              className={`w-auto text-xl border-none px-1 focus:ring-0 ${dietary ? getColorClass('dietary', dietary) : 'text-muted-foreground'}`}
               style={dietary ? {backgroundColor: 'transparent'} : {}}
             >
               <SelectValue placeholder="diet" />
@@ -130,7 +130,7 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
           
           <Select onValueChange={handleLocationChange}>
             <SelectTrigger 
-              className={`w-auto border-none px-1 focus:ring-0 ${location ? getColorClass('location', location) : 'text-muted-foreground'}`}
+              className={`w-auto text-xl border-none px-1 focus:ring-0 ${location ? getColorClass('location', location) : 'text-muted-foreground'}`}
               style={location ? {backgroundColor: 'transparent'} : {}}
             >
               <SelectValue placeholder="where" />
