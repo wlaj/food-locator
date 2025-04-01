@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${boldonse.variable} antialiased`}>
-        <Toaster position="top-center" richColors />
+        <Toaster position="bottom-right" />
         {children}
       </body>
     </html>
