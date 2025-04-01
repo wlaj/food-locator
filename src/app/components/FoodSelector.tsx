@@ -294,14 +294,6 @@ export default function FoodSelector({ onSelectionChange }: FoodSelectorProps) {
       
       observer.observe(content, { attributes: true });
     });
-
-    return () => {
-      // Clean up any listeners
-      const selectContents = document.querySelectorAll('.select-content');
-      selectContents.forEach(content => {
-        // Remove any observers if needed
-      });
-    };
   }, []);
 
   return (
