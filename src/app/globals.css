@@ -4,78 +4,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 240 10% 3.9%;
+    --background: 120 3% 6.5%;
+    --foreground: 120 3% 85%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 120 3% 15%;
+    --card-foreground: 120 3% 85%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 120 3% 15%;
+    --popover-foreground: 120 3% 85%;
 
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 89 89% 58%;
+    --primary-foreground: 120 3% 6.5%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 89 89% 58%;
+    --secondary-foreground: 120 3% 6.5%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 120 3% 27%;
+    --muted-foreground: 120 3% 70%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 89 100% 67%;
+    --accent-foreground: 120 3% 6.5%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 100% 71%;
+    --destructive-foreground: 120 3% 6.5%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 142 71% 45%;
+    --border: 120 3% 40%;
+    --input: 120 3% 40%;
+    --ring: 89 89% 58%;
 
     --radius: 0.75rem;
 
     /* Food locator specific colors */
-    --drerrie: 262 83% 58%;
-    --tourist: 25 95% 53%; 
-    --foodie: 142 72% 50%;
+    --drerrie: 89 89% 47%;
+    --tourist: 89 89% 50%; 
+    --foodie: 89 89% 58%;
 
-    --turkish: 354 70% 54%;
-    --indonesian: 25 95% 53%;
-    --korean: 215 90% 67%;
-    --japanese: 338 85% 60%;
+    --turkish: 89 89% 56%;
+    --indonesian: 89 89% 44%;
+    --korean: 89 89% 38%;
+    --japanese: 89 89% 33%;
 
-    --halal: 145 63% 42%;
-    --vegetarian: 120 100% 25%;
-  }
-
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --halal: 89 89% 28%;
+    --vegetarian: 89 89% 23%;
   }
 }
 

@@ -98,7 +98,7 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 py-12">
         <div ref={headerRef} className="text-center flex justify-between items-center mb-12">
-          <h1 ref={titleRef} className="text-2xl font-boldonse font-bold mb-2 opacity-0">Fastchaps</h1>
+          <h1 ref={titleRef} className="text-2xl font-boldonse text-primary font-bold mb-2 opacity-0">Fastchaps</h1>
           <p ref={subtitleRef} className="text-muted-foreground opacity-0">
             Find the best restaurants in Amsterdam based on your preferences
           </p>

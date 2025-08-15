@@ -13,7 +13,7 @@ const boldonse = localFont({
   src: [
     {
       path: "../../public/fonts/Boldonse-Regular.ttf",
-      weight: "500",
+      weight: "400",
     },
   ],
   variable: "--font-boldonse",
