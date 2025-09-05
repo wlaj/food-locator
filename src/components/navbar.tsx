@@ -1,12 +1,17 @@
+"use client"
+
 import Logo from "@/components/logo"
 import ThemeToggle from "@/components/theme-toggle"
 import SearchInput from "@/components/search-input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useScroll } from "@/hooks/use-scroll"
+import { cn } from "@/lib/utils"
 
 export default function Navbar() {
+  const { isAtTop } = useScroll()
   return (
-    <header className="border-b px-4 fixed top-0 right-0 bg-white w-full md:px-6">
+    <header className="border-b px-4 z-10 fixed top-0 right-0 bg-white w-full md:px-6">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <div className="flex-1">
@@ -15,7 +20,10 @@ export default function Navbar() {
           </Link>
         </div>
         {/* Middle area */}
-        <div className="grow max-sm:hidden">
+        <div className={cn(
+          "grow max-sm:hidden transition-all duration-300 ease-in-out",
+          !isAtTop ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+        )}>
           <SearchInput className="mx-auto max-w-xs" />
         </div>
         {/* Right side */}
