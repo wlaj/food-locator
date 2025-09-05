@@ -1,5 +1,6 @@
 import { Gallery } from "@/components/gallery";
 import Hero from "@/components/hero";
+import HowItWorks from "@/components/how-it-works";
 import { getRestaurants } from "@/lib/actions";
 
 export default async function Home() {
@@ -13,6 +14,7 @@ export default async function Home() {
         demoTitle="View based on location"
         restaurants={restaurants || []}
       />
+      <HowItWorks heading="How it works" demoTitle="Book a demo" demoUrl="" />
     </div>
   );
 }
