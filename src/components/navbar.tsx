@@ -10,7 +10,7 @@ export default function Navbar() {
   const id = useId()
 
   return (
-    <header className="border-b px-4 md:px-6">
+    <header className="border-b px-4 fixed top-0 right-0 bg-white w-full md:px-6">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <div className="flex-1">
