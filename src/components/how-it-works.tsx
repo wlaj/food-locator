@@ -9,7 +9,7 @@ type HowItWorks = {
 
 const HowItWorks = ({ heading, demoUrl, demoTitle }: HowItWorks) => {
   return (
-    <section className="py-32">
+    <section className="py-12">
       <div className="mb-8 flex flex-col gap-8 justify-between md:mb-14 lg:mb-16">
         <div>
           <h2 className="mb-3 text-3xl font-semibold md:mb-4 md:text-4xl lg:mb-6">
