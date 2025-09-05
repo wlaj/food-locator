@@ -9,7 +9,7 @@
           "--project-ref=gkjxlwsnwywidpacajzj"
         ],
         "env": {
-          "SUPABASE_ACCESS_TOKEN": "sb_publishable_mwigBXZ8CM5H8Zs2cn6q4Q_TT_U2dqt"
+          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_mwigBXZ8CM5H8Zs2cn6q4Q_TT_U2dqt"
         }
       }
     }
