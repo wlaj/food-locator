@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
+    "type": "npx supabase gen types typescript --project-id gkjxlwsnwywidpacajzj --schema public > src/lib/types/supabase.ts",
     "lint": "eslint"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import { useId } from "react"
-import { MicIcon, SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 
 import Logo from "@/components/logo"
 import ThemeToggle from "@/components/theme-toggle"

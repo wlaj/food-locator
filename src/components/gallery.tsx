@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,74 +10,21 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { IconLocation, IconLocationFilled } from "@tabler/icons-react";
-
-interface GalleryItem {
-  id: string;
-  title: string;
-  summary: string;
-  url: string;
-  image: string;
-}
+import { IconLocationFilled } from "@tabler/icons-react";
+import { Restaurant } from "@/app/global";
 
 interface GalleryProps {
   heading?: string;
   demoUrl?: string;
   demoTitle?: string;
-  items?: GalleryItem[];
+  restaurants?: Restaurant[];
 }
 
 const Gallery = ({
   heading = "Gallery",
   demoUrl = "https://www.shadcnblocks.com",
   demoTitle = "Book a demo",
-  items = [
-    {
-      id: "item-1",
-      title: "Build Modern UIs",
-      summary:
-        "Create stunning user interfaces with our comprehensive design system.",
-      url: "#",
-      image:
-        "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-dark-1.svg",
-    },
-    {
-      id: "item-2",
-      title: "Computer Vision Technology",
-      summary:
-        "Powerful image recognition and processing capabilities that allow AI systems to analyze, understand, and interpret visual information from the world.",
-      url: "#",
-      image:
-        "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-dark-1.svg",
-    },
-    {
-      id: "item-3",
-      title: "Machine Learning Automation",
-      summary:
-        "Self-improving algorithms that learn from data patterns to automate complex tasks and make intelligent decisions with minimal human intervention.",
-      url: "#",
-      image:
-        "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-dark-1.svg",
-    },
-    {
-      id: "item-4",
-      title: "Predictive Analytics",
-      summary:
-        "Advanced forecasting capabilities that analyze historical data to predict future trends and outcomes, helping businesses make data-driven decisions.",
-      url: "#",
-      image:
-        "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-dark-1.svg",
-    },
-    {
-      id: "item-5",
-      title: "Neural Network Architecture",
-      summary:
-        "Sophisticated AI models inspired by human brain structure, capable of solving complex problems through deep learning and pattern recognition.",
-      url: "#",
-      image:
-        "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-dark-1.svg",
-    },
-  ],
+  restaurants,
 }: GalleryProps) => {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -151,10 +98,10 @@ const Gallery = ({
           className="relative w-full max-w-full"
         >
           <CarouselContent className="hide-scrollbar w-full max-w-full">
-            {items.map((item) => (
+            {restaurants?.map((item) => (
               <CarouselItem key={item.id} className="md:max-w-[452px]">
                 <a
-                  href={item.url}
+                  href={item.name || ''}
                   className="group flex flex-col justify-between"
                 >
                   <div>
@@ -162,8 +109,8 @@ const Gallery = ({
                       <div className="flex-1">
                         <div className="relative h-full w-full origin-bottom transition duration-300 group-hover:scale-105">
                           <img
-                            src={item.image}
-                            alt={item.title}
+                            src={item.image_url || ''}
+                            alt={item.name || ''}
                             className="h-full w-full object-cover object-center"
                           />
                         </div>
@@ -171,10 +118,10 @@ const Gallery = ({
                     </div>
                   </div>
                   <div className="mb-2 line-clamp-3 break-words pt-4 text-lg font-medium md:mb-3 md:pt-4 md:text-xl lg:pt-4 lg:text-2xl">
-                    {item.title}
+                    {item.name}
                   </div>
                   <div className="text-muted-foreground mb-8 line-clamp-2 text-sm md:mb-12 md:text-base lg:mb-9">
-                    {item.summary}
+                    {item.cuisine}
                   </div>
                   <div className="flex items-center text-sm">
                     Read more{" "}
