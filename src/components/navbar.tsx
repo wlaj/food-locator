@@ -5,6 +5,7 @@ import Logo from "@/components/logo"
 import ThemeToggle from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { IconLocation } from "@tabler/icons-react"
 
 export default function Navbar() {
   const id = useId()
@@ -36,7 +37,7 @@ export default function Navbar() {
               aria-label="Press to speak"
               type="submit"
             >
-              <MicIcon size={16} aria-hidden="true" />
+              <IconLocation size={16} aria-hidden="true" />
             </button>
           </div>
         </div>
