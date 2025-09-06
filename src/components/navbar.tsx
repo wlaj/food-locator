@@ -1,9 +1,8 @@
-import ThemeToggle from "@/components/theme-toggle"
-import NavbarClient from "@/components/navbar-client"
-import { Button } from "@/components/ui/button"
-import NavbarAuth from "@/components/navbar-auth"
-import Link from "next/link"
-import { IconChefHat } from "@tabler/icons-react"
+import ThemeToggle from "@/components/theme-toggle";
+import NavbarClient from "@/components/navbar-client";
+import NavbarAuth from "@/components/navbar-auth";
+import Link from "next/link";
+import { IconInnerShadowBottomRight } from "@tabler/icons-react";
 
 export default function Navbar() {
   return (
@@ -11,8 +10,8 @@ export default function Navbar() {
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <div className="flex-1">
-          <Link href="/" className="text-primary hover:text-primary/90">
-            <IconChefHat />
+          <Link href="/" className="text-primary flex gap-2 items-center hover:text-primary/90">
+            <IconInnerShadowBottomRight className="size-8" />
           </Link>
         </div>
         {/* Middle area */}
@@ -27,5 +26,5 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  )
+  );
 }
