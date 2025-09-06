@@ -36,6 +36,15 @@ export default async function DashboardPage() {
             <div className="rounded-lg border bg-card p-6">
               <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
               <div className="space-y-2">
+                {user?.user_metadata?.avatar_url && (
+                  <div className="mb-4">
+                    <img 
+                      src={user.user_metadata.avatar_url} 
+                      alt="Profile" 
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  </div>
+                )}
                 <p><span className="font-medium">Email:</span> {user?.email}</p>
                 <p><span className="font-medium">Name:</span> {user?.user_metadata?.full_name || 'Not set'}</p>
                 <p><span className="font-medium">Username:</span> {user?.user_metadata?.username || 'Not set'}</p>

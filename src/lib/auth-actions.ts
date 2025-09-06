@@ -55,18 +55,63 @@ export async function signOut() {
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
   
+  // Handle avatar upload if present
+  let avatarUrl = formData.get('avatar_url') as string || ''
+  const avatarFile = formData.get('avatar') as File
+  
+  if (avatarFile && avatarFile.size > 0) {
+    // Get current user for file path
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      redirect('/dashboard?error=' + encodeURIComponent('Authentication error'))
+      return
+    }
+    
+    // Create file path that matches RLS policy: userId/filename
+    const fileExt = avatarFile.name.split('.').pop()
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`
+    
+    try {
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, avatarFile, {
+          upsert: true
+        })
+
+      if (uploadError) {
+        redirect('/dashboard?error=' + encodeURIComponent(`Upload failed: ${uploadError.message}`))
+        return
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName)
+
+      avatarUrl = urlData.publicUrl
+    } catch (error) {
+      redirect('/dashboard?error=' + encodeURIComponent('Avatar upload failed'))
+      return
+    }
+  }
+  
   const firstName = formData.get('first_name') as string
   const lastName = formData.get('last_name') as string
   const fullName = `${firstName} ${lastName}`.trim()
   
-  const data = {
+  const data: Record<string, string> = {
     full_name: fullName,
     first_name: firstName,
     last_name: lastName,
     username: formData.get('username') as string,
     website: formData.get('website') as string,
     bio: formData.get('bio') as string,
-    avatar_url: formData.get('avatar_url') as string,
+  }
+  
+  // Only include avatar_url if we have one
+  if (avatarUrl) {
+    data.avatar_url = avatarUrl
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -75,8 +120,9 @@ export async function updateUserProfile(formData: FormData) {
 
   if (error) {
     redirect('/dashboard?error=' + encodeURIComponent('Could not update profile. Please try again.'))
+    return
   }
-
+  
   revalidatePath('/dashboard')
   redirect('/dashboard?success=' + encodeURIComponent('Profile updated successfully!'))
 }

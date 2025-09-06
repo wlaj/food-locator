@@ -5,7 +5,6 @@ import { CheckIcon, ImagePlusIcon } from "lucide-react"
 import { User } from "@supabase/supabase-js"
 
 import { useCharacterLimit } from "@/hooks/use-character-limit"
-import { useFileUpload } from "@/hooks/use-file-upload"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -32,15 +31,6 @@ import { updateUserProfile } from "@/lib/auth-actions"
 //   },
 // ]
 
-const initialAvatarImage = [
-  {
-    name: "avatar-72-01.jpg",
-    size: 1528737,
-    type: "image/jpeg",
-    url: "/avatar-72-01.jpg",
-    id: "avatar-123456789",
-  },
-]
 
 interface ProfileEditDialogProps {
   user: User | null
@@ -62,11 +52,6 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
 
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleSubmit = async (formData: FormData) => {
-    await updateUserProfile(formData)
-    setIsOpen(false)
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -83,10 +68,10 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
           username.
         </DialogDescription>
         <div className="overflow-y-auto">
-          {/* <ProfileBg /> */}
-          <Avatar />
-          <div className="px-6 pt-4 pb-6">
-            <form className="space-y-4" action={handleSubmit}>
+          <form className="space-y-4" action={updateUserProfile}>
+            {/* <ProfileBg /> */}
+            <Avatar user={user} />
+            <div className="px-6 pt-4 pb-6">
               <div className="flex flex-col gap-4 sm:flex-row">
                 <div className="flex-1 space-y-2">
                   <Label htmlFor={`${id}-first-name`}>First name</Label>
@@ -170,7 +155,8 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
                 </p>
               </div>
               
-              <DialogFooter className="border-t px-0 py-4">
+              </div>
+              <DialogFooter className="border-t px-6 py-4">
                 <DialogClose asChild>
                   <Button type="button" variant="outline">
                     Cancel
@@ -179,7 +165,6 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
                 <Button type="submit">Save changes</Button>
               </DialogFooter>
             </form>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -241,20 +226,29 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
 //   )
 // }
 
-function Avatar() {
-  const [{ files }, { openFileDialog, getInputProps }] = useFileUpload({
-    accept: "image/*",
-    initialFiles: initialAvatarImage,
-  })
-
-  const currentImage = files[0] ? ('preview' in files[0] ? files[0].preview : files[0].url) : null
+function Avatar({ user }: { user: User | null }) {
+  const [selectedImage, setSelectedImage] = useState<string | null>(
+    user?.user_metadata?.avatar_url || null
+  )
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      setSelectedImage(url)
+    }
+  }
+  
+  const openFileDialog = () => {
+    document.getElementById('avatar-upload')?.click()
+  }
 
   return (
     <div className="mt-6 px-6">
       <div className="border-background bg-muted relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 shadow-xs shadow-black/10">
-        {currentImage && (
+        {selectedImage && (
           <img
-            src={currentImage}
+            src={selectedImage}
             className="size-full object-cover"
             width={80}
             height={80}
@@ -270,7 +264,11 @@ function Avatar() {
           <ImagePlusIcon size={16} aria-hidden="true" />
         </button>
         <input
-          {...getInputProps()}
+          id="avatar-upload"
+          name="avatar"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
           className="sr-only"
           aria-label="Upload profile picture"
         />
