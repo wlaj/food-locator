@@ -14,7 +14,7 @@ export default function NavbarClient() {
       "grow max-sm:hidden transition-all duration-300 ease-in-out",
       !isAtTop || pathname !== '/' ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
     )}>
-      <SearchInput className="mx-auto max-w-xs" />
+      <SearchInput className="mx-auto max-w-xl" />
     </div>
   )
 }

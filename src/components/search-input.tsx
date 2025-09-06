@@ -1,29 +1,64 @@
 "use client";
 
-import { useId, useState } from "react";
+import * as React from "react";
 import { useRouter } from "next/navigation";
-import { SearchIcon } from "lucide-react";
-import { IconLocation } from "@tabler/icons-react";
-import { Input } from "@/components/ui/input";
+import { Check, ChevronsUpDown, SearchIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SelectNative } from "./ui/select-native";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { IconLocation } from "@tabler/icons-react";
+
+const locations = [
+  {
+    value: "amsterdam",
+    label: "Amsterdam",
+  },
+  {
+    value: "rotterdam",
+    label: "Rotterdam",
+  },
+  {
+    value: "utrecht",
+    label: "Utrecht",
+  },
+  {
+    value: "the-hague",
+    label: "The Hague",
+  },
+  {
+    value: "eindhoven",
+    label: "Eindhoven",
+  },
+];
 
 interface SearchInputProps {
   placeholder?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
-  showLocationIcon?: boolean;
 }
 
 export default function SearchInput({
   placeholder = "Search restaurants...",
   className,
   size = "md",
-  showLocationIcon = true,
 }: SearchInputProps) {
-  const id = useId();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [locationOpen, setLocationOpen] = React.useState(false);
+  const [selectedLocation, setSelectedLocation] = React.useState("amsterdam");
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,43 +68,82 @@ export default function SearchInput({
   };
 
   const sizeClasses = {
-    sm: "h-6 px-6 text-sm",
-    md: "h-8 px-8",
-    lg: "h-10 px-10 text-lg",
+    sm: "h-8 text-sm",
+    md: "h-10",
+    lg: "h-12 text-lg",
   };
 
   return (
     <form
       onSubmit={handleSearchSubmit}
-      className={cn("relative w-full flex rounded-md shadow-xs", className)}
+      className={cn("relative w-full flex rounded-lg border shadow-sm", className)}
     >
-      <SelectNative className="text-muted-foreground h-8 hover:text-foreground w-fit rounded-e-none shadow-none">
-        <option value="https://">Amsterdam</option>
-        <option value="http://">Rotterdam</option>
-      </SelectNative>
-      <Input
-        id={id}
-        className={cn("-ms-px rounded-s-none shadow-none focus-visible:z-10", sizeClasses[size])}
-        placeholder={placeholder}
-        type="search"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-      {/* <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-2 peer-disabled:opacity-50">
-        <SearchIcon size={size === "lg" ? 20 : size === "sm" ? 14 : 16} />
-      </div> */}
-      {showLocationIcon && (
+      <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            role="combobox"
+            aria-expanded={locationOpen}
+            className={cn(
+              "justify-between border-0 rounded-r-none border-r bg-background hover:bg-muted/50",
+              sizeClasses[size]
+            )}
+          >
+            <IconLocation className="size-4" />
+            {selectedLocation
+              ? locations.find((location) => location.value === selectedLocation)?.label
+              : "Select location..."}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0" align="start">
+          <Command>
+            <CommandInput placeholder="Search location..." />
+            <CommandList>
+              <CommandEmpty>No location found.</CommandEmpty>
+              <CommandGroup>
+                {locations.map((location) => (
+                  <CommandItem
+                    key={location.value}
+                    value={location.value}
+                    onSelect={(currentValue) => {
+                      setSelectedLocation(currentValue === selectedLocation ? "" : currentValue);
+                      setLocationOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedLocation === location.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {location.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <div className="flex-1 relative">
+        <Input
+          className={cn(
+            "border-0 rounded-l-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 pl-4",
+            sizeClasses[size]
+          )}
+          placeholder={placeholder}
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <button
-          className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Search"
           type="submit"
+          className="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Search"
         >
-          <IconLocation
-            size={size === "lg" ? 20 : size === "sm" ? 14 : 16}
-            aria-hidden="true"
-          />
+          <SearchIcon className="h-4 w-4" />
         </button>
-      )}
+      </div>
     </form>
   );
 }
