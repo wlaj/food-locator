@@ -14,51 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      dietary_options: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       restaurants: {
         Row: {
           atmosphere: number | null
           authenticity: number | null
+          created_at: string | null
+          created_by: string | null
           cuisine: string | null
           description: string | null
           dietary: string[] | null
           favorite_dishes: string[] | null
           id: string
           image_url: string | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string | null
           persona_scores: Json | null
           price: number | null
           rating_score: number | null
+          updated_at: string | null
+          updated_by: string | null
         }
         Insert: {
           atmosphere?: number | null
           authenticity?: number | null
+          created_at?: string | null
+          created_by?: string | null
           cuisine?: string | null
           description?: string | null
           dietary?: string[] | null
           favorite_dishes?: string[] | null
           id: string
           image_url?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string | null
           persona_scores?: Json | null
           price?: number | null
           rating_score?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
         }
         Update: {
           atmosphere?: number | null
           authenticity?: number | null
+          created_at?: string | null
+          created_by?: string | null
           cuisine?: string | null
           description?: string | null
           dietary?: string[] | null
           favorite_dishes?: string[] | null
           id?: string
           image_url?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           name?: string | null
           persona_scores?: Json | null
           price?: number | null
           rating_score?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -67,7 +130,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_restaurants_by_distance: {
+        Args: {
+          radius_km?: number
+          result_limit?: number
+          user_lat: number
+          user_lng: number
+        }
+        Returns: {
+          atmosphere: number
+          authenticity: number
+          created_at: string
+          created_by: string
+          cuisine: string
+          description: string
+          dietary: string[]
+          distance_km: number
+          favorite_dishes: string[]
+          id: string
+          image_url: string
+          latitude: number
+          location: string
+          longitude: number
+          name: string
+          persona_scores: Json
+          price: number
+          rating_score: number
+          updated_at: string
+          updated_by: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

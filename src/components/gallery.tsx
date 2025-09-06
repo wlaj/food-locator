@@ -108,11 +108,17 @@ const Gallery = ({
                     <div className="aspect-3/2 flex overflow-clip rounded-xl">
                       <div className="flex-1">
                         <div className="relative h-full w-full origin-bottom transition duration-300 group-hover:scale-105">
-                          <img
-                            src={item.image_url || ''}
-                            alt={item.name || ''}
-                            className="h-full w-full object-cover object-center"
-                          />
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name || ''}
+                              className="h-full w-full object-cover object-center"
+                            />
+                          ) : (
+                            <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-500">No Image</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
