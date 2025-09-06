@@ -1,17 +1,22 @@
 "use client"
 
-import { useState, useId, useRef } from "react"
+import { useState, useId, useRef, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { createRestaurant, updateRestaurant } from "@/lib/actions"
 import { Restaurant } from "@/app/global"
 import { toast } from "sonner"
 import RestaurantImageUpload from "@/components/restaurant-image-upload"
 import DietaryTagSelector from "@/components/dietary-tag-selector"
 import { parseGoogleMapsUrl } from "@/lib/google-maps-parser"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant
@@ -22,12 +27,37 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(restaurant?.image_url || null)
+  const [cuisineOpen, setCuisineOpen] = useState(false)
+  const [selectedCuisine, setSelectedCuisine] = useState(restaurant?.cuisine || "")
+  const [cuisines, setCuisines] = useState<string[]>([])
   const googleMapsId = useId()
+  const ratingId = useId()
   const nameRef = useRef<HTMLInputElement>(null)
   const latitudeRef = useRef<HTMLInputElement>(null)
   const longitudeRef = useRef<HTMLInputElement>(null)
   
   const isEditing = !!restaurant
+
+  useEffect(() => {
+    async function fetchCuisines() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('cuisines')
+          .select('name')
+          .order('name')
+        if (data) {
+          setCuisines(data.map(c => c.name))
+        }
+      } catch (error) {
+        console.error('Error fetching cuisines:', error)
+      }
+    }
+    if (open) {
+      fetchCuisines()
+    }
+  }, [open])
 
   const handleGoogleMapsUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
@@ -114,7 +144,7 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input
@@ -127,12 +157,49 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="cuisine">Cuisine</Label>
-              <Input
-                id="cuisine"
-                name="cuisine"
-                defaultValue={restaurant?.cuisine || ''}
-              />
+              <Label>Cuisine</Label>
+              <Popover open={cuisineOpen} onOpenChange={setCuisineOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={cuisineOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedCuisine || "Select cuisine..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search cuisine..." />
+                    <CommandList>
+                      <CommandEmpty>No cuisine found.</CommandEmpty>
+                      <CommandGroup>
+                        {cuisines.map((cuisine) => (
+                          <CommandItem
+                            key={cuisine}
+                            value={cuisine}
+                            onSelect={(currentValue) => {
+                              setSelectedCuisine(currentValue === selectedCuisine ? "" : currentValue)
+                              setCuisineOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedCuisine === cuisine ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {cuisine}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <input name="cuisine" type="hidden" value={selectedCuisine} />
             </div>
             
             <div className="space-y-2">
@@ -158,56 +225,106 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
               defaultValue={restaurant?.longitude || ''}
             />
             
-            <div className="space-y-2">
-              <Label htmlFor="price">Price Level (1-5)</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                min="1"
-                max="5"
-                defaultValue={restaurant?.price || ''}
-              />
-            </div>
+            <fieldset className="space-y-4">
+              <legend className="text-foreground text-sm leading-none font-medium">
+                Price Level (1-5)
+              </legend>
+              <RadioGroup className="flex gap-0 -space-x-px rounded-md shadow-xs" name="price" defaultValue={restaurant?.price?.toString() || ""}>
+                {["1", "2", "3", "4", "5"].map((value) => (
+                  <label
+                    key={value}
+                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border text-center text-sm font-medium transition-[color,box-shadow] outline-none first:rounded-s-md last:rounded-e-md has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50 has-data-[state=checked]:z-10"
+                  >
+                    <RadioGroupItem
+                      value={value}
+                      className="sr-only after:absolute after:inset-0"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </RadioGroup>
+              <div className="mt-1 flex justify-between text-xs font-medium">
+                <p>💰 Cheap</p>
+                <p>Expensive 💸</p>
+              </div>
+            </fieldset>
+            
+            <fieldset className="space-y-4">
+              <legend className="text-foreground text-sm leading-none font-medium">
+                Rate your experience
+              </legend>
+              <RadioGroup className="flex gap-1.5 w-full" name="rating_score" defaultValue={restaurant?.rating_score?.toString() || ""}>
+                {[
+                  { value: "1", label: "Terrible", icon: "😠" },
+                  { value: "2", label: "Bad", icon: "🙁" },
+                  { value: "3", label: "Okay", icon: "😐" },
+                  { value: "4", label: "Good", icon: "🙂" },
+                  { value: "5", label: "Amazing", icon: "😀" },
+                ].map((item) => (
+                  <label
+                    key={`${ratingId}-${item.value}`}
+                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex h-9 flex-1 cursor-pointer flex-col items-center justify-center rounded-full border text-center text-xl shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50"
+                  >
+                    <RadioGroupItem
+                      id={`${ratingId}-${item.value}`}
+                      value={item.value}
+                      className="sr-only after:absolute after:inset-0"
+                    />
+                    {item.icon}
+                  </label>
+                ))}
+              </RadioGroup>
+            </fieldset>
+            
+            <fieldset className="space-y-4">
+              <legend className="text-foreground text-sm leading-none font-medium">
+                Atmosphere (1-10)
+              </legend>
+              <RadioGroup className="flex gap-0 -space-x-px rounded-md shadow-xs" name="atmosphere" defaultValue={restaurant?.atmosphere?.toString() || ""}>
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map((value) => (
+                  <label
+                    key={value}
+                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border text-center text-sm font-medium transition-[color,box-shadow] outline-none first:rounded-s-md last:rounded-e-md has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50 has-data-[state=checked]:z-10"
+                  >
+                    <RadioGroupItem
+                      value={value}
+                      className="sr-only after:absolute after:inset-0"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </RadioGroup>
+              <div className="mt-1 flex justify-between text-xs font-medium">
+                <p>😴 Dull</p>
+                <p>Vibrant 🎉</p>
+              </div>
+            </fieldset>
+            
+            <fieldset className="space-y-4">
+              <legend className="text-foreground text-sm leading-none font-medium">
+                Authenticity (1-10)
+              </legend>
+              <RadioGroup className="flex gap-0 -space-x-px rounded-md shadow-xs" name="authenticity" defaultValue={restaurant?.authenticity?.toString() || ""}>
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map((value) => (
+                  <label
+                    key={value}
+                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border text-center text-sm font-medium transition-[color,box-shadow] outline-none first:rounded-s-md last:rounded-e-md has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50 has-data-[state=checked]:z-10"
+                  >
+                    <RadioGroupItem
+                      value={value}
+                      className="sr-only after:absolute after:inset-0"
+                    />
+                    {value}
+                  </label>
+                ))}
+              </RadioGroup>
+              <div className="mt-1 flex justify-between text-xs font-medium">
+                <p>🤖 Generic</p>
+                <p>Authentic ✨</p>
+              </div>
+            </fieldset>
             
             <div className="space-y-2">
-              <Label htmlFor="rating_score">Rating (0-5)</Label>
-              <Input
-                id="rating_score"
-                name="rating_score"
-                type="number"
-                min="0"
-                max="5"
-                step="0.1"
-                defaultValue={restaurant?.rating_score || ''}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="atmosphere">Atmosphere (1-10)</Label>
-              <Input
-                id="atmosphere"
-                name="atmosphere"
-                type="number"
-                min="1"
-                max="10"
-                defaultValue={restaurant?.atmosphere || ''}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="authenticity">Authenticity (1-10)</Label>
-              <Input
-                id="authenticity"
-                name="authenticity"
-                type="number"
-                min="1"
-                max="10"
-                defaultValue={restaurant?.authenticity || ''}
-              />
-            </div>
-            
-            <div className="space-y-2 md:col-span-3">
               <Label>Restaurant Image</Label>
               <RestaurantImageUpload 
                 defaultImageUrl={currentImageUrl || undefined}
