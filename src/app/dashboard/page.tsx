@@ -4,17 +4,20 @@ import { Button } from '@/components/ui/button'
 import ProtectedRoute from '@/components/protected-route'
 import ProfileEditDialog from '@/components/profile-edit-dialog'
 import ToastHandler from '@/components/toast-handler'
+import RestaurantTable from '@/components/restaurant-table'
+import { getRestaurants } from '@/lib/actions'
 import { Suspense } from 'react'
 
 export default async function DashboardPage() {
   const user = await getUser()
+  const restaurants = await getRestaurants(50) || []
 
   return (
     <ProtectedRoute>
       <Suspense>
         <ToastHandler />
       </Suspense>
-      <div className="min-h-screen bg-background mt-32 p-8">
+      <div className="min-h-screen bg-background mt-24 p-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 flex items-center justify-between">
             <div>
@@ -32,32 +35,36 @@ export default async function DashboardPage() {
           </div>
 
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-lg border bg-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
-              <div className="space-y-2">
-                {user?.user_metadata?.avatar_url && (
-                  <div className="mb-4">
-                    <img 
-                      src={user.user_metadata.avatar_url} 
-                      alt="Profile" 
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  </div>
-                )}
-                <p><span className="font-medium">Email:</span> {user?.email}</p>
-                <p><span className="font-medium">Name:</span> {user?.user_metadata?.full_name || 'Not set'}</p>
-                <p><span className="font-medium">Username:</span> {user?.user_metadata?.username || 'Not set'}</p>
-                <p><span className="font-medium">Website:</span> {user?.user_metadata?.website || 'Not set'}</p>
+          <div className="space-y-8">
+            <RestaurantTable restaurants={restaurants} />
+            
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-lg border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
+                <div className="space-y-2">
+                  {user?.user_metadata?.avatar_url && (
+                    <div className="mb-4">
+                      <img 
+                        src={user.user_metadata.avatar_url} 
+                        alt="Profile" 
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <p><span className="font-medium">Email:</span> {user?.email}</p>
+                  <p><span className="font-medium">Name:</span> {user?.user_metadata?.full_name || 'Not set'}</p>
+                  <p><span className="font-medium">Username:</span> {user?.user_metadata?.username || 'Not set'}</p>
+                  <p><span className="font-medium">Website:</span> {user?.user_metadata?.website || 'Not set'}</p>
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-lg border bg-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Account Details</h2>
-              <div className="space-y-2">
-                <p><span className="font-medium">User ID:</span> {user?.id}</p>
-                <p><span className="font-medium">Created:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}</p>
-                <p><span className="font-medium">Last Sign In:</span> {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}</p>
+              <div className="rounded-lg border bg-card p-6">
+                <h2 className="text-xl font-semibold mb-4">Account Details</h2>
+                <div className="space-y-2">
+                  <p><span className="font-medium">User ID:</span> {user?.id}</p>
+                  <p><span className="font-medium">Created:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}</p>
+                  <p><span className="font-medium">Last Sign In:</span> {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}</p>
+                </div>
               </div>
             </div>
           </div>
