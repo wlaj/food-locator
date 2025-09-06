@@ -62,7 +62,7 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
         </DialogHeader>
         
         <form action={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input
@@ -88,6 +88,30 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
                 id="location"
                 name="location"
                 defaultValue={restaurant?.location || ''}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="latitude">Latitude</Label>
+              <Input
+                id="latitude"
+                name="latitude"
+                type="number"
+                step="any"
+                placeholder="52.3676"
+                defaultValue={restaurant?.latitude || ''}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="longitude">Longitude</Label>
+              <Input
+                id="longitude"
+                name="longitude"
+                type="number"
+                step="any"
+                placeholder="4.9041"
+                defaultValue={restaurant?.longitude || ''}
               />
             </div>
             
@@ -140,7 +164,7 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
               />
             </div>
             
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2 md:col-span-3">
               <Label>Restaurant Image</Label>
               <RestaurantImageUpload 
                 defaultImageUrl={currentImageUrl || undefined}

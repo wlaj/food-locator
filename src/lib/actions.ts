@@ -20,20 +20,71 @@ export async function getRestaurants(limit: number = 10): Promise<Restaurant[] |
   return data;
 }
 
-export async function searchRestaurants(query: string): Promise<Restaurant[] | null> {
+export async function searchRestaurants(
+  query: string,
+  location?: { lat: number; lon: number }
+): Promise<Restaurant[] | null> {
   const supabase = await createClient();
   
-  const { data, error } = await supabase
-    .from('restaurants')
-    .select('*')
-    .or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ilike.%${query}%`);
+  let queryBuilder = supabase.from('restaurants').select('*');
+  
+  // If query is "*", get all restaurants; otherwise search by query
+  if (query !== "*") {
+    queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ilike.%${query}%`);
+  }
+
+  if (location) {
+    // Add ordering by proximity using the Haversine formula
+    queryBuilder = queryBuilder
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .order('id', { ascending: false }); // Default order, will be overridden by client-side sorting
+  }
+
+  const { data, error } = await queryBuilder;
 
   if (error) {
     console.error('Error searching restaurants:', error);
     return null;
   }
 
+  if (location && data) {
+    // Sort by distance on the client side since PostgREST doesn't have built-in distance functions
+    const restaurantsWithDistance = data
+      .filter(restaurant => restaurant.latitude && restaurant.longitude)
+      .map(restaurant => {
+        const distance = calculateDistance(
+          location.lat,
+          location.lon,
+          restaurant.latitude!,
+          restaurant.longitude!
+        );
+        return { ...restaurant, distance };
+      })
+      .filter(restaurant => restaurant.distance <= 3) // Only show restaurants within 3km
+      .sort((a, b) => a.distance - b.distance);
+    
+    console.log(`Location search: ${location.lat}, ${location.lon}`);
+    console.log(`Found ${restaurantsWithDistance.length} restaurants within 3km`);
+    console.log(restaurantsWithDistance.map(r => ({ name: r.name, distance: r.distance.toFixed(2) + 'km' })));
+    
+    return restaurantsWithDistance;
+  }
+
   return data;
+}
+
+// Haversine formula to calculate distance between two points in kilometers
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
 }
 
 export async function createRestaurant(formData: FormData) {
@@ -48,6 +99,8 @@ export async function createRestaurant(formData: FormData) {
   const image_url = formData.get('image_url') as string || null
   const dietary = formData.get('dietary') ? (formData.get('dietary') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
+  const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
 
   const restaurant: TablesInsert<'restaurants'> = {
     id: crypto.randomUUID(),
@@ -61,7 +114,9 @@ export async function createRestaurant(formData: FormData) {
     authenticity,
     image_url,
     dietary,
-    favorite_dishes
+    favorite_dishes,
+    latitude,
+    longitude
   }
 
   const supabase = await createClient();
@@ -93,6 +148,8 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const image_url = formData.get('image_url') as string || null
   const dietary = formData.get('dietary') ? (formData.get('dietary') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
+  const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
 
   const updates: TablesUpdate<'restaurants'> = {
     name,
@@ -105,7 +162,9 @@ export async function updateRestaurant(id: string, formData: FormData) {
     authenticity,
     image_url,
     dietary,
-    favorite_dishes
+    favorite_dishes,
+    latitude,
+    longitude
   }
 
   const supabase = await createClient();
