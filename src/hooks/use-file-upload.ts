@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useRef, ChangeEvent } from "react"
+import { useState, useRef, ChangeEvent, DragEvent } from "react"
 
 interface FileWithPreview extends File {
   id: string
   preview: string
+  file: File
 }
 
 interface InitialFile {
@@ -18,31 +19,51 @@ interface InitialFile {
 interface UseFileUploadProps {
   accept?: string
   multiple?: boolean
+  maxSize?: number
   initialFiles?: InitialFile[]
 }
 
 export function useFileUpload({
   accept = "*/*",
   multiple = false,
+  maxSize = 2 * 1024 * 1024, // 2MB default
   initialFiles = [],
 }: UseFileUploadProps = {}) {
   const [files, setFiles] = useState<(FileWithPreview | InitialFile)[]>(
     initialFiles
   )
+  const [isDragging, setIsDragging] = useState(false)
+  const [errors, setErrors] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const openFileDialog = () => {
-    inputRef.current?.click()
+  const validateFiles = (fileList: File[]): { valid: File[], errors: string[] } => {
+    const valid: File[] = []
+    const newErrors: string[] = []
+
+    fileList.forEach(file => {
+      if (maxSize && file.size > maxSize) {
+        newErrors.push(`File "${file.name}" is too large (max ${Math.round(maxSize / 1024 / 1024)}MB)`)
+      } else {
+        valid.push(file)
+      }
+    })
+
+    return { valid, errors: newErrors }
   }
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files || [])
-    
-    const newFiles = selectedFiles.map((file) => {
-      const fileWithPreview = Object.assign(file, {
+  const processFiles = (fileList: File[]) => {
+    const { valid, errors: validationErrors } = validateFiles(fileList)
+    setErrors(validationErrors)
+
+    if (valid.length === 0) return
+
+    const newFiles = valid.map((file) => {
+      const fileWithPreview = {
+        ...file,
         id: Math.random().toString(36).substring(2, 15),
         preview: URL.createObjectURL(file),
-      })
+        file: file,
+      } as FileWithPreview
       return fileWithPreview
     })
 
@@ -51,6 +72,36 @@ export function useFileUpload({
     } else {
       setFiles(newFiles)
     }
+  }
+
+  const openFileDialog = () => {
+    inputRef.current?.click()
+  }
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || [])
+    processFiles(selectedFiles)
+  }
+
+  const handleDragEnter = (event: DragEvent) => {
+    event.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (event: DragEvent) => {
+    event.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDragOver = (event: DragEvent) => {
+    event.preventDefault()
+  }
+
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault()
+    setIsDragging(false)
+    const droppedFiles = Array.from(event.dataTransfer.files)
+    processFiles(droppedFiles)
   }
 
   const removeFile = (id: string) => {
@@ -76,7 +127,15 @@ export function useFileUpload({
   })
 
   return [
-    { files },
-    { openFileDialog, removeFile, getInputProps }
+    { files, isDragging, errors },
+    { 
+      handleDragEnter, 
+      handleDragLeave, 
+      handleDragOver, 
+      handleDrop, 
+      openFileDialog, 
+      removeFile, 
+      getInputProps 
+    }
   ] as const
 }

@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { createRestaurant, updateRestaurant } from "@/lib/actions"
 import { Restaurant } from "@/app/global"
 import { toast } from "sonner"
+import RestaurantImageUpload from "@/components/restaurant-image-upload"
+import DietaryTagSelector from "@/components/dietary-tag-selector"
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant
@@ -18,6 +20,7 @@ interface RestaurantDialogProps {
 export default function RestaurantDialog({ restaurant, trigger }: RestaurantDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(restaurant?.image_url || null)
   
   const isEditing = !!restaurant
 
@@ -137,13 +140,12 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="image_url">Image URL</Label>
-              <Input
-                id="image_url"
+            <div className="space-y-2 md:col-span-2">
+              <Label>Restaurant Image</Label>
+              <RestaurantImageUpload 
+                defaultImageUrl={currentImageUrl || undefined}
                 name="image_url"
-                type="url"
-                defaultValue={restaurant?.image_url || ''}
+                onImageChange={(imageUrl) => setCurrentImageUrl(imageUrl)}
               />
             </div>
           </div>
@@ -158,15 +160,11 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="dietary">Dietary Options (comma-separated)</Label>
-            <Input
-              id="dietary"
-              name="dietary"
-              placeholder="vegetarian, vegan, gluten-free"
-              defaultValue={restaurant?.dietary?.join(', ') || ''}
-            />
-          </div>
+          <DietaryTagSelector 
+            defaultValues={restaurant?.dietary || []}
+            name="dietary"
+            placeholder="Add dietary option"
+          />
           
           <div className="space-y-2">
             <Label htmlFor="favorite_dishes">Favorite Dishes (comma-separated)</Label>

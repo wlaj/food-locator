@@ -19,9 +19,9 @@ export default function Navbar() {
         <NavbarClient />
         {/* Right side */}
         <div className="flex flex-1 items-center justify-end gap-2">
-          <Button asChild variant="ghost" size="sm" className="text-sm">
+          {/* <Button asChild variant="ghost" size="sm" className="text-sm">
             <a href="#">Community</a>
-          </Button>
+          </Button> */}
           <NavbarAuth />
           <ThemeToggle />
         </div>

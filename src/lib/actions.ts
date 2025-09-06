@@ -142,3 +142,78 @@ export async function deleteRestaurant(id: string) {
   revalidatePath('/dashboard')
   return { success: true }
 }
+
+export async function getDietaryOptions() {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('dietary_options')
+    .select('id, name, description')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching dietary options:', error)
+    return null
+  }
+
+  return data
+}
+
+export async function uploadRestaurantImage(file: File): Promise<{ url?: string, error?: string }> {
+  const supabase = await createClient();
+  
+  // Create a unique filename
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+  const filePath = `restaurants/${fileName}`;
+
+  try {
+    // Upload file to storage
+    const { error: uploadError } = await supabase.storage
+      .from('restaurant-images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Error uploading file:', uploadError);
+      return { error: 'Failed to upload image' };
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('restaurant-images')
+      .getPublicUrl(filePath);
+
+    return { url: publicUrl };
+  } catch (error) {
+    console.error('Error in uploadRestaurantImage:', error);
+    return { error: 'Failed to upload image' };
+  }
+}
+
+export async function deleteRestaurantImage(imageUrl: string): Promise<{ success?: boolean, error?: string }> {
+  const supabase = await createClient();
+  
+  try {
+    // Extract file path from URL
+    const url = new URL(imageUrl);
+    const pathParts = url.pathname.split('/');
+    const filePath = pathParts.slice(-2).join('/'); // gets "restaurants/filename.ext"
+
+    const { error } = await supabase.storage
+      .from('restaurant-images')
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Error deleting file:', error);
+      return { error: 'Failed to delete image' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteRestaurantImage:', error);
+    return { error: 'Failed to delete image' };
+  }
+}
