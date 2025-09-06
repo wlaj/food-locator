@@ -2,13 +2,13 @@ import { Gallery } from "@/components/gallery";
 import { searchRestaurants } from "@/lib/actions";
 
 interface SearchPageProps {
-  params: {
+  params: Promise<{
     query: string;
-  };
+  }>;
 }
 
 export default async function SearchPage({ params }: SearchPageProps) {
-  const { query } = params;
+  const { query } = await params;
   const decodedQuery = decodeURIComponent(query);
   const restaurants = await searchRestaurants(decodedQuery);
 
