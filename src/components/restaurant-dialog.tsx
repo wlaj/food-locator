@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useId, useRef } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { Restaurant } from "@/app/global"
 import { toast } from "sonner"
 import RestaurantImageUpload from "@/components/restaurant-image-upload"
 import DietaryTagSelector from "@/components/dietary-tag-selector"
+import { parseGoogleMapsUrl } from "@/lib/google-maps-parser"
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant
@@ -21,8 +22,40 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(restaurant?.image_url || null)
+  const googleMapsId = useId()
+  const nameRef = useRef<HTMLInputElement>(null)
+  const latitudeRef = useRef<HTMLInputElement>(null)
+  const longitudeRef = useRef<HTMLInputElement>(null)
   
   const isEditing = !!restaurant
+
+  const handleGoogleMapsUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value
+    if (url) {
+      const parsedData = parseGoogleMapsUrl(url)
+      
+      if (parsedData.name && nameRef.current) {
+        // Only auto-fill name if it's empty or if we're creating a new restaurant
+        if (!nameRef.current.value || !isEditing) {
+          nameRef.current.value = parsedData.name
+        }
+      }
+      
+      if (parsedData.latitude && latitudeRef.current) {
+        latitudeRef.current.value = parsedData.latitude.toString()
+      }
+      
+      if (parsedData.longitude && longitudeRef.current) {
+        longitudeRef.current.value = parsedData.longitude.toString()
+      }
+
+      if (parsedData.name || parsedData.latitude || parsedData.longitude) {
+        toast.success('Restaurant details extracted from Google Maps URL')
+      } else {
+        toast.error('Could not extract restaurant details from URL')
+      }
+    }
+  }
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -62,12 +95,32 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
         </DialogHeader>
         
         <form action={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor={googleMapsId}>Google Maps URL *</Label>
+            <div className="relative">
+              <Input
+                id={googleMapsId}
+                name="google_maps_url"
+                className="peer ps-16"
+                placeholder="maps.app.goo.gl/example"
+                type="text"
+                defaultValue={restaurant?.google_maps_url || ''}
+                onChange={handleGoogleMapsUrlChange}
+                required
+              />
+              <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm peer-disabled:opacity-50">
+                https://
+              </span>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
                 name="name"
+                ref={nameRef}
                 defaultValue={restaurant?.name || ''}
                 required
               />
@@ -91,29 +144,19 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="latitude">Latitude</Label>
-              <Input
-                id="latitude"
-                name="latitude"
-                type="number"
-                step="any"
-                placeholder="52.3676"
-                defaultValue={restaurant?.latitude || ''}
-              />
-            </div>
+            <input
+              ref={latitudeRef}
+              name="latitude"
+              type="hidden"
+              defaultValue={restaurant?.latitude || ''}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="longitude">Longitude</Label>
-              <Input
-                id="longitude"
-                name="longitude"
-                type="number"
-                step="any"
-                placeholder="4.9041"
-                defaultValue={restaurant?.longitude || ''}
-              />
-            </div>
+            <input
+              ref={longitudeRef}
+              name="longitude"
+              type="hidden"
+              defaultValue={restaurant?.longitude || ''}
+            />
             
             <div className="space-y-2">
               <Label htmlFor="price">Price Level (1-5)</Label>

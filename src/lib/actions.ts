@@ -101,6 +101,28 @@ export async function createRestaurant(formData: FormData) {
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
   const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+  const google_maps_url = formData.get('google_maps_url') as string
+
+  if (!google_maps_url) {
+    return { error: 'Google Maps URL is required' }
+  }
+
+  if (!latitude || !longitude) {
+    return { error: 'Could not extract coordinates from Google Maps URL' }
+  }
+
+  const supabase = await createClient();
+
+  // Check if restaurant name already exists
+  const { data: existingRestaurant } = await supabase
+    .from('restaurants')
+    .select('name')
+    .ilike('name', name)
+    .single();
+
+  if (existingRestaurant) {
+    return { error: 'A restaurant with this name already exists' }
+  }
 
   const restaurant: TablesInsert<'restaurants'> = {
     id: crypto.randomUUID(),
@@ -116,11 +138,10 @@ export async function createRestaurant(formData: FormData) {
     dietary,
     favorite_dishes,
     latitude,
-    longitude
+    longitude,
+    google_maps_url
   }
 
-  const supabase = await createClient();
-  
   const { data, error } = await supabase
     .from('restaurants')
     .insert(restaurant)
@@ -150,6 +171,29 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
   const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+  const google_maps_url = formData.get('google_maps_url') as string
+
+  if (!google_maps_url) {
+    return { error: 'Google Maps URL is required' }
+  }
+
+  if (!latitude || !longitude) {
+    return { error: 'Could not extract coordinates from Google Maps URL' }
+  }
+
+  const supabase = await createClient();
+
+  // Check if restaurant name already exists (excluding current restaurant)
+  const { data: existingRestaurant } = await supabase
+    .from('restaurants')
+    .select('name, id')
+    .ilike('name', name)
+    .neq('id', id)
+    .single();
+
+  if (existingRestaurant) {
+    return { error: 'A restaurant with this name already exists' }
+  }
 
   const updates: TablesUpdate<'restaurants'> = {
     name,
@@ -164,11 +208,10 @@ export async function updateRestaurant(id: string, formData: FormData) {
     dietary,
     favorite_dishes,
     latitude,
-    longitude
+    longitude,
+    google_maps_url
   }
 
-  const supabase = await createClient();
-  
   const { data, error } = await supabase
     .from('restaurants')
     .update(updates)

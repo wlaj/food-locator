@@ -45,6 +45,7 @@ export type Database = {
           description: string | null
           dietary: string[] | null
           favorite_dishes: string[] | null
+          google_maps_url: string | null
           id: string
           image_url: string | null
           latitude: number | null
@@ -66,6 +67,7 @@ export type Database = {
           description?: string | null
           dietary?: string[] | null
           favorite_dishes?: string[] | null
+          google_maps_url?: string | null
           id: string
           image_url?: string | null
           latitude?: number | null
@@ -87,6 +89,7 @@ export type Database = {
           description?: string | null
           dietary?: string[] | null
           favorite_dishes?: string[] | null
+          google_maps_url?: string | null
           id?: string
           image_url?: string | null
           latitude?: number | null
@@ -130,6 +133,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_user_role: {
+        Args: { target_role: string; target_user_id: string }
+        Returns: undefined
+      }
+      create_first_admin: {
+        Args: { user_email: string }
+        Returns: undefined
+      }
+      demote_to_restaurant_owner: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      get_all_users_with_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          email: string
+          last_sign_in_at: string
+          role: string
+          user_id: string
+        }[]
+      }
+      get_my_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_restaurant_ownership_info: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          owner_email: string
+          owner_id: string
+          restaurant_id: string
+          restaurant_name: string
+        }[]
+      }
       get_restaurants_by_distance: {
         Args: {
           radius_km?: number
@@ -159,6 +198,33 @@ export type Database = {
           updated_at: string
           updated_by: string
         }[]
+      }
+      get_user_restaurants: {
+        Args: { user_uuid?: string }
+        Returns: {
+          created_at: string
+          cuisine: string
+          id: string
+          location: string
+          name: string
+          rating_score: number
+        }[]
+      }
+      get_user_role: {
+        Args: { user_uuid?: string }
+        Returns: string
+      }
+      is_admin: {
+        Args: { user_uuid?: string }
+        Returns: boolean
+      }
+      promote_to_admin: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      user_owns_restaurant: {
+        Args: { restaurant_id: string; user_uuid?: string }
+        Returns: boolean
       }
     }
     Enums: {
