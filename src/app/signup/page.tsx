@@ -1,4 +1,4 @@
-import { signInWithEmail, signUpWithEmail } from '@/lib/auth-actions'
+import { signUpWithEmail } from '@/lib/auth-actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,19 +7,12 @@ import { redirect } from 'next/navigation'
 import ToastHandler from '@/components/toast-handler'
 import { Suspense } from 'react'
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; message?: string; mode?: string }>
-}) {
+export default async function SignupPage() {
   const user = await getUser()
-  const params = await searchParams
   
   if (user) {
     redirect('/dashboard')
   }
-
-  const isSignUp = params.mode === 'signup'
 
   return (
     <>
@@ -30,10 +23,19 @@ export default async function LoginPage({
         <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight">
-            {isSignUp ? 'Create your account' : 'Sign in to your account'}
+            Create your account
           </h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Or{' '}
+            <a
+              href="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              sign in to your existing account
+            </a>
+          </p>
         </div>
-        <form className="mt-8 space-y-6" action={isSignUp ? signUpWithEmail : signInWithEmail}>
+        <form className="mt-8 space-y-6" action={signUpWithEmail}>
           <div className="space-y-4">
             <div>
               <Label htmlFor="email">Email address</Label>
@@ -52,30 +54,17 @@ export default async function LoginPage({
                 id="password"
                 name="password"
                 type="password"
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                autoComplete="new-password"
                 required
                 placeholder="Enter your password"
               />
             </div>
           </div>
 
-
           <div>
             <Button type="submit" className="w-full">
-              {isSignUp ? 'Sign up' : 'Sign in'}
+              Create account
             </Button>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <a
-                href={isSignUp ? '/login' : '/login?mode=signup'}
-                className="font-medium text-primary hover:underline"
-              >
-                {isSignUp ? 'Sign in' : 'Sign up'}
-              </a>
-            </p>
           </div>
         </form>
       </div>

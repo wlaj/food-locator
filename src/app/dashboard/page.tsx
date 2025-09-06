@@ -3,17 +3,17 @@ import { signOut } from '@/lib/auth-actions'
 import { Button } from '@/components/ui/button'
 import ProtectedRoute from '@/components/protected-route'
 import ProfileEditDialog from '@/components/profile-edit-dialog'
+import ToastHandler from '@/components/toast-handler'
+import { Suspense } from 'react'
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; message?: string }>
-}) {
+export default async function DashboardPage() {
   const user = await getUser()
-  const params = await searchParams
 
   return (
     <ProtectedRoute>
+      <Suspense>
+        <ToastHandler />
+      </Suspense>
       <div className="min-h-screen bg-background mt-32 p-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 flex items-center justify-between">
@@ -31,17 +31,6 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {params.error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-red-500">
-              {params.error}
-            </div>
-          )}
-
-          {params.message && (
-            <div className="mb-4 rounded-md bg-green-50 p-4 text-green-500">
-              {params.message}
-            </div>
-          )}
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-lg border bg-card p-6">

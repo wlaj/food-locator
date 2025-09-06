@@ -15,7 +15,7 @@ export async function signInWithEmail(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    redirect('/login?error=Could not authenticate user')
+    redirect('/login?error=' + encodeURIComponent('Invalid email or password'))
   }
 
   revalidatePath('/', 'layout')
@@ -33,10 +33,10 @@ export async function signUpWithEmail(formData: FormData) {
   const { error } = await supabase.auth.signUp(data)
 
   if (error) {
-    redirect('/signup?error=Could not create user')
+    redirect('/signup?error=' + encodeURIComponent('Could not create account. Please try again.'))
   }
 
-  redirect('/signup?message=Check email to continue sign in process')
+  redirect('/signup?success=' + encodeURIComponent('Account created! Check your email to verify your account.'))
 }
 
 export async function signOut() {
@@ -74,9 +74,9 @@ export async function updateUserProfile(formData: FormData) {
   })
 
   if (error) {
-    redirect('/dashboard?error=Could not update profile')
+    redirect('/dashboard?error=' + encodeURIComponent('Could not update profile. Please try again.'))
   }
 
   revalidatePath('/dashboard')
-  redirect('/dashboard?message=Profile updated successfully')
+  redirect('/dashboard?success=' + encodeURIComponent('Profile updated successfully!'))
 }

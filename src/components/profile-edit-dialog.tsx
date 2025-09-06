@@ -1,7 +1,7 @@
 "use client"
 
 import { useId, useState } from "react"
-import { CheckIcon, ImagePlusIcon, XIcon } from "lucide-react"
+import { CheckIcon, ImagePlusIcon } from "lucide-react"
 import { User } from "@supabase/supabase-js"
 
 import { useCharacterLimit } from "@/hooks/use-character-limit"
@@ -22,15 +22,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { updateUserProfile } from "@/lib/auth-actions"
 
-const initialBgImage = [
-  {
-    name: "profile-bg.jpg",
-    size: 1528737,
-    type: "image/jpeg",
-    url: "/profile-bg.jpg",
-    id: "profile-bg-123456789",
-  },
-]
+// const initialBgImage = [
+//   {
+//     name: "profile-bg.jpg",
+//     size: 1528737,
+//     type: "image/jpeg",
+//     url: "/profile-bg.jpg",
+//     id: "profile-bg-123456789",
+//   },
+// ]
 
 const initialAvatarImage = [
   {
@@ -83,7 +83,7 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
           username.
         </DialogDescription>
         <div className="overflow-y-auto">
-          <ProfileBg />
+          {/* <ProfileBg /> */}
           <Avatar />
           <div className="px-6 pt-4 pb-6">
             <form className="space-y-4" action={handleSubmit}>
@@ -186,60 +186,60 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
   )
 }
 
-function ProfileBg() {
-  const [{ files }, { removeFile, openFileDialog, getInputProps }] =
-    useFileUpload({
-      accept: "image/*",
-      initialFiles: initialBgImage,
-    })
+// function ProfileBg() {
+//   const [{ files }, { removeFile, openFileDialog, getInputProps }] =
+//     useFileUpload({
+//       accept: "image/*",
+//       initialFiles: initialBgImage,
+//     })
 
-  const currentImage = files[0] ? ('preview' in files[0] ? files[0].preview : files[0].url) : null
+//   const currentImage = files[0] ? ('preview' in files[0] ? files[0].preview : files[0].url) : null
 
-  return (
-    <div className="h-32">
-      <div className="bg-muted relative flex size-full items-center justify-center overflow-hidden">
-        {currentImage && (
-          <img
-            className="size-full object-cover"
-            src={currentImage}
-            alt={
-              files[0] && 'preview' in files[0]
-                ? "Preview of uploaded image"
-                : "Default profile background"
-            }
-            width={512}
-            height={96}
-          />
-        )}
-        <div className="absolute inset-0 flex items-center justify-center gap-2">
-          <button
-            type="button"
-            className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-            onClick={openFileDialog}
-            aria-label={currentImage ? "Change image" : "Upload image"}
-          >
-            <ImagePlusIcon size={16} aria-hidden="true" />
-          </button>
-          {currentImage && (
-            <button
-              type="button"
-              className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
-              onClick={() => removeFile(files[0]?.id)}
-              aria-label="Remove image"
-            >
-              <XIcon size={16} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-      </div>
-      <input
-        {...getInputProps()}
-        className="sr-only"
-        aria-label="Upload image file"
-      />
-    </div>
-  )
-}
+//   return (
+//     <div className="h-32">
+//       <div className="bg-muted relative flex size-full items-center justify-center overflow-hidden">
+//         {currentImage && (
+//           <img
+//             className="size-full object-cover"
+//             src={currentImage}
+//             alt={
+//               files[0] && 'preview' in files[0]
+//                 ? "Preview of uploaded image"
+//                 : "Default profile background"
+//             }
+//             width={512}
+//             height={96}
+//           />
+//         )}
+//         <div className="absolute inset-0 flex items-center justify-center gap-2">
+//           <button
+//             type="button"
+//             className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
+//             onClick={openFileDialog}
+//             aria-label={currentImage ? "Change image" : "Upload image"}
+//           >
+//             <ImagePlusIcon size={16} aria-hidden="true" />
+//           </button>
+//           {currentImage && (
+//             <button
+//               type="button"
+//               className="focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-10 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]"
+//               onClick={() => removeFile(files[0]?.id)}
+//               aria-label="Remove image"
+//             >
+//               <XIcon size={16} aria-hidden="true" />
+//             </button>
+//           )}
+//         </div>
+//       </div>
+//       <input
+//         {...getInputProps()}
+//         className="sr-only"
+//         aria-label="Upload image file"
+//       />
+//     </div>
+//   )
+// }
 
 function Avatar() {
   const [{ files }, { openFileDialog, getInputProps }] = useFileUpload({
@@ -250,7 +250,7 @@ function Avatar() {
   const currentImage = files[0] ? ('preview' in files[0] ? files[0].preview : files[0].url) : null
 
   return (
-    <div className="-mt-10 px-6">
+    <div className="mt-6 px-6">
       <div className="border-background bg-muted relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 shadow-xs shadow-black/10">
         {currentImage && (
           <img
