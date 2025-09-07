@@ -1,10 +1,10 @@
 "use client"
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, Suspense } from 'react'
 import { toast } from 'sonner'
 
-export default function ToastHandler() {
+function ToastHandlerContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const processedRef = useRef(new Set<string>())
@@ -55,4 +55,12 @@ export default function ToastHandler() {
   }, [searchParams, router])
 
   return null
+}
+
+export default function ToastHandler() {
+  return (
+    <Suspense fallback={null}>
+      <ToastHandlerContent />
+    </Suspense>
+  )
 }

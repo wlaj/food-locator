@@ -31,7 +31,7 @@ interface SearchInputProps {
   size?: "sm" | "md" | "lg";
 }
 
-export default function SearchInput({
+function SearchInputContent({
   placeholder = "Search restaurants...",
   className,
   size = "md",
@@ -277,5 +277,13 @@ export default function SearchInput({
         </button>
       </div>
     </form>
+  );
+}
+
+export default function SearchInput(props: SearchInputProps) {
+  return (
+    <React.Suspense fallback={<div className="h-10 w-full bg-muted/50 animate-pulse rounded-lg" />}>
+      <SearchInputContent {...props} />
+    </React.Suspense>
   );
 }

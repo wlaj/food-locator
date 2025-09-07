@@ -65,7 +65,7 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
       } else {
         setNameValidation({ isChecking: false, isValid: true, error: null })
       }
-    } catch (error) {
+    } catch {
       setNameValidation({ 
         isChecking: false, 
         isValid: false, 
@@ -207,7 +207,7 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
         toast.success(`Restaurant ${isEditing ? 'updated' : 'created'} successfully`)
         setOpen(false)
       }
-    } catch (error) {
+    } catch {
       toast.error('Something went wrong')
     } finally {
       setLoading(false)
