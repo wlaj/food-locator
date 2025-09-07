@@ -2,16 +2,16 @@ import ThemeToggle from "@/components/theme-toggle";
 import NavbarClient from "@/components/navbar-client";
 import NavbarAuth from "@/components/navbar-auth";
 import Link from "next/link";
-import { IconInnerShadowBottomRight } from "@tabler/icons-react";
+import { IconInnerShadowBottomRightFilled } from "@tabler/icons-react";
 
 export default function Navbar() {
   return (
-    <header className="border-b px-4 z-10 fixed top-0 right-0 bg-white w-full md:px-6">
+    <header className="border-b px-4 z-20 fixed top-0 right-0 bg-white w-full md:px-6">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <div className="flex-1">
           <Link href="/" className="text-primary flex gap-2 items-center hover:text-primary/90">
-            <IconInnerShadowBottomRight className="size-8" />
+            <IconInnerShadowBottomRightFilled className="size-8" />
           </Link>
         </div>
         {/* Middle area */}

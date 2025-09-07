@@ -6,13 +6,23 @@ const Hero = ({ className }: { className: string }) => {
   return (
     <div
       className={cn(
-        "p-4 flex flex-col rounded-lg h-96 justify-center items-center",
+        "p-4 flex flex-col rounded-lg h-96 justify-center items-center relative overflow-hidden bg-black",
         className
       )}
     >
-      <div className="flex max-w-2xl flex-col gap-8">
+      <div 
+        className="absolute top-0 right-0 w-1/3 h-full"
+        style={{
+          backgroundImage: 'url(/banner.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          transformOrigin: 'center center'
+        }}
+      ></div>
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+      <div className="flex max-w-2xl flex-col gap-8 relative z-10">
         <h1 className="text-neutral-100 text-5xl font-semibold">
-          Ontdek & reserveer het ideale restaurant voor ieder moment
+          Ontdek snel de best geprijsde restaurants & eettentjes
         </h1>
         <SearchInput className="w-full bg-white rounded-lg" />
       </div>

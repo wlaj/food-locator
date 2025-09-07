@@ -14,7 +14,7 @@ export default async function Home() {
         demoTitle="View based on location"
         restaurants={restaurants || []}
       />
-      <HowItWorks heading="How it works" demoTitle="Book a demo" demoUrl="" />
+      <HowItWorks heading="Hoe het werkt" />
     </div>
   );
 }

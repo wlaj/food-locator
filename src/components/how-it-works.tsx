@@ -3,8 +3,8 @@ import React from "react";
 
 type HowItWorks = {
   heading: string;
-  demoUrl: string;
-  demoTitle: string;
+  demoUrl?: string;
+  demoTitle?: string;
 };
 
 const HowItWorks = ({ heading, demoUrl, demoTitle }: HowItWorks) => {
