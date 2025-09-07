@@ -1,1 +1,4 @@
 - Use Context7 to check up-to-date docs when needed for implementing new libraries or frameworks, or adding features using them.
+- Use supabase MCP when working on features that involve the database.
+- Use shadcn MCP when implementing new components or updating them.
+- Use pnpm in the project.

@@ -22,7 +22,7 @@ export default function Navbar() {
             <a href="#">Community</a>
           </Button> */}
           <NavbarAuth />
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
         </div>
       </div>
     </header>
