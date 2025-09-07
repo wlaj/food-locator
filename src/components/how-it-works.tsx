@@ -1,4 +1,4 @@
-import { IconPentagonNumber1 } from "@tabler/icons-react";
+import { IconCircle1, IconCircle2, IconCircle3, IconNumber1, IconNumber2, IconNumber3 } from "@tabler/icons-react";
 import React from "react";
 
 type HowItWorks = {
@@ -24,24 +24,24 @@ const HowItWorks = ({ heading, demoUrl, demoTitle }: HowItWorks) => {
         </div>
         <div className="flex gap-4 items-center">
           <div className="flex flex-col gap-2 p-6 border w-1/3">
-            <IconPentagonNumber1 className="size-4" />
-            <h3 className="text-xl font-medium">Twitter</h3>
+            <IconCircle1 className="size-8" />
+            <h3 className="text-xl font-medium">Zoek op locatie of voeg je locatie toe</h3>
             <p className="text-neutral-600">
-              Connect with others, share experiences, and stay in the loop.
+              Vul je postcode in om restaurants in jouw buurt te vinden.
             </p>
           </div>
           <div className="flex flex-col gap-2 p-6 border w-1/3">
-            <IconPentagonNumber1 className="size-4" />
-            <h3 className="text-xl font-medium">Twitter</h3>
+            <IconCircle2 className="size-8" />
+            <h3 className="text-xl font-medium">Ontdek lokale restaurants</h3>
             <p className="text-neutral-600">
-              Connect with others, share experiences, and stay in the loop.
+              Bekijk een overzicht van alle restaurants bij jou in de buurt.
             </p>
           </div>
           <div className="flex flex-col gap-2 p-6 border w-1/3">
-            <IconPentagonNumber1 className="size-4" />
-            <h3 className="text-xl font-medium">Twitter</h3>
+            <IconCircle3 className="size-8" />
+            <h3 className="text-xl font-medium">Bestel en geniet</h3>
             <p className="text-neutral-600">
-              Connect with others, share experiences, and stay in the loop.
+              Kies je favoriete gerecht en plaats eenvoudig je bestelling.
             </p>
           </div>
         </div>

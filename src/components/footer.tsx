@@ -27,31 +27,28 @@ interface FooterProps {
 const Footer = ({
   logo = {
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg",
-    alt: "blocks for shadcn/ui",
-    title: "Shadcnblocks.com",
-    url: "https://www.shadcnblocks.com",
+    alt: "Software for B2B",
+    title: "digics.net",
+    url: "https://www.digics.net",
   },
-  tagline = "Components made easy.",
+  tagline = "Food locator",
   menuItems = [
     {
-      title: "Product",
+      title: "Locations",
       links: [
-        { text: "Overview", url: "#" },
-        { text: "Pricing", url: "#" },
-        { text: "Marketplace", url: "#" },
-        { text: "Features", url: "#" },
-        { text: "Integrations", url: "#" },
-        { text: "Pricing", url: "#" },
+        { text: "Amsterdam Centrum", url: "#" },
+        { text: "Amsterdam Nieuw-West", url: "#" },
+        { text: "Amsterdam Noord", url: "#" },
+        { text: "Amsterdam Oost", url: "#" },
+        { text: "Amsterdam Zuid", url: "#" },
+        { text: "Rotterdam Centrum", url: "#" },
       ],
     },
     {
       title: "Company",
       links: [
-        { text: "About", url: "#" },
-        { text: "Team", url: "#" },
-        { text: "Blog", url: "#" },
-        { text: "Careers", url: "#" },
         { text: "Contact", url: "#" },
+        { text: "Terms & Conditions", url: "#" },
         { text: "Privacy", url: "#" },
       ],
     },
@@ -72,7 +69,7 @@ const Footer = ({
       ],
     },
   ],
-  copyright = "© 2024 Shadcnblocks.com. All rights reserved.",
+  copyright = "© 2025 Digics.net. All rights reserved.",
   bottomLinks = [
     { text: "Terms and Conditions", url: "#" },
     { text: "Privacy Policy", url: "#" },
@@ -90,12 +87,12 @@ const Footer = ({
             </div>
             {menuItems.map((section, sectionIdx) => (
               <div key={sectionIdx}>
-                <h3 className="mb-4 font-bold">{section.title}</h3>
+                <h3 className="mb-4 font-semibold text-neutral-200">{section.title}</h3>
                 <ul className="text-muted-foreground space-y-4">
                   {section.links.map((link, linkIdx) => (
                     <li
                       key={linkIdx}
-                      className="hover:text-primary font-medium"
+                      className="hover:opacity-80 font-medium"
                     >
                       <a href={link.url}>{link.text}</a>
                     </li>
