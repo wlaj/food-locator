@@ -30,6 +30,9 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
   const [cuisineOpen, setCuisineOpen] = useState(false)
   const [selectedCuisine, setSelectedCuisine] = useState(restaurant?.cuisine || "")
   const [cuisines, setCuisines] = useState<string[]>([])
+  const [locationOpen, setLocationOpen] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState(restaurant?.location || "")
+  const [locations, setLocations] = useState<string[]>([])
   const [googleMapsError, setGoogleMapsError] = useState<string | null>(null)
   const [nameValidation, setNameValidation] = useState<{
     isChecking: boolean;
@@ -89,23 +92,37 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
   }
 
   useEffect(() => {
-    async function fetchCuisines() {
+    async function fetchOptions() {
       try {
         const { createClient } = await import('@/lib/supabase/client')
         const supabase = createClient()
-        const { data } = await supabase
+        
+        // Fetch cuisines
+        const { data: cuisineData } = await supabase
           .from('cuisines')
           .select('name')
           .order('name')
-        if (data) {
-          setCuisines(data.map(c => c.name))
+        if (cuisineData) {
+          setCuisines(cuisineData.map(c => c.name))
+        }
+        
+        // Fetch locations
+        const { data: locationData, error: locationError } = await supabase
+          .from('locations')
+          .select('label')
+          .order('label')
+        if (locationError) {
+          console.error('Error fetching locations:', locationError)
+        } else if (locationData) {
+          console.log('Fetched locations:', locationData)
+          setLocations(locationData.map(l => l.label))
         }
       } catch (error) {
-        console.error('Error fetching cuisines:', error)
+        console.error('Error fetching options:', error)
       }
     }
     if (open) {
-      fetchCuisines()
+      fetchOptions()
     }
   }, [open])
 
@@ -324,13 +341,49 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                name="location"
-                placeholder="e.g., Amsterdam Noord, Rotterdam Centrum"
-                defaultValue={restaurant?.location || ''}
-              />
+              <Label>Location</Label>
+              <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={locationOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedLocation || "Select location..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search location..." />
+                    <CommandList>
+                      <CommandEmpty>No location found.</CommandEmpty>
+                      <CommandGroup>
+                        {locations.map((location) => (
+                          <CommandItem
+                            key={location}
+                            value={location}
+                            onSelect={(currentValue) => {
+                              setSelectedLocation(currentValue === selectedLocation ? "" : currentValue)
+                              setLocationOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedLocation === location ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {location}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <input name="location" type="hidden" value={selectedLocation} />
             </div>
             
             <div className="space-y-2">
