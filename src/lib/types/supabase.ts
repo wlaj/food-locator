@@ -66,7 +66,6 @@ export type Database = {
           label: string
           lat: number
           lon: number
-          neighborhood: string | null
           updated_at: string | null
           value: string
         }
@@ -79,7 +78,6 @@ export type Database = {
           label: string
           lat: number
           lon: number
-          neighborhood?: string | null
           updated_at?: string | null
           value: string
         }
@@ -92,7 +90,6 @@ export type Database = {
           label?: string
           lat?: number
           lon?: number
-          neighborhood?: string | null
           updated_at?: string | null
           value?: string
         }

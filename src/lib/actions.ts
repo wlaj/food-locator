@@ -22,7 +22,7 @@ export async function getRestaurants(limit: number = 10): Promise<Restaurant[] |
 
 export async function searchRestaurants(
   query: string,
-  location?: { lat: number; lon: number }
+  location?: string
 ): Promise<Restaurant[] | null> {
   const supabase = await createClient();
   
@@ -33,12 +33,9 @@ export async function searchRestaurants(
     queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ilike.%${query}%`);
   }
 
+  // Filter by location if provided
   if (location) {
-    // Add ordering by proximity using the Haversine formula
-    queryBuilder = queryBuilder
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
-      .order('id', { ascending: false }); // Default order, will be overridden by client-side sorting
+    queryBuilder = queryBuilder.ilike('location', `%${location}%`);
   }
 
   const { data, error } = await queryBuilder;
@@ -49,43 +46,14 @@ export async function searchRestaurants(
   }
 
   if (location && data) {
-    // Sort by distance on the client side since PostgREST doesn't have built-in distance functions
-    const restaurantsWithDistance = data
-      .filter(restaurant => restaurant.latitude && restaurant.longitude)
-      .map(restaurant => {
-        const distance = calculateDistance(
-          location.lat,
-          location.lon,
-          restaurant.latitude!,
-          restaurant.longitude!
-        );
-        return { ...restaurant, distance };
-      })
-      .filter(restaurant => restaurant.distance <= 3) // Only show restaurants within 3km
-      .sort((a, b) => a.distance - b.distance);
-    
-    console.log(`Location search: ${location.lat}, ${location.lon}`);
-    console.log(`Found ${restaurantsWithDistance.length} restaurants within 3km`);
-    console.log(restaurantsWithDistance.map(r => ({ name: r.name, distance: r.distance.toFixed(2) + 'km' })));
-    
-    return restaurantsWithDistance;
+    console.log(`Location search: ${location}`);
+    console.log(`Found ${data.length} restaurants matching location`);
+    console.log(data.map(r => ({ name: r.name, location: r.location })));
   }
 
   return data;
 }
 
-// Haversine formula to calculate distance between two points in kilometers
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth's radius in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-}
 
 export async function createRestaurant(formData: FormData) {
   const name = formData.get('name') as string

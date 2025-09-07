@@ -4,15 +4,13 @@ import { searchRestaurants } from "@/lib/actions";
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
-    lat?: string;
-    lon?: string;
     location?: string;
   }>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
-  const { q: query, lat, lon, location } = params;
+  const { q: query, location } = params;
 
   if (!query) {
     return (
@@ -27,10 +25,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  const restaurants = await searchRestaurants(query, lat && lon ? {
-    lat: parseFloat(lat),
-    lon: parseFloat(lon)
-  } : undefined);
+  const restaurants = await searchRestaurants(query, location);
 
   const isLocationOnlySearch = query === "*";
   const searchContext = location ? `in ${location}` : "";

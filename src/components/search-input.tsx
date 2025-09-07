@@ -75,8 +75,6 @@ function SearchInputContent({
   // Sync state with URL parameters
   React.useEffect(() => {
     const urlQuery = searchParams.get('q');
-    const urlLat = searchParams.get('lat');
-    const urlLon = searchParams.get('lon');
     const urlLocation = searchParams.get('location');
 
     // Update search query from URL (but not if it's the wildcard "*")
@@ -87,24 +85,13 @@ function SearchInputContent({
       setSearchQuery("");
     }
 
-    // Find matching location from coordinates or location name
-    if (locations.length > 0) {
-      if (urlLat && urlLon) {
-        const lat = parseFloat(urlLat);
-        const lon = parseFloat(urlLon);
-        const matchingLocation = locations.find(loc => 
-          Math.abs(loc.lat - lat) < 0.01 && Math.abs(loc.lon - lon) < 0.01
-        );
-        if (matchingLocation) {
-          setSelectedLocation(matchingLocation.value);
-        }
-      } else if (urlLocation) {
-        const matchingLocation = locations.find(loc => 
-          loc.label.toLowerCase() === urlLocation.toLowerCase()
-        );
-        if (matchingLocation) {
-          setSelectedLocation(matchingLocation.value);
-        }
+    // Find matching location from location name
+    if (locations.length > 0 && urlLocation) {
+      const matchingLocation = locations.find(loc => 
+        loc.label.toLowerCase() === urlLocation.toLowerCase()
+      );
+      if (matchingLocation) {
+        setSelectedLocation(matchingLocation.value);
       }
     }
   }, [searchParams, pathname, locations]);
@@ -118,8 +105,6 @@ function SearchInputContent({
       const searchParams = new URLSearchParams({
         q: searchQuery.trim(),
         ...(selectedLocationData && {
-          lat: selectedLocationData.lat.toString(),
-          lon: selectedLocationData.lon.toString(),
           location: selectedLocationData.label
         })
       });
@@ -128,8 +113,6 @@ function SearchInputContent({
       // Search with just location (browse restaurants in area)
       const searchParams = new URLSearchParams({
         q: "*", // Use wildcard to get all restaurants
-        lat: selectedLocationData.lat.toString(),
-        lon: selectedLocationData.lon.toString(),
         location: selectedLocationData.label
       });
       router.push(`/search?${searchParams.toString()}`);
@@ -183,7 +166,7 @@ function SearchInputContent({
                   return (
                     <CommandGroup heading="Cities">
                       {cities.map((city) => {
-                        const cityLocation = locations.find(loc => loc.city === city && !loc.district && !loc.neighborhood);
+                        const cityLocation = locations.find(loc => loc.city === city && !loc.district);
                         return cityLocation ? (
                           <CommandItem
                             key={cityLocation.value}
@@ -244,7 +227,6 @@ function SearchInputContent({
                               {location.district && (
                                 <span className="text-xs text-muted-foreground">
                                   {location.district}
-                                  {location.neighborhood && ` • ${location.neighborhood}`}
                                 </span>
                               )}
                             </div>
