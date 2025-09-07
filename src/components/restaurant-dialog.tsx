@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useId, useRef, useEffect } from "react"
+import { useState, useId, useRef, useEffect, useCallback } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,13 +9,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { createRestaurant, updateRestaurant } from "@/lib/actions"
+import { createRestaurant, updateRestaurant, checkRestaurantName } from "@/lib/actions"
 import { Restaurant } from "@/app/global"
 import { toast } from "sonner"
 import RestaurantImageUpload from "@/components/restaurant-image-upload"
 import DietaryTagSelector from "@/components/dietary-tag-selector"
 import { parseGoogleMapsUrl } from "@/lib/google-maps-parser"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, CheckIcon, TriangleAlertIcon, LoaderCircleIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface RestaurantDialogProps {
@@ -30,13 +30,63 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
   const [cuisineOpen, setCuisineOpen] = useState(false)
   const [selectedCuisine, setSelectedCuisine] = useState(restaurant?.cuisine || "")
   const [cuisines, setCuisines] = useState<string[]>([])
+  const [googleMapsError, setGoogleMapsError] = useState<string | null>(null)
+  const [nameValidation, setNameValidation] = useState<{
+    isChecking: boolean;
+    isValid: boolean | null;
+    error: string | null;
+  }>({ isChecking: false, isValid: null, error: null })
   const googleMapsId = useId()
   const ratingId = useId()
   const nameRef = useRef<HTMLInputElement>(null)
-  const latitudeRef = useRef<HTMLInputElement>(null)
-  const longitudeRef = useRef<HTMLInputElement>(null)
+  const nameTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   const isEditing = !!restaurant
+
+  const debouncedNameCheck = useCallback(async (name: string) => {
+    if (!name.trim()) {
+      setNameValidation({ isChecking: false, isValid: null, error: null })
+      return
+    }
+
+    setNameValidation({ isChecking: true, isValid: null, error: null })
+    
+    try {
+      const result = await checkRestaurantName(name, isEditing ? restaurant.id : undefined)
+      if (result.exists) {
+        setNameValidation({ 
+          isChecking: false, 
+          isValid: false, 
+          error: 'A restaurant with this name already exists' 
+        })
+      } else {
+        setNameValidation({ isChecking: false, isValid: true, error: null })
+      }
+    } catch (error) {
+      setNameValidation({ 
+        isChecking: false, 
+        isValid: false, 
+        error: 'Failed to check name availability' 
+      })
+    }
+  }, [isEditing, restaurant?.id])
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value
+    
+    if (nameTimeoutRef.current) {
+      clearTimeout(nameTimeoutRef.current)
+    }
+    
+    if (!name.trim()) {
+      setNameValidation({ isChecking: false, isValid: null, error: null })
+      return
+    }
+    
+    nameTimeoutRef.current = setTimeout(() => {
+      debouncedNameCheck(name)
+    }, 500)
+  }
 
   useEffect(() => {
     async function fetchCuisines() {
@@ -59,38 +109,74 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     }
   }, [open])
 
+  useEffect(() => {
+    return () => {
+      if (nameTimeoutRef.current) {
+        clearTimeout(nameTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const handleGoogleMapsUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
-    if (url) {
-      const parsedData = parseGoogleMapsUrl(url)
-      
-      if (parsedData.name && nameRef.current) {
-        // Only auto-fill name if it's empty or if we're creating a new restaurant
-        if (!nameRef.current.value || !isEditing) {
-          nameRef.current.value = parsedData.name
-        }
+    
+    if (!url.trim()) {
+      setGoogleMapsError(null)
+      return
+    }
+    
+    const parsedData = parseGoogleMapsUrl(url)
+    
+    if (!parsedData.isValid) {
+      setGoogleMapsError('Please enter a valid Google Maps URL')
+      return
+    }
+    
+    setGoogleMapsError(null)
+    
+    if (parsedData.name && nameRef.current) {
+      // Only auto-fill name if it's empty or if we're creating a new restaurant
+      if (!nameRef.current.value || !isEditing) {
+        nameRef.current.value = parsedData.name
+        // Trigger name validation after auto-fill
+        handleNameChange({ target: { value: parsedData.name } } as React.ChangeEvent<HTMLInputElement>)
       }
-      
-      if (parsedData.latitude && latitudeRef.current) {
-        latitudeRef.current.value = parsedData.latitude.toString()
-      }
-      
-      if (parsedData.longitude && longitudeRef.current) {
-        longitudeRef.current.value = parsedData.longitude.toString()
-      }
+    }
 
-      if (parsedData.name || parsedData.latitude || parsedData.longitude) {
-        toast.success('Restaurant details extracted from Google Maps URL')
-      } else {
-        toast.error('Could not extract restaurant details from URL')
-      }
+    if (parsedData.name) {
+      toast.success('Restaurant name extracted from Google Maps URL')
+    } else {
+      toast.info('Google Maps URL is valid - please enter restaurant name manually')
     }
   }
 
   async function handleSubmit(formData: FormData) {
+    // Check for validation errors before submitting
+    if (googleMapsError || nameValidation.error) {
+      toast.error('Please fix all validation errors before submitting')
+      return
+    }
+    
+    // If name validation is still in progress, wait a bit
+    if (nameValidation.isChecking) {
+      toast.error('Please wait for name validation to complete')
+      return
+    }
+    
     setLoading(true)
     
     try {
+      // Validate Google Maps URL
+      const googleMapsUrl = formData.get('google_maps_url') as string
+      if (googleMapsUrl) {
+        const parsedData = parseGoogleMapsUrl(googleMapsUrl)
+        if (!parsedData.isValid) {
+          toast.error('Please provide a valid Google Maps URL')
+          setLoading(false)
+          return
+        }
+      }
+      
       let result
       if (isEditing) {
         result = await updateRestaurant(restaurant.id, formData)
@@ -131,29 +217,64 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
               <Input
                 id={googleMapsId}
                 name="google_maps_url"
-                className="peer ps-16"
+                className={`peer ps-16 ${googleMapsError ? 'aria-invalid' : ''}`}
                 placeholder="maps.app.goo.gl/example"
                 type="text"
                 defaultValue={restaurant?.google_maps_url || ''}
                 onChange={handleGoogleMapsUrlChange}
+                aria-invalid={!!googleMapsError}
                 required
               />
               <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm peer-disabled:opacity-50">
                 https://
               </span>
             </div>
+            {googleMapsError && (
+              <p
+                className="text-destructive mt-2 text-xs"
+                role="alert"
+                aria-live="polite"
+              >
+                {googleMapsError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                name="name"
-                ref={nameRef}
-                defaultValue={restaurant?.name || ''}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="name"
+                  name="name"
+                  ref={nameRef}
+                  className={`peer pe-9 ${nameValidation.error ? 'aria-invalid' : ''}`}
+                  defaultValue={restaurant?.name || ''}
+                  onChange={handleNameChange}
+                  aria-invalid={!!nameValidation.error}
+                  required
+                />
+                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 peer-disabled:opacity-50">
+                  {nameValidation.isChecking && (
+                    <LoaderCircleIcon size={16} className="animate-spin" aria-hidden="true" />
+                  )}
+                  {!nameValidation.isChecking && nameValidation.isValid === true && (
+                    <CheckIcon size={16} className="text-green-500" aria-hidden="true" />
+                  )}
+                  {!nameValidation.isChecking && nameValidation.isValid === false && (
+                    <TriangleAlertIcon size={16} className="text-destructive" aria-hidden="true" />
+                  )}
+                </div>
+              </div>
+              {nameValidation.error && (
+                <p
+                  className="text-destructive mt-2 text-xs"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {nameValidation.error}
+                </p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -207,23 +328,47 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
               <Input
                 id="location"
                 name="location"
+                placeholder="e.g., Amsterdam Noord, Rotterdam Centrum"
                 defaultValue={restaurant?.location || ''}
               />
             </div>
-
-            <input
-              ref={latitudeRef}
-              name="latitude"
-              type="hidden"
-              defaultValue={restaurant?.latitude || ''}
-            />
-
-            <input
-              ref={longitudeRef}
-              name="longitude"
-              type="hidden"
-              defaultValue={restaurant?.longitude || ''}
-            />
+            
+            <div className="space-y-2">
+              <Label>Coordinates (Optional)</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor="latitude" className="text-xs text-muted-foreground">Latitude</Label>
+                  <Input
+                    id="latitude"
+                    name="latitude"
+                    type="number"
+                    step="0.000001"
+                    min="0"
+                    max="90"
+                    placeholder="52.370216"
+                    defaultValue={restaurant?.latitude?.toString() || ''}
+                    title="Enter latitude (0-90)"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="longitude" className="text-xs text-muted-foreground">Longitude</Label>
+                  <Input
+                    id="longitude"
+                    name="longitude"
+                    type="number"
+                    step="0.000001"
+                    min="-180"
+                    max="180"
+                    placeholder="4.895168"
+                    defaultValue={restaurant?.longitude?.toString() || ''}
+                    title="Enter longitude (-180 to 180)"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Coordinates can help with location-based searches. Leave empty if unknown.
+              </p>
+            </div>
             
             <fieldset className="space-y-4">
               <legend className="text-foreground text-sm leading-none font-medium">

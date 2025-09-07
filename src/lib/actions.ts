@@ -107,11 +107,18 @@ export async function createRestaurant(formData: FormData) {
     return { error: 'Google Maps URL is required' }
   }
 
-  if (!latitude || !longitude) {
-    return { error: 'Could not extract coordinates from Google Maps URL' }
-  }
-
   const supabase = await createClient();
+
+  // Check if Google Maps URL already exists
+  const { data: existingGoogleMapsUrl } = await supabase
+    .from('restaurants')
+    .select('google_maps_url')
+    .eq('google_maps_url', google_maps_url)
+    .single();
+
+  if (existingGoogleMapsUrl) {
+    return { error: 'A restaurant with this Google Maps URL already exists' }
+  }
 
   // Check if restaurant name already exists
   const { data: existingRestaurant } = await supabase
@@ -177,11 +184,19 @@ export async function updateRestaurant(id: string, formData: FormData) {
     return { error: 'Google Maps URL is required' }
   }
 
-  if (!latitude || !longitude) {
-    return { error: 'Could not extract coordinates from Google Maps URL' }
-  }
-
   const supabase = await createClient();
+
+  // Check if Google Maps URL already exists (excluding current restaurant)
+  const { data: existingGoogleMapsUrl } = await supabase
+    .from('restaurants')
+    .select('google_maps_url, id')
+    .eq('google_maps_url', google_maps_url)
+    .neq('id', id)
+    .single();
+
+  if (existingGoogleMapsUrl) {
+    return { error: 'A restaurant with this Google Maps URL already exists' }
+  }
 
   // Check if restaurant name already exists (excluding current restaurant)
   const { data: existingRestaurant } = await supabase
@@ -318,4 +333,21 @@ export async function deleteRestaurantImage(imageUrl: string): Promise<{ success
     console.error('Error in deleteRestaurantImage:', error);
     return { error: 'Failed to delete image' };
   }
+}
+
+export async function checkRestaurantName(name: string, excludeId?: string): Promise<{ exists: boolean }> {
+  const supabase = await createClient();
+  
+  let query = supabase
+    .from('restaurants')
+    .select('id')
+    .ilike('name', name);
+  
+  if (excludeId) {
+    query = query.neq('id', excludeId);
+  }
+  
+  const { data } = await query.single();
+  
+  return { exists: !!data };
 }
