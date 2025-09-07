@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      cuisines: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       dietary_options: {
         Row: {
           created_at: string | null
@@ -32,6 +53,45 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          city: string
+          created_at: string | null
+          district: string | null
+          id: number
+          label: string
+          lat: number
+          lon: number
+          neighborhood: string | null
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          city: string
+          created_at?: string | null
+          district?: string | null
+          id?: number
+          label: string
+          lat: number
+          lon: number
+          neighborhood?: string | null
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          city?: string
+          created_at?: string | null
+          district?: string | null
+          id?: number
+          label?: string
+          lat?: number
+          lon?: number
+          neighborhood?: string | null
+          updated_at?: string | null
+          value?: string
         }
         Relationships: []
       }

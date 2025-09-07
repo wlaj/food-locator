@@ -20,31 +20,10 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { IconLocation } from "@tabler/icons-react";
+import { createClient } from "@/lib/supabase/client";
+import type { Tables } from "@/lib/types/supabase";
 
-const locations = [
-  { value: "amsterdam", label: "Amsterdam", lat: 52.3676, lon: 4.9041 },
-  { value: "rotterdam", label: "Rotterdam", lat: 51.9225, lon: 4.4792 },
-  { value: "utrecht", label: "Utrecht", lat: 52.0907, lon: 5.1214 },
-  { value: "the-hague", label: "The Hague", lat: 52.0705, lon: 4.3007 },
-  { value: "eindhoven", label: "Eindhoven", lat: 51.4416, lon: 5.4697 },
-  { value: "amsterdam-centrum", label: "Amsterdam Centrum", lat: 52.3740, lon: 4.8897 },
-  { value: "amsterdam-west", label: "Amsterdam West", lat: 52.3676, lon: 4.8518 },
-  { value: "amsterdam-oost", label: "Amsterdam Oost", lat: 52.3676, lon: 4.9041 },
-  { value: "amsterdam-noord", label: "Amsterdam Noord", lat: 52.3947, lon: 4.9015 },
-  { value: "amsterdam-zuid", label: "Amsterdam Zuid", lat: 52.3505, lon: 4.8995 },
-  { value: "amsterdam-nieuw-west", label: "Amsterdam Nieuw-West", lat: 52.3676, lon: 4.8081 },
-  { value: "amsterdam-zuidoost", label: "Amsterdam Zuidoost", lat: 52.3094, lon: 4.9725 },
-  { value: "de-pijp", label: "De Pijp, Amsterdam", lat: 52.3526, lon: 4.8921 },
-  { value: "jordaan", label: "Jordaan, Amsterdam", lat: 52.3765, lon: 4.8839 },
-  { value: "vondelpark", label: "Vondelpark, Amsterdam", lat: 52.3579, lon: 4.8686 },
-  { value: "museum-quarter", label: "Museum Quarter, Amsterdam", lat: 52.3579, lon: 4.8795 },
-  { value: "red-light-district", label: "Red Light District, Amsterdam", lat: 52.3740, lon: 4.8978 },
-  { value: "nieuwmarkt", label: "Nieuwmarkt, Amsterdam", lat: 52.3719, lon: 4.9003 },
-  { value: "plantage", label: "Plantage, Amsterdam", lat: 52.3676, lon: 4.9127 },
-  { value: "oud-west", label: "Oud-West, Amsterdam", lat: 52.3676, lon: 4.8647 },
-  { value: "oud-zuid", label: "Oud-Zuid, Amsterdam", lat: 52.3505, lon: 4.8795 },
-  { value: "waterlooplein", label: "Waterlooplein, Amsterdam", lat: 52.3676, lon: 4.9041 },
-];
+type Location = Tables<'locations'>;
 
 interface SearchInputProps {
   placeholder?: string;
@@ -63,6 +42,35 @@ export default function SearchInput({
   const [searchQuery, setSearchQuery] = React.useState("");
   const [locationOpen, setLocationOpen] = React.useState(false);
   const [selectedLocation, setSelectedLocation] = React.useState("amsterdam");
+  const [locations, setLocations] = React.useState<Location[]>([]);
+  const [isLoadingLocations, setIsLoadingLocations] = React.useState(true);
+  const [searchValue, setSearchValue] = React.useState("");
+  const supabase = createClient();
+
+  // Fetch locations from database
+  React.useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('locations')
+          .select('*')
+          .order('city', { ascending: true })
+          .order('label', { ascending: true });
+        
+        if (error) {
+          console.error('Error fetching locations:', error);
+        } else {
+          setLocations(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, [supabase]);
 
   // Sync state with URL parameters
   React.useEffect(() => {
@@ -80,24 +88,26 @@ export default function SearchInput({
     }
 
     // Find matching location from coordinates or location name
-    if (urlLat && urlLon) {
-      const lat = parseFloat(urlLat);
-      const lon = parseFloat(urlLon);
-      const matchingLocation = locations.find(loc => 
-        Math.abs(loc.lat - lat) < 0.01 && Math.abs(loc.lon - lon) < 0.01
-      );
-      if (matchingLocation) {
-        setSelectedLocation(matchingLocation.value);
-      }
-    } else if (urlLocation) {
-      const matchingLocation = locations.find(loc => 
-        loc.label.toLowerCase() === urlLocation.toLowerCase()
-      );
-      if (matchingLocation) {
-        setSelectedLocation(matchingLocation.value);
+    if (locations.length > 0) {
+      if (urlLat && urlLon) {
+        const lat = parseFloat(urlLat);
+        const lon = parseFloat(urlLon);
+        const matchingLocation = locations.find(loc => 
+          Math.abs(loc.lat - lat) < 0.01 && Math.abs(loc.lon - lon) < 0.01
+        );
+        if (matchingLocation) {
+          setSelectedLocation(matchingLocation.value);
+        }
+      } else if (urlLocation) {
+        const matchingLocation = locations.find(loc => 
+          loc.label.toLowerCase() === urlLocation.toLowerCase()
+        );
+        if (matchingLocation) {
+          setSelectedLocation(matchingLocation.value);
+        }
       }
     }
-  }, [searchParams, pathname]);
+  }, [searchParams, pathname, locations]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,31 +165,94 @@ export default function SearchInput({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
+        <PopoverContent className="w-[300px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search location..." />
+            <CommandInput 
+              placeholder="Search location..." 
+              value={searchValue}
+              onValueChange={setSearchValue}
+            />
             <CommandList>
-              <CommandEmpty>No location found.</CommandEmpty>
-              <CommandGroup>
-                {locations.map((location) => (
-                  <CommandItem
-                    key={location.value}
-                    value={location.value}
-                    onSelect={(currentValue) => {
-                      setSelectedLocation(currentValue === selectedLocation ? "" : currentValue);
-                      setLocationOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedLocation === location.value ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {location.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              <CommandEmpty>
+                {isLoadingLocations ? "Loading locations..." : "No location found."}
+              </CommandEmpty>
+              {(() => {
+                // If no search query, show city suggestions
+                if (!searchValue.trim()) {
+                  const cities = Array.from(new Set(locations.map(loc => loc.city))).sort();
+                  return (
+                    <CommandGroup heading="Cities">
+                      {cities.map((city) => {
+                        const cityLocation = locations.find(loc => loc.city === city && !loc.district && !loc.neighborhood);
+                        return cityLocation ? (
+                          <CommandItem
+                            key={cityLocation.value}
+                            value={cityLocation.value}
+                            onSelect={(currentValue) => {
+                              setSelectedLocation(currentValue === selectedLocation ? "" : currentValue);
+                              setLocationOpen(false);
+                              setSearchValue("");
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedLocation === cityLocation.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {city}
+                          </CommandItem>
+                        ) : null;
+                      })}
+                    </CommandGroup>
+                  );
+                }
+
+                // Group locations by city when searching
+                const groupedLocations = locations.reduce((groups, location) => {
+                  if (!groups[location.city]) {
+                    groups[location.city] = [];
+                  }
+                  groups[location.city].push(location);
+                  return groups;
+                }, {} as Record<string, Location[]>);
+
+                return Object.entries(groupedLocations)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([city, cityLocations]) => (
+                    <CommandGroup key={city} heading={city}>
+                      {cityLocations
+                        .sort((a, b) => a.label.localeCompare(b.label))
+                        .map((location) => (
+                          <CommandItem
+                            key={location.value}
+                            value={location.value}
+                            onSelect={(currentValue) => {
+                              setSelectedLocation(currentValue === selectedLocation ? "" : currentValue);
+                              setLocationOpen(false);
+                              setSearchValue("");
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedLocation === location.value ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span>{location.label}</span>
+                              {location.district && (
+                                <span className="text-xs text-muted-foreground">
+                                  {location.district}
+                                  {location.neighborhood && ` • ${location.neighborhood}`}
+                                </span>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  ));
+              })()}
             </CommandList>
           </Command>
         </PopoverContent>
