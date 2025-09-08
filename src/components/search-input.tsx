@@ -464,7 +464,7 @@ function SearchInputContent({
 
       {/* User Dropdown */}
       {showUserDropdown && (
-        <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
           <Command>
             <CommandList>
               {isLoadingUsers ? (
