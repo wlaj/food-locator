@@ -5,12 +5,12 @@ import ProtectedRoute from '@/components/protected-route'
 import ProfileEditDialog from '@/components/profile-edit-dialog'
 import ToastHandler from '@/components/toast-handler'
 import RestaurantTable from '@/components/restaurant-table'
-import { getRestaurants } from '@/lib/actions'
+import { getUserRestaurants } from '@/lib/actions'
 import { Suspense } from 'react'
 
 export default async function DashboardPage() {
   const user = await getUser()
-  const restaurants = await getRestaurants(50) || []
+  const restaurants = await getUserRestaurants(50) || []
 
   return (
     <ProtectedRoute>

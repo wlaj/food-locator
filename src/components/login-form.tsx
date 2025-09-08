@@ -1,4 +1,3 @@
-import { GalleryVerticalEnd } from "lucide-react"
 import { signInWithEmail } from '@/lib/auth-actions'
 import Link from 'next/link'
 
@@ -6,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { IconInnerShadowBottomRightFilled } from "@tabler/icons-react"
 
 export function LoginForm({
   className,
@@ -20,9 +20,6 @@ export function LoginForm({
               href="/"
               className="flex flex-col items-center gap-2 font-medium"
             >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEnd className="size-6" />
-              </div>
               <span className="sr-only">Food Locator</span>
             </Link>
             <h1 className="text-xl font-bold">Welcome to Food Locator</h1>

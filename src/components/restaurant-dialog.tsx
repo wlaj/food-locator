@@ -14,7 +14,6 @@ import { Restaurant } from "@/app/global"
 import { toast } from "sonner"
 import RestaurantImageUpload from "@/components/restaurant-image-upload"
 import DietaryTagSelector from "@/components/dietary-tag-selector"
-import { parseGoogleMapsUrl } from "@/lib/google-maps-parser"
 import { Check, ChevronsUpDown, CheckIcon, TriangleAlertIcon, LoaderCircleIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,13 +32,11 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
   const [locationOpen, setLocationOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState(restaurant?.location || "")
   const [locations, setLocations] = useState<string[]>([])
-  const [googleMapsError, setGoogleMapsError] = useState<string | null>(null)
   const [nameValidation, setNameValidation] = useState<{
     isChecking: boolean;
     isValid: boolean | null;
     error: string | null;
   }>({ isChecking: false, isValid: null, error: null })
-  const googleMapsId = useId()
   const ratingId = useId()
   const nameRef = useRef<HTMLInputElement>(null)
   const nameTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -134,42 +131,10 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     }
   }, [])
 
-  const handleGoogleMapsUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    
-    if (!url.trim()) {
-      setGoogleMapsError(null)
-      return
-    }
-    
-    const parsedData = parseGoogleMapsUrl(url)
-    
-    if (!parsedData.isValid) {
-      setGoogleMapsError('Please enter a valid Google Maps URL')
-      return
-    }
-    
-    setGoogleMapsError(null)
-    
-    if (parsedData.name && nameRef.current) {
-      // Only auto-fill name if it's empty or if we're creating a new restaurant
-      if (!nameRef.current.value || !isEditing) {
-        nameRef.current.value = parsedData.name
-        // Trigger name validation after auto-fill
-        handleNameChange({ target: { value: parsedData.name } } as React.ChangeEvent<HTMLInputElement>)
-      }
-    }
-
-    if (parsedData.name) {
-      toast.success('Restaurant name extracted from Google Maps URL')
-    } else {
-      toast.info('Google Maps URL is valid - please enter restaurant name manually')
-    }
-  }
 
   async function handleSubmit(formData: FormData) {
     // Check for validation errors before submitting
-    if (googleMapsError || nameValidation.error) {
+    if (nameValidation.error) {
       toast.error('Please fix all validation errors before submitting')
       return
     }
@@ -183,17 +148,6 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     setLoading(true)
     
     try {
-      // Validate Google Maps URL
-      const googleMapsUrl = formData.get('google_maps_url') as string
-      if (googleMapsUrl) {
-        const parsedData = parseGoogleMapsUrl(googleMapsUrl)
-        if (!parsedData.isValid) {
-          toast.error('Please provide a valid Google Maps URL')
-          setLoading(false)
-          return
-        }
-      }
-      
       let result
       if (isEditing) {
         result = await updateRestaurant(restaurant.id, formData)
@@ -228,35 +182,6 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
         </DialogHeader>
         
         <form action={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor={googleMapsId}>Google Maps URL *</Label>
-            <div className="relative">
-              <Input
-                id={googleMapsId}
-                name="google_maps_url"
-                className={`peer ps-16 ${googleMapsError ? 'aria-invalid' : ''}`}
-                placeholder="maps.app.goo.gl/example"
-                type="text"
-                defaultValue={restaurant?.google_maps_url || ''}
-                onChange={handleGoogleMapsUrlChange}
-                aria-invalid={!!googleMapsError}
-                required
-              />
-              <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm peer-disabled:opacity-50">
-                https://
-              </span>
-            </div>
-            {googleMapsError && (
-              <p
-                className="text-destructive mt-2 text-xs"
-                role="alert"
-                aria-live="polite"
-              >
-                {googleMapsError}
-              </p>
-            )}
-          </div>
-
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>

@@ -3,6 +3,7 @@ import NavbarClient from "@/components/navbar-client";
 import NavbarAuth from "@/components/navbar-auth";
 import Link from "next/link";
 import { IconInnerShadowBottomRightFilled } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   return (
@@ -18,9 +19,9 @@ export default function Navbar() {
         <NavbarClient />
         {/* Right side */}
         <div className="flex flex-1 items-center justify-end gap-2">
-          {/* <Button asChild variant="ghost" size="sm" className="text-sm">
-            <a href="#">Community</a>
-          </Button> */}
+          <Button asChild variant="ghost" size="sm" className="text-sm">
+            <Link href="/community">Community</Link>
+          </Button>
           <NavbarAuth />
           {/* <ThemeToggle /> */}
         </div>

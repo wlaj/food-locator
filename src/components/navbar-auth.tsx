@@ -18,10 +18,7 @@ export default async function NavbarAuth() {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/login">Sign in</Link>
-        </Button>
-        <Button asChild size="sm" variant='secondary'>
+        <Button asChild variant='secondary'>
           <Link href="/signup">Get Started</Link>
         </Button>
       </div>

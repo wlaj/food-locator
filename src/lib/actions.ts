@@ -20,6 +20,32 @@ export async function getRestaurants(limit: number = 10): Promise<Restaurant[] |
   return data;
 }
 
+export async function getUserRestaurants(limit: number = 50): Promise<Restaurant[] | null> {
+  const supabase = await createClient();
+  
+  // Check if user is admin
+  const { data: roleData } = await supabase.rpc('get_my_role');
+  const isAdmin = roleData === 'admin';
+  
+  let query = supabase.from('restaurants').select('*').limit(limit);
+  
+  // If not admin, filter by created_by current user
+  if (!isAdmin) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      query = query.eq('created_by', user.id);
+    }
+  }
+  
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching user restaurants:', error);
+  }
+
+  return data;
+}
+
 export async function searchRestaurants(
   query: string,
   location?: string
@@ -113,24 +139,8 @@ export async function createRestaurant(formData: FormData) {
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
   const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
-  const google_maps_url = formData.get('google_maps_url') as string
-
-  if (!google_maps_url) {
-    return { error: 'Google Maps URL is required' }
-  }
 
   const supabase = await createClient();
-
-  // Check if Google Maps URL already exists
-  const { data: existingGoogleMapsUrl } = await supabase
-    .from('restaurants')
-    .select('google_maps_url')
-    .eq('google_maps_url', google_maps_url)
-    .single();
-
-  if (existingGoogleMapsUrl) {
-    return { error: 'A restaurant with this Google Maps URL already exists' }
-  }
 
   // Check if restaurant name already exists
   const { data: existingRestaurant } = await supabase
@@ -157,8 +167,7 @@ export async function createRestaurant(formData: FormData) {
     dietary,
     favorite_dishes,
     latitude,
-    longitude,
-    google_maps_url
+    longitude
   }
 
   const { data, error } = await supabase
@@ -190,25 +199,8 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
   const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
-  const google_maps_url = formData.get('google_maps_url') as string
-
-  if (!google_maps_url) {
-    return { error: 'Google Maps URL is required' }
-  }
 
   const supabase = await createClient();
-
-  // Check if Google Maps URL already exists (excluding current restaurant)
-  const { data: existingGoogleMapsUrl } = await supabase
-    .from('restaurants')
-    .select('google_maps_url, id')
-    .eq('google_maps_url', google_maps_url)
-    .neq('id', id)
-    .single();
-
-  if (existingGoogleMapsUrl) {
-    return { error: 'A restaurant with this Google Maps URL already exists' }
-  }
 
   // Check if restaurant name already exists (excluding current restaurant)
   const { data: existingRestaurant } = await supabase
@@ -235,8 +227,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
     dietary,
     favorite_dishes,
     latitude,
-    longitude,
-    google_maps_url
+    longitude
   }
 
   const { data, error } = await supabase

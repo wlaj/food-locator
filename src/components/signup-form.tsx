@@ -21,9 +21,6 @@ export function SignupForm({
               href="/"
               className="flex flex-col items-center gap-2 font-medium"
             >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEnd className="size-6" />
-              </div>
               <span className="sr-only">Food Locator</span>
             </Link>
             <h1 className="text-xl font-bold">Create your account</h1>
