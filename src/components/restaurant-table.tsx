@@ -1,33 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Restaurant } from "@/app/global"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import RestaurantDialog from "./restaurant-dialog"
-import DeleteRestaurantDialog from "./delete-restaurant-dialog"
-import { deleteRestaurant } from "@/lib/actions"
-import { toast } from "sonner"
-import { PencilIcon, TrashIcon, PlusIcon } from "lucide-react"
+import { useState } from "react";
+import { Restaurant } from "@/app/global";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import RestaurantDialog from "./restaurant-dialog";
+import DeleteRestaurantDialog from "./delete-restaurant-dialog";
+import { deleteRestaurant } from "@/lib/actions";
+import { toast } from "sonner";
+import { PencilIcon, TrashIcon, PlusIcon } from "lucide-react";
 
 interface RestaurantTableProps {
-  restaurants: Restaurant[]
+  restaurants: Restaurant[];
 }
 
 export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
-  const [loading, setLoading] = useState<string | null>(null)
+  const [loading, setLoading] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
-    setLoading(id)
-    const result = await deleteRestaurant(id)
-    
+    setLoading(id);
+    const result = await deleteRestaurant(id);
+
     if (result.error) {
-      toast.error(result.error)
+      toast.error(result.error);
     } else {
-      toast.success('Restaurant deleted successfully')
+      toast.success("Restaurant deleted successfully");
     }
-    
-    setLoading(null)
+
+    setLoading(null);
   }
 
   return (
@@ -43,7 +50,7 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
           }
         />
       </div>
-      
+
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
@@ -59,7 +66,10 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
           <TableBody>
             {restaurants.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No restaurants found. Add your first restaurant!
                 </TableCell>
               </TableRow>
@@ -68,7 +78,7 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                 <TableRow key={restaurant.id}>
                   <TableCell className="font-medium">
                     <div>
-                      {restaurant.name || 'Unnamed Restaurant'}
+                      {restaurant.name || "Unnamed Restaurant"}
                       {restaurant.description && (
                         <div className="text-sm text-muted-foreground mt-1 max-w-xs truncate">
                           {restaurant.description}
@@ -76,13 +86,15 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{restaurant.cuisine || '-'}</TableCell>
-                  <TableCell>{restaurant.location || '-'}</TableCell>
+                  <TableCell>{restaurant.cuisine || "-"}</TableCell>
+                  <TableCell>{restaurant.location || "-"}</TableCell>
                   <TableCell>
-                    {restaurant.price ? '$'.repeat(restaurant.price) : '-'}
+                    {restaurant.price ? "$".repeat(restaurant.price) : "-"}
                   </TableCell>
                   <TableCell>
-                    {restaurant.rating_score ? `${restaurant.rating_score}/5` : '-'}
+                    {restaurant.rating_score
+                      ? `${restaurant.rating_score}/5`
+                      : "-"}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
@@ -95,7 +107,7 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                         }
                       />
                       <DeleteRestaurantDialog
-                        restaurantName={restaurant.name || 'Unknown'}
+                        restaurantName={restaurant.name || "Unknown"}
                         onConfirm={() => handleDelete(restaurant.id)}
                         isLoading={loading === restaurant.id}
                         trigger={
@@ -116,12 +128,13 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
           </TableBody>
         </Table>
       </div>
-      
+
       {restaurants.length > 0 && (
         <div className="text-sm text-muted-foreground">
-          Showing {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}
+          Showing {restaurants.length} restaurant
+          {restaurants.length !== 1 ? "s" : ""}
         </div>
       )}
     </div>
-  )
+  );
 }
