@@ -22,7 +22,7 @@ export default async function NavbarAuth() {
           <Link href="/login">Sign in</Link>
         </Button>
         <Button asChild size="sm" variant='secondary'>
-          <Link href="/login?mode=signup">Get Started</Link>
+          <Link href="/signup">Get Started</Link>
         </Button>
       </div>
     )

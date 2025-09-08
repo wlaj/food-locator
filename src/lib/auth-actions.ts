@@ -33,7 +33,7 @@ export async function signUpWithEmail(formData: FormData) {
   const { error } = await supabase.auth.signUp(data)
 
   if (error) {
-    redirect('/signup?error=' + encodeURIComponent('Could not create account. Please try again.'))
+    redirect('/signup?error=' + encodeURIComponent(`Could not create account: ${error.message}`))
   }
 
   redirect('/signup?success=' + encodeURIComponent('Account created! Check your email to verify your account.'))
@@ -64,7 +64,6 @@ export async function updateUserProfile(formData: FormData) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       redirect('/dashboard?error=' + encodeURIComponent('Authentication error'))
-      return
     }
     
     // Create file path that matches RLS policy: userId/filename
@@ -81,7 +80,6 @@ export async function updateUserProfile(formData: FormData) {
 
       if (uploadError) {
         redirect('/dashboard?error=' + encodeURIComponent(`Upload failed: ${uploadError.message}`))
-        return
       }
 
       // Get public URL
@@ -92,7 +90,6 @@ export async function updateUserProfile(formData: FormData) {
       avatarUrl = urlData.publicUrl
     } catch (error) {
       redirect('/dashboard?error=' + encodeURIComponent('Avatar upload failed'))
-      return
     }
   }
   
@@ -120,7 +117,6 @@ export async function updateUserProfile(formData: FormData) {
 
   if (error) {
     redirect('/dashboard?error=' + encodeURIComponent('Could not update profile. Please try again.'))
-    return
   }
   
   revalidatePath('/dashboard')
