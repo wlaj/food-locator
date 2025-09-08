@@ -319,3 +319,43 @@ export async function checkRestaurantName(name: string, excludeId?: string): Pro
   
   return { exists: !!data };
 }
+
+export async function likeRestaurant(restaurantId: string): Promise<{ success: boolean; likes?: number; error?: string }> {
+  const supabase = await createClient();
+  
+  try {
+    // First get current likes count
+    const { data: restaurant, error: fetchError } = await supabase
+      .from('restaurants')
+      .select('likes')
+      .eq('id', restaurantId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching restaurant:', fetchError);
+      return { success: false, error: 'Failed to fetch restaurant' };
+    }
+
+    const currentLikes = restaurant.likes || 0;
+    const newLikes = currentLikes + 1;
+
+    // Update likes count
+    const { data, error: updateError } = await supabase
+      .from('restaurants')
+      .update({ likes: newLikes })
+      .eq('id', restaurantId)
+      .select('likes')
+      .single();
+
+    if (updateError) {
+      console.error('Error updating likes:', updateError);
+      return { success: false, error: 'Failed to update likes' };
+    }
+
+    revalidatePath('/', 'layout'); // Revalidate all pages to refresh likes count
+    return { success: true, likes: data.likes };
+  } catch (error) {
+    console.error('Error in likeRestaurant:', error);
+    return { success: false, error: 'Failed to like restaurant' };
+  }
+}

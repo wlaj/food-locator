@@ -10,8 +10,8 @@ export default function Navbar() {
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <div className="flex-1">
-          <Link href="/" className="text-primary flex gap-2 items-center hover:text-primary/90">
-            <IconInnerShadowBottomRightFilled className="size-8 hover:rotate-45 transition-all duration-500" />
+          <Link href="/" className="text-foreground flex gap-2 items-center">
+            <IconInnerShadowBottomRightFilled className="size-9 hover:rotate-45 transition-all duration-500" />
           </Link>
         </div>
         {/* Middle area */}
