@@ -26,6 +26,50 @@ export async function searchRestaurants(
 ): Promise<Restaurant[] | null> {
   const supabase = await createClient();
   
+  // Check if query is a username search (starts with @)
+  if (query.startsWith('@')) {
+    const username = query.substring(1); // Remove the @ symbol
+    
+    // First, get users with matching username from the users_with_usernames view
+    const { data: creators, error: creatorsError } = await supabase
+      .from('users_with_usernames')
+      .select('user_id, username')
+      .ilike('username', username);
+    
+    if (creatorsError) {
+      console.error('Error fetching creators:', creatorsError);
+      return null;
+    }
+    
+    if (!creators || creators.length === 0) {
+      return []; // No users found with this username
+    }
+    
+    // Get the user IDs that match the username
+    const userIds = creators.map(creator => creator.user_id);
+    
+    // Now search for restaurants created by these users
+    let restaurantQueryBuilder = supabase
+      .from('restaurants')
+      .select('*')
+      .in('created_by', userIds);
+    
+    // Filter by location if provided
+    if (location) {
+      restaurantQueryBuilder = restaurantQueryBuilder.ilike('location', `%${location}%`);
+    }
+    
+    const { data: restaurantData, error: restaurantError } = await restaurantQueryBuilder;
+    
+    if (restaurantError) {
+      console.error('Error searching restaurants by user:', restaurantError);
+      return null;
+    }
+    
+    return restaurantData;
+  }
+  
+  // Regular search logic
   let queryBuilder = supabase.from('restaurants').select('*');
   
   // If query is "*", get all restaurants; otherwise search by query
