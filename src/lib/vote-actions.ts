@@ -10,13 +10,37 @@ export interface Topic {
   topic_description: string
 }
 
-export interface VoteActionResult {
+export interface Vote {
+  id: string;
+  topic_id: string;
+  topic_title: string;
+  topic_description: string | null;
+  option_title: string;
+  option_description: string | null;
+  order_index: number | null;
+  vote_type: string;
+  status: string;
+  max_selections: number | null;
+  ends_at: string | null;
+  created_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  is_public: boolean;
+}
+
+export interface TopicActionResult {
   success: boolean;
   error?: string;
   data?: Topic[];
 }
 
-export async function getActiveTopics(): Promise<VoteActionResult> {
+export interface VoteActionResult {
+  success: boolean;
+  error?: string;
+  data?: Vote[] | Vote;
+}
+
+export async function getActiveTopics(): Promise<TopicActionResult> {
   try {
     const supabase = await createClient();
     

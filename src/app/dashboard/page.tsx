@@ -7,7 +7,7 @@ import ToastHandler from '@/components/toast-handler'
 import RestaurantTable from '@/components/restaurant-table'
 import { getUserRestaurants } from '@/lib/actions'
 import VotesTable from '@/components/votes-table'
-import { getAllVotes } from '@/lib/vote-actions'
+import { getAllVotes, type Vote } from '@/lib/vote-actions'
 import { isUserAdmin } from '@/lib/auth-server'
 import { Suspense } from 'react'
 
@@ -19,10 +19,12 @@ export default async function DashboardPage() {
   const userIsAdmin = user ? await isUserAdmin(user.id) : false
   
   // Only fetch votes if user is admin
-  let votes: any[] = []
+  let votes: Vote[] = []
   if (userIsAdmin) {
     const votesResult = await getAllVotes()
-    votes = votesResult?.success ? votesResult.data || [] : []
+    if (votesResult?.success && votesResult.data) {
+      votes = Array.isArray(votesResult.data) ? votesResult.data : [votesResult.data]
+    }
   }
 
   return (

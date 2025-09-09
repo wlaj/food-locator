@@ -17,25 +17,14 @@ import DeleteVoteDialog from "./delete-vote-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { PencilIcon, TrashIcon } from "lucide-react";
-
-interface VoteOption {
-  id: string;
-  topic_id: string;
-  topic_title: string;
-  topic_description: string | null;
-  option_title: string;
-  option_description: string | null;
-  status: string;
-  created_at: string;
-  vote_type: string;
-}
+import { type Vote } from "@/lib/vote-actions";
 
 interface VotesTableProps {
-  initialVotes?: VoteOption[];
+  initialVotes?: Vote[];
 }
 
 export default function VotesTable({ initialVotes = [] }: VotesTableProps) {
-  const [votes, setVotes] = useState<VoteOption[]>(initialVotes);
+  const [votes, setVotes] = useState<Vote[]>(initialVotes);
   
   const supabase = createClient();
 
@@ -129,7 +118,7 @@ export default function VotesTable({ initialVotes = [] }: VotesTableProps) {
                     {vote.vote_type.replace('_', ' ')}
                   </TableCell>
                   <TableCell>
-                    {new Date(vote.created_at).toLocaleDateString()}
+                    {vote.created_at ? new Date(vote.created_at).toLocaleDateString() : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
