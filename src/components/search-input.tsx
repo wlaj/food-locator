@@ -19,10 +19,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
 import { IconLocation } from "@tabler/icons-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/types/supabase";
+import { TagInput, type Tag } from "emblor";
 
 type Location = Tables<"locations">;
 
@@ -30,6 +30,22 @@ type User = {
   id: string;
   email: string;
   username: string;
+};
+
+type Cuisine = {
+  id: string;
+  name: string;
+  description?: string;
+};
+
+type DietaryOption = {
+  id: string;
+  name: string;
+  description?: string;
+};
+
+type SearchOption = (Cuisine | DietaryOption) & {
+  type: 'cuisine' | 'dietary';
 };
 
 interface SearchInputProps {
@@ -57,8 +73,15 @@ function SearchInputContent({
   const [isLoadingUsers, setIsLoadingUsers] = React.useState(false);
   const [userSearchTerm, setUserSearchTerm] = React.useState("");
   const [isUserTyping, setIsUserTyping] = React.useState(false);
+  // New state for tags and hashtag functionality
+  const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
+  const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(null);
+  const [searchOptions, setSearchOptions] = React.useState<SearchOption[]>([]);
+  const [showHashtagDropdown, setShowHashtagDropdown] = React.useState(false);
+  const [isLoadingSearchOptions, setIsLoadingSearchOptions] = React.useState(false);
+  const [hashtagSearchTerm, setHashtagSearchTerm] = React.useState("");
+  const [isHashtagTyping, setIsHashtagTyping] = React.useState(false);
   const supabase = createClient();
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Fetch locations from database
@@ -85,6 +108,56 @@ function SearchInputContent({
 
     fetchLocations();
   }, [supabase]);
+
+  // Fetch cuisines and dietary options for hashtag search
+  const fetchSearchOptions = React.useCallback(
+    (query: string) => {
+      // Clear any existing timeout
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+
+      // Set a new timeout
+      debounceTimerRef.current = setTimeout(async () => {
+        setIsLoadingSearchOptions(true);
+        try {
+          // Fetch both cuisines and dietary options
+          const [cuisinesResponse, dietaryResponse] = await Promise.all([
+            supabase
+              .from("cuisines")
+              .select("id, name, description")
+              .ilike("name", query.trim() ? `%${query.toLowerCase()}%` : "%")
+              .order("name", { ascending: true })
+              .limit(5),
+            supabase
+              .from("dietary_options")
+              .select("id, name, description")
+              .ilike("name", query.trim() ? `%${query.toLowerCase()}%` : "%")
+              .order("name", { ascending: true })
+              .limit(5),
+          ]);
+
+          const cuisines = cuisinesResponse.data || [];
+          const dietary = dietaryResponse.data || [];
+
+          // Combine and format the results
+          const options: SearchOption[] = [
+            ...cuisines.map((c) => ({ ...c, type: "cuisine" as const })),
+            ...dietary.map((d) => ({ ...d, type: "dietary" as const })),
+          ];
+
+          setSearchOptions(options);
+        } catch (error) {
+          console.error("Error fetching search options:", error);
+          setSearchOptions([]);
+        } finally {
+          setIsLoadingSearchOptions(false);
+        }
+      }, 300); // 300ms debounce
+    },
+    [supabase]
+  );
 
   // Fetch users for dropdown suggestions with debouncing
   const fetchUsers = React.useCallback(
@@ -160,6 +233,19 @@ function SearchInputContent({
       // Clear search query if not on search page
       setSearchQuery("");
     }
+    
+    // Handle tags from URL parameters
+    const urlTags = searchParams.get("tags");
+    if (urlTags) {
+      const tags: Tag[] = urlTags.split(",").map((tagName, index) => ({
+        id: `tag-${index}`,
+        text: tagName.trim(),
+      }));
+      setSelectedTags(tags);
+    } else if (pathname !== "/search") {
+      // Clear tags if not on search page
+      setSelectedTags([]);
+    }
 
     // Find matching location from location name
     if (locations.length > 0 && urlLocation) {
@@ -206,6 +292,40 @@ function SearchInputContent({
     }
   }, [searchQuery, fetchUsers, isUserTyping]);
 
+  // Handle hashtag search when # is typed (only when user is actively typing)
+  React.useEffect(() => {
+    // Only show dropdown if user is actively typing
+    if (!isHashtagTyping) {
+      setShowHashtagDropdown(false);
+      return;
+    }
+
+    const query = searchQuery.trim();
+    const hashIndex = query.lastIndexOf("#");
+
+    if (hashIndex !== -1) {
+      const afterHash = query.substring(hashIndex + 1);
+      const beforeHash = query.substring(0, hashIndex);
+
+      // Only show dropdown if # is at the start or after a space
+      if (hashIndex === 0 || beforeHash.endsWith(" ")) {
+        setHashtagSearchTerm(afterHash);
+        setShowHashtagDropdown(true);
+
+        if (afterHash.length >= 1) {
+          fetchSearchOptions(afterHash);
+        } else {
+          fetchSearchOptions(""); // Fetch all options when just # is typed
+        }
+      } else {
+        setShowHashtagDropdown(false);
+      }
+    } else {
+      setShowHashtagDropdown(false);
+      setSearchOptions([]);
+    }
+  }, [searchQuery, fetchSearchOptions, isHashtagTyping]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowUserDropdown(false);
@@ -213,21 +333,39 @@ function SearchInputContent({
       (loc) => loc.value === selectedLocation
     );
 
-    if (searchQuery.trim()) {
-      // Search with restaurant query and location
-      const searchParams = new URLSearchParams({
-        q: searchQuery.trim(),
-        ...(selectedLocationData && {
-          location: selectedLocationData.label,
-        }),
-      });
-      router.push(`/search?${searchParams.toString()}`);
-    } else if (selectedLocationData) {
-      // Search with just location (browse restaurants in area)
-      const searchParams = new URLSearchParams({
-        q: "*", // Use wildcard to get all restaurants
-        location: selectedLocationData.label,
-      });
+    const baseQuery = searchQuery.replace(/#\w+/g, "").trim();
+    // Extract hashtags from query and combine with selected tags
+    const hashtagMatches = searchQuery.match(/#\\w+/g) || [];
+    const existingTagNames = selectedTags.map(tag => tag.text.toLowerCase());
+    const newTagsFromQuery = hashtagMatches
+      .map(hashtag => hashtag.substring(1).toLowerCase())
+      .filter(tagName => !existingTagNames.includes(tagName));
+    
+    const allTagNames = [...selectedTags.map(tag => tag.text), ...newTagsFromQuery];
+    
+    const searchParams = new URLSearchParams();
+    
+    // Add text search query if present
+    if (baseQuery) {
+      searchParams.set("q", baseQuery);
+    }
+    
+    // Add tags as separate parameter
+    if (allTagNames.length > 0) {
+      searchParams.set("tags", allTagNames.join(","));
+    }
+    
+    // Add location if selected
+    if (selectedLocationData) {
+      searchParams.set("location", selectedLocationData.label);
+    }
+    
+    // If no query, tags, or location, browse all restaurants
+    if (!baseQuery && allTagNames.length === 0 && selectedLocationData) {
+      searchParams.set("q", "*");
+    }
+    
+    if (baseQuery || allTagNames.length > 0 || selectedLocationData) {
       router.push(`/search?${searchParams.toString()}`);
     }
   };
@@ -258,16 +396,45 @@ function SearchInputContent({
     router.push(`/search?${searchParams.toString()}`);
   };
 
+  const handleHashtagSelect = (option: SearchOption) => {
+    // Create a tag from the selected option
+    const newTag: Tag = {
+      id: option.id,
+      text: option.name,
+    };
+
+    // Add the tag to selected tags
+    const updatedTags = [...selectedTags, newTag];
+    setSelectedTags(updatedTags);
+    setShowHashtagDropdown(false);
+
+    // Remove the # and search term from the query
+    const query = searchQuery.trim();
+    const hashIndex = query.lastIndexOf("#");
+    
+    let cleanedQuery = searchQuery;
+    if (hashIndex !== -1) {
+      const beforeHash = query.substring(0, hashIndex);
+      cleanedQuery = beforeHash.trim();
+    }
+    
+    setSearchQuery(cleanedQuery);
+    // Don't automatically navigate - let user submit when ready
+  };
+
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       setShowUserDropdown(false);
+      setShowHashtagDropdown(false);
       setIsUserTyping(false);
+      setIsHashtagTyping(false);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setIsUserTyping(true);
+    setIsHashtagTyping(true);
 
     // Reset typing state after user stops typing for 500ms
     if (debounceTimerRef.current) {
@@ -275,20 +442,25 @@ function SearchInputContent({
     }
     debounceTimerRef.current = setTimeout(() => {
       setIsUserTyping(false);
+      setIsHashtagTyping(false);
     }, 500);
   };
 
   const handleInputFocus = () => {
     setIsUserTyping(true);
+    setIsHashtagTyping(true);
   };
 
   const handleInputBlur = () => {
     // Delay hiding to allow clicking on dropdown items
     setTimeout(() => {
       setIsUserTyping(false);
+      setIsHashtagTyping(false);
       setShowUserDropdown(false);
+      setShowHashtagDropdown(false);
     }, 150);
   };
+
 
   const sizeClasses = {
     sm: "h-8 text-sm",
@@ -438,19 +610,38 @@ function SearchInputContent({
           </PopoverContent>
         </Popover>
         <div className="flex-1 relative">
-          <Input
-            ref={searchInputRef}
+          <TagInput
+            tags={selectedTags}
+            setTags={(newTags) => {
+              if (Array.isArray(newTags)) {
+                setSelectedTags(newTags);
+              }
+            }}
+            placeholder={placeholder}
+            activeTagIndex={activeTagIndex}
+            setActiveTagIndex={setActiveTagIndex}
             className={cn(
-              "border-0 rounded-l-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 pl-4",
+              "border-0 rounded-l-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
               sizeClasses[size]
             )}
-            placeholder={placeholder}
-            type="search"
-            value={searchQuery}
-            onChange={handleInputChange}
-            onKeyDown={handleInputKeyDown}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
+            styleClasses={{
+              inlineTagsContainer: cn(
+                "border-0 rounded-l-none bg-background shadow-none focus-within:ring-0 p-1 gap-1 pl-4",
+                sizeClasses[size]
+              ),
+              input: "w-full min-w-[80px] shadow-none px-2 border-0 focus:outline-none focus:ring-0",
+              tag: {
+                body: "h-6 relative bg-primary/10 text-primary border-0 hover:bg-primary/20 rounded-md font-medium text-xs px-2 pe-6",
+                closeButton: "absolute -inset-y-px -end-px p-0 rounded-e-md flex size-6 transition-colors outline-none text-primary/70 hover:text-primary items-center justify-center"
+              }
+            }}
+            inputProps={{
+              value: searchQuery,
+              onChange: handleInputChange,
+              onKeyDown: handleInputKeyDown,
+              onFocus: handleInputFocus,
+              onBlur: handleInputBlur
+            }}
           />
           <button
             type="submit"
@@ -493,6 +684,76 @@ function SearchInputContent({
                     ))}
                   </ScrollArea>
                 </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
+        </div>
+      )}
+
+      {/* Hashtag Dropdown */}
+      {showHashtagDropdown && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+          <Command>
+            <CommandList>
+              {isLoadingSearchOptions ? (
+                <CommandEmpty>Loading options...</CommandEmpty>
+              ) : searchOptions.length === 0 ? (
+                <CommandEmpty>
+                  No options found matching &quot;{hashtagSearchTerm}&quot;
+                </CommandEmpty>
+              ) : (
+                <>
+                  {searchOptions.filter(option => option.type === 'cuisine').length > 0 && (
+                    <CommandGroup heading="Cuisines">
+                      <ScrollArea className="max-h-[100px]">
+                        {searchOptions
+                          .filter(option => option.type === 'cuisine')
+                          .map((option) => (
+                            <CommandItem
+                              key={option.id}
+                              value={option.name}
+                              onSelect={() => handleHashtagSelect(option)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">#{option.name}</span>
+                                {option.description && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {option.description}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                      </ScrollArea>
+                    </CommandGroup>
+                  )}
+                  {searchOptions.filter(option => option.type === 'dietary').length > 0 && (
+                    <CommandGroup heading="Dietary Options">
+                      <ScrollArea className="max-h-[100px]">
+                        {searchOptions
+                          .filter(option => option.type === 'dietary')
+                          .map((option) => (
+                            <CommandItem
+                              key={option.id}
+                              value={option.name}
+                              onSelect={() => handleHashtagSelect(option)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">#{option.name}</span>
+                                {option.description && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {option.description}
+                                  </span>
+                                )}
+                              </div>
+                            </CommandItem>
+                          ))}
+                      </ScrollArea>
+                    </CommandGroup>
+                  )}
+                </>
               )}
             </CommandList>
           </Command>

@@ -6,14 +6,15 @@ interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
     location?: string;
+    tags?: string;
   }>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
-  const { q: query, location } = params;
+  const { q: query, location, tags } = params;
 
-  if (!query) {
+  if (!query && !tags) {
     return (
       <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
         <div className="mt-28 mb-8">
@@ -26,10 +27,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  const restaurants = await searchRestaurants(query, location);
+  const restaurants = await searchRestaurants(query, location, tags);
 
   const isLocationOnlySearch = query === "*";
   const searchContext = location ? `in ${location}` : "";
+  const tagsArray = tags ? tags.split(",") : [];
+  const tagsContext = tagsArray.length > 0 ? `with ${tagsArray.map(tag => `#${tag}`).join(", ")}` : "";
 
   return (
     <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
@@ -39,8 +42,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </h1>
         <p className="text-muted-foreground mt-2">
           {isLocationOnlySearch 
-            ? `Showing restaurants ${searchContext}` 
-            : `Showing results for "${query}" ${searchContext}`
+            ? `Showing restaurants ${searchContext} ${tagsContext}`.trim()
+            : query 
+              ? `Showing results for "${query}" ${searchContext} ${tagsContext}`.trim()
+              : `Showing restaurants ${tagsContext} ${searchContext}`.trim()
           }
         </p>
       </div>

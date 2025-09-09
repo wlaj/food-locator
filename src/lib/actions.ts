@@ -46,13 +46,14 @@ export async function getUserRestaurants(limit: number = 50): Promise<Restaurant
 }
 
 export async function searchRestaurants(
-  query: string,
-  location?: string
+  query?: string,
+  location?: string,
+  tags?: string
 ): Promise<Restaurant[] | null> {
   const supabase = await createClient();
   
   // Check if query is a username search (starts with @)
-  if (query.startsWith('@')) {
+  if (query && query.startsWith('@')) {
     const username = query.substring(1); // Remove the @ symbol
     
     // First, get users with matching username from the users_with_usernames view
@@ -97,14 +98,46 @@ export async function searchRestaurants(
   // Regular search logic
   let queryBuilder = supabase.from('restaurants').select('*');
   
-  // If query is "*", get all restaurants; otherwise search by query
-  if (query !== "*") {
+  // If query is "*" or undefined, get all restaurants; otherwise search by query
+  if (query && query !== "*") {
     queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ilike.%${query}%`);
   }
 
   // Filter by location if provided
   if (location) {
     queryBuilder = queryBuilder.ilike('location', `%${location}%`);
+  }
+
+  // Filter by tags if provided (cuisines and dietary options)
+  if (tags) {
+    const tagArray = tags.split(',').map(tag => tag.trim());
+    
+    // First, get the cuisine and dietary option names from the database to match against
+    const { data: cuisines } = await supabase
+      .from('cuisines')
+      .select('name')
+      .in('name', tagArray);
+    
+    const { data: dietaryOptions } = await supabase
+      .from('dietary_options')
+      .select('name')
+      .in('name', tagArray);
+    
+    const cuisineNames = cuisines?.map(c => c.name) || [];
+    const dietaryNames = dietaryOptions?.map(d => d.name) || [];
+    
+    // Apply cuisine filter (OR logic - any matching cuisine)
+    if (cuisineNames.length > 0) {
+      const cuisineFilters = cuisineNames.map(name => `cuisine.ilike.%${name}%`);
+      queryBuilder = queryBuilder.or(cuisineFilters.join(','));
+    }
+    
+    // Apply dietary filter (AND logic - must contain all dietary options)
+    if (dietaryNames.length > 0) {
+      for (const dietaryName of dietaryNames) {
+        queryBuilder = queryBuilder.contains('dietary', [dietaryName]);
+      }
+    }
   }
 
   const { data, error } = await queryBuilder;
