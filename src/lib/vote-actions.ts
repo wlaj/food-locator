@@ -70,12 +70,30 @@ export async function addVoteOption(formData: FormData): Promise<VoteActionResul
     const topicDescription = formData.get('topic_description') as string;
     const optionTitle = formData.get('option_title') as string;
     const optionDescription = formData.get('option_description') as string;
+    const isPublic = formData.get('is_public') === 'true';
 
     if (!topicId || !topicTitle || !optionTitle) {
       return { success: false, error: 'Topic ID, title, and option title are required' };
     }
 
     const supabase = await createClient();
+    
+    // Get the existing votes for this topic to determine order_index and created_at
+    const { data: existingVotes } = await supabase
+      .from('community_votes')
+      .select('order_index, created_at')
+      .eq('topic_id', topicId)
+      .order('order_index', { ascending: false })
+      .limit(1);
+    
+    const nextOrderIndex = existingVotes && existingVotes.length > 0 
+      ? (existingVotes[0].order_index || 0) + 1 
+      : 0;
+    
+    // Use the same created_at as existing votes for proper grouping, or current time for new topics
+    const createdAt = existingVotes && existingVotes.length > 0 
+      ? existingVotes[0].created_at 
+      : new Date().toISOString();
     
     const { data, error } = await supabase
       .from('community_votes')
@@ -85,8 +103,11 @@ export async function addVoteOption(formData: FormData): Promise<VoteActionResul
         topic_description: topicDescription || null,
         option_title: optionTitle,
         option_description: optionDescription || null,
+        order_index: nextOrderIndex,
         created_by: user.id,
-        status: 'active'
+        status: 'active',
+        is_public: isPublic,
+        created_at: createdAt
       })
       .select()
       .single();
@@ -112,6 +133,7 @@ export async function updateVoteOption(formData: FormData): Promise<VoteActionRe
     const optionTitle = formData.get('option_title') as string;
     const optionDescription = formData.get('option_description') as string;
     const status = formData.get('status') as string;
+    const isPublic = formData.get('is_public') === 'true';
 
     console.log('Update vote - FormData entries:', [...formData.entries()]);
     console.log('Update vote - Data:', { voteId, optionTitle, optionDescription, status });
@@ -141,6 +163,7 @@ export async function updateVoteOption(formData: FormData): Promise<VoteActionRe
         option_title: optionTitle,
         option_description: optionDescription || null,
         status,
+        is_public: isPublic,
         updated_at: new Date().toISOString()
       })
       .eq('id', voteId)

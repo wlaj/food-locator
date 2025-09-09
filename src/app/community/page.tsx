@@ -9,6 +9,7 @@ interface Vote {
   status: string;
   ends_at: string | null;
   created_at: string;
+  is_public: boolean;
   options: {
     id: string;
     title: string;
