@@ -17,14 +17,13 @@ import DeleteVoteDialog from "./delete-vote-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { PencilIcon, TrashIcon } from "lucide-react";
-import { type Vote } from "@/lib/vote-actions";
 
 interface VotesTableProps {
-  initialVotes?: Vote[];
+  initialVotes?: CommunityVote[];
 }
 
 export default function VotesTable({ initialVotes = [] }: VotesTableProps) {
-  const [votes, setVotes] = useState<Vote[]>(initialVotes);
+  const [votes, setVotes] = useState<CommunityVote[]>(initialVotes);
   
   const supabase = createClient();
 

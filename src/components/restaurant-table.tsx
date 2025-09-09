@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Restaurant } from "@/app/global";
 import { Button } from "@/components/ui/button";
 import {
   Table,

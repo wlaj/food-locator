@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from "./supabase/server";
-import { Restaurant } from '../app/global'
 import { TablesInsert, TablesUpdate } from './types/supabase'
 import { revalidatePath } from 'next/cache'
 

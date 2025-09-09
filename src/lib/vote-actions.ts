@@ -4,41 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/auth-server';
 import { revalidatePath } from 'next/cache';
 
-export interface Topic {
-  topic_id: string;
-  topic_title: string;
-  topic_description: string
-}
-
-export interface Vote {
-  id: string;
-  topic_id: string;
-  topic_title: string;
-  topic_description: string | null;
-  option_title: string;
-  option_description: string | null;
-  order_index: number | null;
-  vote_type: string;
-  status: string;
-  max_selections: number | null;
-  ends_at: string | null;
-  created_by: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  is_public: boolean;
-}
-
-export interface TopicActionResult {
-  success: boolean;
-  error?: string;
-  data?: Topic[];
-}
-
-export interface VoteActionResult {
-  success: boolean;
-  error?: string;
-  data?: Vote[] | Vote;
-}
+// Types are now defined in global.d.ts
+export type Vote = CommunityVote
 
 export async function getActiveTopics(): Promise<TopicActionResult> {
   try {

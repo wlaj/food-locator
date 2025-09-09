@@ -10,7 +10,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { createRestaurant, updateRestaurant, checkRestaurantName } from "@/lib/actions"
-import { Restaurant } from "@/app/global"
 import { toast } from "sonner"
 import RestaurantImageUpload from "@/components/restaurant-image-upload"
 import DietaryTagSelector from "@/components/dietary-tag-selector"

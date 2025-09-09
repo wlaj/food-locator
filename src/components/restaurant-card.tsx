@@ -1,4 +1,3 @@
-import { Restaurant } from "@/app/global";
 import { ThumbsUp } from "lucide-react";
 import React, { useState, useTransition } from "react";
 import { likeRestaurant } from "@/lib/actions";

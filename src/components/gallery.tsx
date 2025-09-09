@@ -11,7 +11,6 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { IconLocationFilled } from "@tabler/icons-react";
-import { Restaurant } from "@/app/global";
 import RestaurantCard from "./restaurant-card";
 
 interface GalleryProps {
