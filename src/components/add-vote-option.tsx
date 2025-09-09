@@ -17,7 +17,11 @@ interface ActiveTopic {
   topic_description: string | null;
 }
 
-export default function AddVoteOption() {
+interface AddVoteOptionProps {
+  onVoteAdded?: () => void;
+}
+
+export default function AddVoteOption({ onVoteAdded }: AddVoteOptionProps = {}) {
   const [topics, setTopics] = useState<ActiveTopic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<ActiveTopic | null>(null);
   const [open, setOpen] = useState(false);
@@ -68,6 +72,8 @@ export default function AddVoteOption() {
           // Reset form by getting a fresh form element
           const form = document.getElementById('add-vote-form') as HTMLFormElement;
           form?.reset();
+          // Notify parent to refresh
+          onVoteAdded?.();
         } else {
           toast.error(result.error || 'Failed to add vote option');
         }

@@ -70,7 +70,7 @@ export default function VotesTable({ initialVotes = [] }: VotesTableProps) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Community Votes</h2>
-        <AddVoteOption />
+        <AddVoteOption onVoteAdded={handleRefresh} />
       </div>
 
       <div className="rounded-lg border">
