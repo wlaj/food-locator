@@ -6,11 +6,24 @@ import ProfileEditDialog from '@/components/profile-edit-dialog'
 import ToastHandler from '@/components/toast-handler'
 import RestaurantTable from '@/components/restaurant-table'
 import { getUserRestaurants } from '@/lib/actions'
+import VotesTable from '@/components/votes-table'
+import { getAllVotes } from '@/lib/vote-actions'
+import { isUserAdmin } from '@/lib/auth-server'
 import { Suspense } from 'react'
 
 export default async function DashboardPage() {
   const user = await getUser()
   const restaurants = await getUserRestaurants(50) || []
+  
+  // Check if user is admin server-side
+  const userIsAdmin = user ? await isUserAdmin(user.id) : false
+  
+  // Only fetch votes if user is admin
+  let votes = []
+  if (userIsAdmin) {
+    const votesResult = await getAllVotes()
+    votes = votesResult.success ? votesResult.data : []
+  }
 
   return (
     <ProtectedRoute>
@@ -37,6 +50,8 @@ export default async function DashboardPage() {
 
           <div className="space-y-8">
             <RestaurantTable restaurants={restaurants} />
+            
+            {userIsAdmin && <VotesTable initialVotes={votes} />}
             
             <div className="grid gap-6 md:grid-cols-2">
               <div className="rounded-lg border bg-card p-6">

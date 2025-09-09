@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_user_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          ranking: number | null
+          user_id: string
+          vote_option_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ranking?: number | null
+          user_id: string
+          vote_option_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ranking?: number | null
+          user_id?: string
+          vote_option_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_user_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "community_user_votes_vote_option_id_fkey"
+            columns: ["vote_option_id"]
+            isOneToOne: false
+            referencedRelation: "community_votes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_votes: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          max_selections: number | null
+          option_description: string | null
+          option_title: string
+          order_index: number | null
+          status: string
+          topic_description: string | null
+          topic_id: string
+          topic_title: string
+          updated_at: string | null
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          max_selections?: number | null
+          option_description?: string | null
+          option_title: string
+          order_index?: number | null
+          status?: string
+          topic_description?: string | null
+          topic_id: string
+          topic_title: string
+          updated_at?: string | null
+          vote_type?: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          max_selections?: number | null
+          option_description?: string | null
+          option_title?: string
+          order_index?: number | null
+          status?: string
+          topic_description?: string | null
+          topic_id?: string
+          topic_title?: string
+          updated_at?: string | null
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_votes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       cuisines: {
         Row: {
           created_at: string | null
@@ -105,7 +203,6 @@ export type Database = {
           description: string | null
           dietary: string[] | null
           favorite_dishes: string[] | null
-          google_maps_url: string | null
           id: string
           image_url: string | null
           latitude: number | null
@@ -128,7 +225,6 @@ export type Database = {
           description?: string | null
           dietary?: string[] | null
           favorite_dishes?: string[] | null
-          google_maps_url?: string | null
           id: string
           image_url?: string | null
           latitude?: number | null
@@ -151,7 +247,6 @@ export type Database = {
           description?: string | null
           dietary?: string[] | null
           favorite_dishes?: string[] | null
-          google_maps_url?: string | null
           id?: string
           image_url?: string | null
           latitude?: number | null
@@ -165,7 +260,22 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "restaurants_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -189,11 +299,36 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      users_with_usernames: {
+        Row: {
+          email: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          email?: string | null
+          user_id?: string | null
+          username?: never
+        }
+        Update: {
+          email?: string | null
+          user_id?: string | null
+          username?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       assign_user_role: {
@@ -216,6 +351,20 @@ export type Database = {
           last_sign_in_at: string
           role: string
           user_id: string
+        }[]
+      }
+      get_community_votes_with_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          ends_at: string
+          options: Json
+          status: string
+          topic_description: string
+          topic_id: string
+          topic_title: string
+          total_votes: number
+          vote_type: string
         }[]
       }
       get_my_role: {
