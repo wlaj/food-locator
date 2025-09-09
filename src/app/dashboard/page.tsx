@@ -19,10 +19,10 @@ export default async function DashboardPage() {
   const userIsAdmin = user ? await isUserAdmin(user.id) : false
   
   // Only fetch votes if user is admin
-  let votes = []
+  let votes: any[] = []
   if (userIsAdmin) {
     const votesResult = await getAllVotes()
-    votes = votesResult.success ? votesResult.data : []
+    votes = votesResult?.success ? votesResult.data || [] : []
   }
 
   return (
