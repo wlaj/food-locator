@@ -1,4 +1,5 @@
 import { Gallery } from "@/components/gallery";
+import { RestaurantMap } from "@/components/restaurant-map";
 import { searchRestaurants } from "@/lib/actions";
 
 interface SearchPageProps {
@@ -29,9 +30,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const isLocationOnlySearch = query === "*";
   const searchContext = location ? `in ${location}` : "";
-  const displayTitle = isLocationOnlySearch 
-    ? `Restaurants ${searchContext}` 
-    : `Search Results for "${query}" ${searchContext}`;
 
   return (
     <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
@@ -45,6 +43,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             : `Showing results for "${query}" ${searchContext}`
           }
         </p>
+      </div>
+      <div className="mb-8">
+        <RestaurantMap 
+          restaurants={restaurants || []} 
+          height="500px"
+        />
       </div>
       <Gallery
         heading={`Found ${restaurants?.length || 0} restaurants`}

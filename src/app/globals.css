@@ -51,7 +51,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.9 0.1739 96.85);
+  --primary: oklch(0.145 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -119,4 +119,142 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Leaflet Map Popup Styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05) !important;
+  border: 1px solid oklch(var(--border)) !important;
+  padding: 0 !important;
+  background: oklch(var(--background)) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: oklch(var(--background)) !important;
+  color: oklch(var(--foreground)) !important;
+}
+
+.leaflet-popup-tip {
+  background: oklch(var(--background)) !important;
+  border: 1px solid oklch(var(--border)) !important;
+  border-top: none !important;
+  border-right: none !important;
+}
+
+.leaflet-popup-close-button {
+  color: oklch(var(--muted-foreground)) !important;
+  font-size: 18px !important;
+  padding: 4px 8px !important;
+  width: auto !important;
+  height: auto !important;
+  background: oklch(var(--background)) !important;
+  border-radius: 6px !important;
+  border: 1px solid oklch(var(--border)) !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 1 !important;
+  line-height: 1 !important;
+}
+
+.leaflet-popup-close-button:hover {
+  background: oklch(var(--muted)) !important;
+  color: oklch(var(--foreground)) !important;
+}
+
+/* Custom Restaurant Pin Markers */
+.custom-marker-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 40px;
+}
+
+.marker-inner {
+  position: relative;
+  z-index: 2;
+  color: oklch(var(--primary));
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.2));
+  transition: all 0.2s ease;
+}
+
+.custom-marker:hover .marker-inner {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.3));
+}
+
+.custom-marker.award-marker .marker-inner {
+  color: #f59e0b;
+}
+
+.marker-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 4px;
+  background: rgb(0 0 0 / 0.2);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Map Container Styling */
+.leaflet-container {
+  background: oklch(var(--muted) / 0.3) !important;
+}
+
+/* Hide Leaflet attribution */
+.leaflet-control-attribution {
+  background: oklch(var(--background) / 0.8) !important;
+  color: oklch(var(--muted-foreground)) !important;
+  font-size: 10px !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Zoom control styling */
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.15) !important;
+}
+
+.leaflet-control-zoom a {
+  background: oklch(var(--background)) !important;
+  color: oklch(var(--foreground)) !important;
+  border: 1px solid oklch(var(--border)) !important;
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 34px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: oklch(var(--muted)) !important;
+  color: oklch(var(--foreground)) !important;
+  border-color: oklch(var(--border)) !important;
+}
+
+.leaflet-control-zoom-in {
+  border-bottom: none !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.leaflet-control-zoom-out {
+  border-radius: 0 0 8px 8px !important;
 }
