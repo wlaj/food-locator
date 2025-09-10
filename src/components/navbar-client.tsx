@@ -4,8 +4,11 @@ import { useScroll } from "@/hooks/use-scroll"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import SearchInput from "@/components/search-input"
+import { Tables } from "@/lib/types/supabase"
 
-export default function NavbarClient() {
+type Location = Tables<"locations">;
+
+export default function NavbarClient({ locations }: { locations: Array<Location> | null}) {
   const { isAtTop } = useScroll()
   const pathname = usePathname()
 
@@ -14,7 +17,7 @@ export default function NavbarClient() {
       "grow max-sm:hidden transition-all duration-300 ease-in-out",
       !isAtTop || pathname !== '/' ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
     )}>
-      <SearchInput className="mx-auto max-w-xl" />
+      <SearchInput locations={locations || []} className="mx-auto max-w-xl" />
     </div>
   )
 }

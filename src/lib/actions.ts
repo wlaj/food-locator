@@ -1,8 +1,10 @@
 'use server'
 
 import { createClient } from "./supabase/server";
-import { TablesInsert, TablesUpdate } from './types/supabase'
+import { Tables, TablesInsert, TablesUpdate } from './types/supabase'
 import { revalidatePath } from 'next/cache'
+
+type Location = Tables<"locations">;
 
 export async function getRestaurants(limit: number = 10): Promise<Restaurant[] | null> {
   const supabase = await createClient();
@@ -14,6 +16,21 @@ export async function getRestaurants(limit: number = 10): Promise<Restaurant[] |
 
   if (error) {
     console.error('Error fetching restaurants:', error);
+  }
+
+  return data;
+}
+
+export async function getLocations(limit: number = 50): Promise<Location[] | null> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('locations')
+    .select('*')
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching locations:', error);
   }
 
   return data;

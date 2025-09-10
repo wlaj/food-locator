@@ -1,8 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import SearchInput from "./search-input";
+import { getLocations } from "@/lib/actions";
 
-const Hero = ({ className }: { className: string }) => {
+const Hero = async ({ className }: { className: string }) => {
+  const locations = await getLocations()
   return (
     <div
       className={cn(
@@ -24,7 +26,7 @@ const Hero = ({ className }: { className: string }) => {
         <h1 className="text-neutral-100 text-5xl font-semibold">
           Ontdek snel de best geprijsde food spots
         </h1>
-        <SearchInput className="w-full bg-white rounded-lg" />
+        <SearchInput locations={locations || []} className="w-full bg-white rounded-lg" />
       </div>
     </div>
   );

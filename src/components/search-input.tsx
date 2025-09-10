@@ -45,19 +45,21 @@ type DietaryOption = {
 };
 
 type SearchOption = (Cuisine | DietaryOption) & {
-  type: 'cuisine' | 'dietary';
+  type: "cuisine" | "dietary";
 };
 
 interface SearchInputProps {
   placeholder?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
+  locations: Array<Location>;
 }
 
 function SearchInputContent({
   placeholder = "Search restaurants...",
   className,
   size = "md",
+  locations,
 }: SearchInputProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,8 +67,6 @@ function SearchInputContent({
   const [searchQuery, setSearchQuery] = React.useState("");
   const [locationOpen, setLocationOpen] = React.useState(false);
   const [selectedLocation, setSelectedLocation] = React.useState("amsterdam");
-  const [locations, setLocations] = React.useState<Location[]>([]);
-  const [isLoadingLocations, setIsLoadingLocations] = React.useState(true);
   const [searchValue, setSearchValue] = React.useState("");
   const [users, setUsers] = React.useState<User[]>([]);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
@@ -75,39 +75,17 @@ function SearchInputContent({
   const [isUserTyping, setIsUserTyping] = React.useState(false);
   // New state for tags and hashtag functionality
   const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
-  const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(null);
+  const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(
+    null
+  );
   const [searchOptions, setSearchOptions] = React.useState<SearchOption[]>([]);
   const [showHashtagDropdown, setShowHashtagDropdown] = React.useState(false);
-  const [isLoadingSearchOptions, setIsLoadingSearchOptions] = React.useState(false);
+  const [isLoadingSearchOptions, setIsLoadingSearchOptions] =
+    React.useState(false);
   const [hashtagSearchTerm, setHashtagSearchTerm] = React.useState("");
   const [isHashtagTyping, setIsHashtagTyping] = React.useState(false);
   const supabase = createClient();
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  // Fetch locations from database
-  React.useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("locations")
-          .select("*")
-          .order("city", { ascending: true })
-          .order("label", { ascending: true });
-
-        if (error) {
-          console.error("Error fetching locations:", error);
-        } else {
-          setLocations(data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      } finally {
-        setIsLoadingLocations(false);
-      }
-    };
-
-    fetchLocations();
-  }, [supabase]);
 
   // Fetch cuisines and dietary options for hashtag search
   const fetchSearchOptions = React.useCallback(
@@ -233,7 +211,7 @@ function SearchInputContent({
       // Clear search query if not on search page
       setSearchQuery("");
     }
-    
+
     // Handle tags from URL parameters
     const urlTags = searchParams.get("tags");
     if (urlTags) {
@@ -336,35 +314,38 @@ function SearchInputContent({
     const baseQuery = searchQuery.replace(/#\w+/g, "").trim();
     // Extract hashtags from query and combine with selected tags
     const hashtagMatches = searchQuery.match(/#\\w+/g) || [];
-    const existingTagNames = selectedTags.map(tag => tag.text.toLowerCase());
+    const existingTagNames = selectedTags.map((tag) => tag.text.toLowerCase());
     const newTagsFromQuery = hashtagMatches
-      .map(hashtag => hashtag.substring(1).toLowerCase())
-      .filter(tagName => !existingTagNames.includes(tagName));
-    
-    const allTagNames = [...selectedTags.map(tag => tag.text), ...newTagsFromQuery];
-    
+      .map((hashtag) => hashtag.substring(1).toLowerCase())
+      .filter((tagName) => !existingTagNames.includes(tagName));
+
+    const allTagNames = [
+      ...selectedTags.map((tag) => tag.text),
+      ...newTagsFromQuery,
+    ];
+
     const searchParams = new URLSearchParams();
-    
+
     // Add text search query if present
     if (baseQuery) {
       searchParams.set("q", baseQuery);
     }
-    
+
     // Add tags as separate parameter
     if (allTagNames.length > 0) {
       searchParams.set("tags", allTagNames.join(","));
     }
-    
+
     // Add location if selected
     if (selectedLocationData) {
       searchParams.set("location", selectedLocationData.label);
     }
-    
+
     // If no query, tags, or location, browse all restaurants
     if (!baseQuery && allTagNames.length === 0 && selectedLocationData) {
       searchParams.set("q", "*");
     }
-    
+
     if (baseQuery || allTagNames.length > 0 || selectedLocationData) {
       router.push(`/search?${searchParams.toString()}`);
     }
@@ -411,13 +392,13 @@ function SearchInputContent({
     // Remove the # and search term from the query
     const query = searchQuery.trim();
     const hashIndex = query.lastIndexOf("#");
-    
+
     let cleanedQuery = searchQuery;
     if (hashIndex !== -1) {
       const beforeHash = query.substring(0, hashIndex);
       cleanedQuery = beforeHash.trim();
     }
-    
+
     setSearchQuery(cleanedQuery);
     // Don't automatically navigate - let user submit when ready
   };
@@ -460,7 +441,6 @@ function SearchInputContent({
       setShowHashtagDropdown(false);
     }, 150);
   };
-
 
   const sizeClasses = {
     sm: "h-8 text-sm",
@@ -505,11 +485,7 @@ function SearchInputContent({
                 onValueChange={setSearchValue}
               />
               <CommandList>
-                <CommandEmpty>
-                  {isLoadingLocations
-                    ? "Loading locations..."
-                    : "No location found."}
-                </CommandEmpty>
+                <CommandEmpty>No location found.</CommandEmpty>
                 {(() => {
                   // If no search query, show city suggestions
                   if (!searchValue.trim()) {
@@ -629,18 +605,20 @@ function SearchInputContent({
                 "border-0 rounded-l-none bg-background shadow-none focus-within:ring-0 p-1 gap-1 pl-4",
                 sizeClasses[size]
               ),
-              input: "w-full min-w-[80px] shadow-none px-2 border-0 focus:outline-none focus:ring-0",
+              input:
+                "w-full min-w-[80px] shadow-none px-2 border-0 focus:outline-none focus:ring-0",
               tag: {
                 body: "h-6 relative bg-primary/10 text-primary border-0 hover:bg-primary/20 rounded-md font-medium text-xs px-2 pe-6",
-                closeButton: "absolute -inset-y-px -end-px p-0 rounded-e-md flex size-6 transition-colors outline-none text-primary/70 hover:text-primary items-center justify-center"
-              }
+                closeButton:
+                  "absolute -inset-y-px -end-px p-0 rounded-e-md flex size-6 transition-colors outline-none text-primary/70 hover:text-primary items-center justify-center",
+              },
             }}
             inputProps={{
               value: searchQuery,
               onChange: handleInputChange,
               onKeyDown: handleInputKeyDown,
               onFocus: handleInputFocus,
-              onBlur: handleInputBlur
+              onBlur: handleInputBlur,
             }}
           />
           <button
@@ -703,11 +681,12 @@ function SearchInputContent({
                 </CommandEmpty>
               ) : (
                 <>
-                  {searchOptions.filter(option => option.type === 'cuisine').length > 0 && (
+                  {searchOptions.filter((option) => option.type === "cuisine")
+                    .length > 0 && (
                     <CommandGroup heading="Cuisines">
                       <ScrollArea className="max-h-[100px]">
                         {searchOptions
-                          .filter(option => option.type === 'cuisine')
+                          .filter((option) => option.type === "cuisine")
                           .map((option) => (
                             <CommandItem
                               key={option.id}
@@ -716,7 +695,9 @@ function SearchInputContent({
                               className="cursor-pointer"
                             >
                               <div className="flex flex-col">
-                                <span className="font-medium">#{option.name}</span>
+                                <span className="font-medium">
+                                  #{option.name}
+                                </span>
                                 {option.description && (
                                   <span className="text-xs text-muted-foreground">
                                     {option.description}
@@ -728,11 +709,12 @@ function SearchInputContent({
                       </ScrollArea>
                     </CommandGroup>
                   )}
-                  {searchOptions.filter(option => option.type === 'dietary').length > 0 && (
+                  {searchOptions.filter((option) => option.type === "dietary")
+                    .length > 0 && (
                     <CommandGroup heading="Dietary Options">
                       <ScrollArea className="max-h-[100px]">
                         {searchOptions
-                          .filter(option => option.type === 'dietary')
+                          .filter((option) => option.type === "dietary")
                           .map((option) => (
                             <CommandItem
                               key={option.id}
@@ -741,7 +723,9 @@ function SearchInputContent({
                               className="cursor-pointer"
                             >
                               <div className="flex flex-col">
-                                <span className="font-medium">#{option.name}</span>
+                                <span className="font-medium">
+                                  #{option.name}
+                                </span>
                                 {option.description && (
                                   <span className="text-xs text-muted-foreground">
                                     {option.description}
