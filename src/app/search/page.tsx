@@ -1,6 +1,7 @@
 import { Gallery } from "@/components/gallery";
 import { RestaurantMap } from "@/components/restaurant-map";
 import { searchRestaurants } from "@/lib/actions";
+import { getTranslations } from 'next-intl/server';
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -13,14 +14,15 @@ interface SearchPageProps {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const { q: query, location, tags } = params;
+  const t = await getTranslations();
 
   if (!query && !tags) {
     return (
       <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
         <div className="mt-28 mb-8">
-          <h1 className="text-3xl font-bold">Search</h1>
+          <h1 className="text-3xl font-bold">{t('search.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Enter a search term to find restaurants
+            {t('search.noQuery')}
           </p>
         </div>
       </div>
@@ -30,22 +32,22 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const restaurants = await searchRestaurants(query, location, tags);
 
   const isLocationOnlySearch = query === "*";
-  const searchContext = location ? `in ${location}` : "";
+  const searchContext = location ? `${t('search.in')} ${location}` : "";
   const tagsArray = tags ? tags.split(",") : [];
-  const tagsContext = tagsArray.length > 0 ? `with ${tagsArray.map(tag => `#${tag}`).join(", ")}` : "";
+  const tagsContext = tagsArray.length > 0 ? `${t('search.with')} ${tagsArray.map(tag => `#${tag}`).join(", ")}` : "";
 
   return (
     <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
       <div className="mt-28 mb-8">
         <h1 className="text-3xl font-bold">
-          {isLocationOnlySearch ? "Browse Restaurants" : "Search Results"}
+          {isLocationOnlySearch ? t('search.browseRestaurants') : t('search.results')}
         </h1>
         <p className="text-muted-foreground mt-2">
           {isLocationOnlySearch 
-            ? `Showing restaurants ${searchContext} ${tagsContext}`.trim()
+            ? `${t('search.showingRestaurants')} ${searchContext} ${tagsContext}`.trim()
             : query 
-              ? `Showing results for "${query}" ${searchContext} ${tagsContext}`.trim()
-              : `Showing restaurants ${tagsContext} ${searchContext}`.trim()
+              ? t('search.showingResults', { query }) + ` ${searchContext} ${tagsContext}`.trim()
+              : `${t('search.showingRestaurants')} ${tagsContext} ${searchContext}`.trim()
           }
         </p>
       </div>
@@ -56,8 +58,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         />
       </div>
       <Gallery
-        heading={`Found ${restaurants?.length || 0} restaurants`}
-        demoTitle={isLocationOnlySearch ? "Near your selected area" : "Matching your search"}
+        heading={t('search.foundResults', { count: restaurants?.length || 0 })}
+        demoTitle={isLocationOnlySearch ? t('search.nearSelectedArea') : t('search.matchingSearch')}
         restaurants={restaurants || []}
       />
     </div>

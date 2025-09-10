@@ -7,6 +7,7 @@ import {
   IconNumber3,
 } from "@tabler/icons-react";
 import React from "react";
+import { getTranslations } from 'next-intl/server';
 
 type HowItWorks = {
   heading: string;
@@ -14,7 +15,9 @@ type HowItWorks = {
   demoTitle?: string;
 };
 
-const HowItWorks = ({ heading, demoUrl, demoTitle }: HowItWorks) => {
+const HowItWorks = async ({ heading, demoUrl, demoTitle }: HowItWorks) => {
+  const t = await getTranslations();
+  
   return (
     <section className="py-12">
       <div className="mb-8 flex flex-col gap-8 justify-between md:mb-14 lg:mb-16">
@@ -33,24 +36,24 @@ const HowItWorks = ({ heading, demoUrl, demoTitle }: HowItWorks) => {
           <div className="flex flex-col gap-2 rounded-xl p-6 border w-1/3">
             <IconCircle1 className="size-8" />
             <h3 className="text-xl font-medium">
-              Zoek op locatie of voeg je locatie toe
+              {t('howItWorks.step1.title')}
             </h3>
             <p className="text-neutral-600">
-              Vul je postcode in om restaurants in jouw buurt te vinden.
+              {t('howItWorks.step1.description')}
             </p>
           </div>
           <div className="flex flex-col gap-2 rounded-xl p-6 border w-1/3">
             <IconCircle2 className="size-8" />
-            <h3 className="text-xl font-medium">Ontdek lokale restaurants</h3>
+            <h3 className="text-xl font-medium">{t('howItWorks.step2.title')}</h3>
             <p className="text-neutral-600">
-              Bekijk een overzicht van alle restaurants bij jou in de buurt.
+              {t('howItWorks.step2.description')}
             </p>
           </div>
           <div className="flex flex-col gap-2 p-6 rounded-xl border w-1/3">
             <IconCircle3 className="size-8" />
-            <h3 className="text-xl font-medium">Bestel en geniet</h3>
+            <h3 className="text-xl font-medium">{t('howItWorks.step3.title')}</h3>
             <p className="text-neutral-600">
-              Kies je favoriete gerecht en plaats eenvoudig je bestelling.
+              {t('howItWorks.step3.description')}
             </p>
           </div>
         </div>

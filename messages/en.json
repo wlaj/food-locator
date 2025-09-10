@@ -1,0 +1,104 @@
+{
+  "common": {
+    "search": "Search",
+    "login": "Login",
+    "signup": "Sign up",
+    "logout": "Logout",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "close": "Close"
+  },
+  "navigation": {
+    "home": "Home",
+    "search": "Search",
+    "dashboard": "Dashboard",
+    "community": "Community",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Quickly discover the best priced food spots",
+    "searchPlaceholder": "Search for restaurants..."
+  },
+  "howItWorks": {
+    "heading": "How it works",
+    "step1": {
+      "title": "Search by location or add your location",
+      "description": "Enter your postal code to find restaurants in your area."
+    },
+    "step2": {
+      "title": "Discover local restaurants",
+      "description": "View an overview of all restaurants near you."
+    },
+    "step3": {
+      "title": "Order and enjoy",
+      "description": "Choose your favorite dish and easily place your order."
+    }
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search for restaurants...",
+    "noQuery": "Enter a search term to find restaurants",
+    "results": "Search Results",
+    "browseRestaurants": "Browse Restaurants",
+    "showingResults": "Showing results for \"{query}\"",
+    "showingRestaurants": "Showing restaurants",
+    "foundResults": "Found {count} restaurants",
+    "nearSelectedArea": "Near your selected area",
+    "matchingSearch": "Matching your search",
+    "in": "in",
+    "with": "with"
+  },
+  "gallery": {
+    "restaurants": "Restaurants",
+    "viewBasedOnLocation": "View based on location"
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "signupTitle": "Sign up",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signupLink": "Sign up here",
+    "loginLink": "Login here",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Enter your password"
+  },
+  "restaurant": {
+    "details": "Restaurant details",
+    "cuisine": "Cuisine",
+    "location": "Location",
+    "dietary": "Dietary options",
+    "addRestaurant": "Add restaurant",
+    "editRestaurant": "Edit restaurant",
+    "deleteRestaurant": "Delete restaurant",
+    "confirmDelete": "Are you sure you want to delete this restaurant?",
+    "name": "Name",
+    "description": "Description",
+    "address": "Address",
+    "city": "City",
+    "tags": "Tags"
+  },
+  "errors": {
+    "general": "Something went wrong",
+    "invalidCredentials": "Invalid credentials",
+    "emailRequired": "Email address is required",
+    "passwordRequired": "Password is required",
+    "passwordsDoNotMatch": "Passwords do not match"
+  },
+  "success": {
+    "loginSuccessful": "Successfully logged in",
+    "signupSuccessful": "Account created successfully",
+    "restaurantAdded": "Restaurant added",
+    "restaurantUpdated": "Restaurant updated",
+    "restaurantDeleted": "Restaurant deleted"
+  }
+}

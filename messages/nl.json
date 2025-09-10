@@ -1,0 +1,104 @@
+{
+  "common": {
+    "search": "Zoeken",
+    "login": "Inloggen",
+    "signup": "Registreren",
+    "logout": "Uitloggen",
+    "submit": "Verzenden",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "back": "Terug",
+    "next": "Volgende",
+    "loading": "Laden...",
+    "close": "Sluiten"
+  },
+  "navigation": {
+    "home": "Home",
+    "search": "Zoeken",
+    "dashboard": "Dashboard",
+    "community": "Community",
+    "profile": "Profiel"
+  },
+  "hero": {
+    "title": "Ontdek snel de best geprijsde food spots",
+    "searchPlaceholder": "Zoek naar restaurants..."
+  },
+  "howItWorks": {
+    "heading": "Hoe het werkt",
+    "step1": {
+      "title": "Zoek op locatie of voeg je locatie toe",
+      "description": "Vul je postcode in om restaurants in jouw buurt te vinden."
+    },
+    "step2": {
+      "title": "Ontdek lokale restaurants",
+      "description": "Bekijk een overzicht van alle restaurants bij jou in de buurt."
+    },
+    "step3": {
+      "title": "Bestel en geniet",
+      "description": "Kies je favoriete gerecht en plaats eenvoudig je bestelling."
+    }
+  },
+  "search": {
+    "title": "Zoeken",
+    "placeholder": "Zoek naar restaurants...",
+    "noQuery": "Voer een zoekterm in om restaurants te vinden",
+    "results": "Zoekresultaten",
+    "browseRestaurants": "Restaurants bekijken",
+    "showingResults": "Resultaten tonen voor \"{query}\"",
+    "showingRestaurants": "Restaurants tonen",
+    "foundResults": "{count} restaurants gevonden",
+    "nearSelectedArea": "Nabij je geselecteerde gebied",
+    "matchingSearch": "Passend bij je zoekopdracht",
+    "in": "in",
+    "with": "met"
+  },
+  "gallery": {
+    "restaurants": "Restaurants",
+    "viewBasedOnLocation": "Weergave op basis van locatie"
+  },
+  "auth": {
+    "loginTitle": "Inloggen",
+    "signupTitle": "Registreren",
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "confirmPassword": "Bevestig wachtwoord",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "noAccount": "Nog geen account?",
+    "hasAccount": "Al een account?",
+    "signupLink": "Registreer hier",
+    "loginLink": "Log hier in",
+    "emailPlaceholder": "je@voorbeeld.nl",
+    "passwordPlaceholder": "Voer je wachtwoord in"
+  },
+  "restaurant": {
+    "details": "Restaurant details",
+    "cuisine": "Keuken",
+    "location": "Locatie",
+    "dietary": "Dieetwensen",
+    "addRestaurant": "Restaurant toevoegen",
+    "editRestaurant": "Restaurant bewerken",
+    "deleteRestaurant": "Restaurant verwijderen",
+    "confirmDelete": "Weet je zeker dat je dit restaurant wilt verwijderen?",
+    "name": "Naam",
+    "description": "Beschrijving",
+    "address": "Adres",
+    "city": "Stad",
+    "tags": "Tags"
+  },
+  "errors": {
+    "general": "Er is iets misgegaan",
+    "invalidCredentials": "Ongeldige inloggegevens",
+    "emailRequired": "E-mailadres is verplicht",
+    "passwordRequired": "Wachtwoord is verplicht",
+    "passwordsDoNotMatch": "Wachtwoorden komen niet overeen"
+  },
+  "success": {
+    "loginSuccessful": "Succesvol ingelogd",
+    "signupSuccessful": "Account succesvol aangemaakt",
+    "restaurantAdded": "Restaurant toegevoegd",
+    "restaurantUpdated": "Restaurant bijgewerkt",
+    "restaurantDeleted": "Restaurant verwijderd"
+  }
+}
