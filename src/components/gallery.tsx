@@ -45,7 +45,6 @@ const Gallery = ({
   }, [carouselApi]);
   return (
     <section className="py-32">
-      <div className="container">
         <div className="mb-8 flex flex-col justify-between md:mb-14 md:flex-row md:items-end lg:mb-16">
           <div>
             <h2 className="mb-3 text-3xl font-semibold md:mb-4 md:text-4xl lg:mb-6">
@@ -83,7 +82,6 @@ const Gallery = ({
               <ArrowRight className="size-5" />
             </Button>
           </div>
-        </div>
       </div>
       <div className="w-full max-w-full">
         <Carousel

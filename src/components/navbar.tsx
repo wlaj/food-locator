@@ -9,18 +9,20 @@ export default async function Navbar() {
   const locations = await getLocations()
   return (
     <header className="border-b px-4 z-20 fixed top-0 right-0 bg-white w-full md:px-6">
-      <div className="flex h-16 items-center justify-between gap-4">
+      <div className="flex h-14 md:h-16 items-center justify-between gap-2 md:gap-4">
         {/* Logo */}
-        <div className="flex-1">
+        <div className="flex-shrink-0 md:flex-1">
           <Link href="/" className="text-foreground flex gap-2 items-center">
-            <IconInnerShadowBottomRightFilled className="size-9 hover:rotate-45 transition-all duration-500" />
+            <IconInnerShadowBottomRightFilled className="size-7 md:size-9 hover:rotate-45 transition-all duration-500" />
           </Link>
         </div>
         {/* Middle area */}
-        <NavbarClient locations={locations} />
+        <div className="flex-1 md:flex-none">
+          <NavbarClient locations={locations} />
+        </div>
         {/* Right side */}
-        <div className="flex flex-1 items-center justify-end gap-2">
-          <Button asChild variant="ghost" size="sm" className="text-sm">
+        <div className="flex flex-shrink-0 md:flex-1 items-center justify-end gap-1 md:gap-2">
+          <Button asChild variant="ghost" size="sm" className="text-xs md:text-sm px-2 md:px-3">
             <Link href="/community">Community</Link>
           </Button>
           <NavbarAuth />
