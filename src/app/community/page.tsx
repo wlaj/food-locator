@@ -36,7 +36,7 @@ export default async function CommunityPage() {
   const votes = await getActiveVotes();
 
   return (
-    <div className="mt-16 max-w-4xl mx-auto px-4 py-12">
+    <div className="mt-32 md:mt-16 max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Community Votes</h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">

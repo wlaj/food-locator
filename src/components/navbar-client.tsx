@@ -12,6 +12,7 @@ export default function NavbarClient({ locations }: { locations: Array<Location>
   const { isAtTop } = useScroll()
   const pathname = usePathname()
   const isSearchPage = pathname === '/search'
+  const isCommunityPage = pathname === '/community'
 
   return (
     <>
@@ -27,13 +28,13 @@ export default function NavbarClient({ locations }: { locations: Array<Location>
         />
       </div>
 
-      {/* Mobile version - only show on search page */}
-      {isSearchPage && (
+      {/* Mobile version - only show on search and community pages */}
+      {(isSearchPage || isCommunityPage) && (
         <div className="block sm:hidden w-full">
           <SearchInput 
             locations={locations || []} 
             className="w-full" 
-            size="md" 
+            size="sm" 
           />
         </div>
       )}
