@@ -19,7 +19,7 @@ const HowItWorks = async ({ heading, demoUrl, demoTitle }: HowItWorks) => {
   const t = await getTranslations();
   
   return (
-    <section className="py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+    <section className="py-8 md:py-12">
       <div className="mb-6 md:mb-8 flex flex-col gap-6 md:gap-8 justify-between lg:mb-16">
         <div>
           <h2 className="mb-3 text-2xl sm:text-3xl font-semibold md:mb-4 md:text-4xl lg:mb-6">

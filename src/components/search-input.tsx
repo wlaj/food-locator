@@ -66,8 +66,10 @@ function SearchInputContent({
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [locationOpen, setLocationOpen] = React.useState(false);
+  const [mobileLocationOpen, setMobileLocationOpen] = React.useState(false);
   const [selectedLocation, setSelectedLocation] = React.useState("amsterdam");
   const [searchValue, setSearchValue] = React.useState("");
+  const [mobileSearchValue, setMobileSearchValue] = React.useState("");
   const [users, setUsers] = React.useState<User[]>([]);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = React.useState(false);
@@ -450,6 +452,145 @@ function SearchInputContent({
 
   return (
     <div className="relative">
+      {/* Mobile: Location selector above search */}
+      <div className="md:hidden mb-2 relative">
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={mobileLocationOpen}
+          className={cn(
+            "w-full justify-between bg-background hover:bg-muted/50",
+            sizeClasses[size]
+          )}
+          onClick={() => setMobileLocationOpen(!mobileLocationOpen)}
+        >
+          <div className="flex items-center gap-2">
+            <IconLocation className="size-4" />
+            <span className="text-sm">
+              {selectedLocation
+                ? locations.find(
+                    (location) => location.value === selectedLocation
+                  )?.label
+                : "Select location..."}
+            </span>
+          </div>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+        
+        {/* Mobile dropdown */}
+        {mobileLocationOpen && (
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-hidden">
+            <Command>
+              <CommandInput
+                placeholder="Search location..."
+                value={mobileSearchValue}
+                onValueChange={setMobileSearchValue}
+              />
+              <CommandList>
+                <CommandEmpty>No location found.</CommandEmpty>
+                <ScrollArea className="h-[200px]">
+                  {(() => {
+                    // If no search query, show city suggestions
+                    if (!mobileSearchValue.trim()) {
+                      const cities = Array.from(
+                        new Set(locations.map((loc) => loc.city))
+                      ).sort();
+                      return (
+                        <CommandGroup heading="Cities">
+                          {cities.map((city) => {
+                            const cityLocation = locations.find(
+                              (loc) => loc.city === city && !loc.district
+                            );
+                            return cityLocation ? (
+                              <CommandItem
+                                key={cityLocation.value}
+                                value={cityLocation.value}
+                                onSelect={(currentValue) => {
+                                  setSelectedLocation(
+                                    currentValue === selectedLocation
+                                      ? ""
+                                      : currentValue
+                                  );
+                                  setMobileLocationOpen(false);
+                                  setMobileSearchValue("");
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedLocation === cityLocation.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {city}
+                              </CommandItem>
+                            ) : null;
+                          })}
+                        </CommandGroup>
+                      );
+                    }
+
+                    // Group locations by city when searching
+                    const groupedLocations = locations.reduce(
+                      (groups, location) => {
+                        if (!groups[location.city]) {
+                          groups[location.city] = [];
+                        }
+                        groups[location.city].push(location);
+                        return groups;
+                      },
+                      {} as Record<string, Location[]>
+                    );
+
+                    return Object.entries(groupedLocations)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([city, cityLocations]) => (
+                        <CommandGroup key={city} heading={city}>
+                          {cityLocations
+                            .sort((a, b) => a.label.localeCompare(b.label))
+                            .map((location) => (
+                              <CommandItem
+                                key={location.value}
+                                value={location.value}
+                                onSelect={(currentValue) => {
+                                  setSelectedLocation(
+                                    currentValue === selectedLocation
+                                      ? ""
+                                      : currentValue
+                                  );
+                                  setMobileLocationOpen(false);
+                                  setMobileSearchValue("");
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedLocation === location.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span>{location.label}</span>
+                                  {location.district && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {location.district}
+                                    </span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      ));
+                  })()}
+                </ScrollArea>
+              </CommandList>
+            </Command>
+          </div>
+        )}
+      </div>
+
       <form
         onSubmit={handleSearchSubmit}
         className={cn(
@@ -457,134 +598,138 @@ function SearchInputContent({
           className
         )}
       >
-        <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              role="combobox"
-              aria-expanded={locationOpen}
-              className={cn(
-                "justify-between border-0 rounded-r-none border-r bg-background hover:bg-muted/50",
-                sizeClasses[size]
-              )}
-            >
-              <IconLocation className="size-4" />
-              {selectedLocation
-                ? locations.find(
-                    (location) => location.value === selectedLocation
-                  )?.label
-                : "Select location..."}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[300px] p-0" align="start">
-            <Command>
-              <CommandInput
-                placeholder="Search location..."
-                value={searchValue}
-                onValueChange={setSearchValue}
-              />
-              <CommandList>
-                <CommandEmpty>No location found.</CommandEmpty>
-                {(() => {
-                  // If no search query, show city suggestions
-                  if (!searchValue.trim()) {
-                    const cities = Array.from(
-                      new Set(locations.map((loc) => loc.city))
-                    ).sort();
-                    return (
-                      <CommandGroup heading="Cities">
-                        {cities.map((city) => {
-                          const cityLocation = locations.find(
-                            (loc) => loc.city === city && !loc.district
-                          );
-                          return cityLocation ? (
-                            <CommandItem
-                              key={cityLocation.value}
-                              value={cityLocation.value}
-                              onSelect={(currentValue) => {
-                                setSelectedLocation(
-                                  currentValue === selectedLocation
-                                    ? ""
-                                    : currentValue
-                                );
-                                setLocationOpen(false);
-                                setSearchValue("");
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedLocation === cityLocation.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {city}
-                            </CommandItem>
-                          ) : null;
-                        })}
-                      </CommandGroup>
+        {/* Desktop: Location selector integrated */}
+        <div className="hidden md:block">
+          <Popover open={locationOpen} onOpenChange={setLocationOpen} modal={false}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                role="combobox"
+                aria-expanded={locationOpen}
+                className={cn(
+                  "justify-between border-0 rounded-r-none border-r bg-background hover:bg-muted/50",
+                  sizeClasses[size]
+                )}
+              >
+                <IconLocation className="size-4" />
+                {selectedLocation
+                  ? locations.find(
+                      (location) => location.value === selectedLocation
+                    )?.label
+                  : "Select location..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0" align="start">
+              <Command>
+                <CommandInput
+                  placeholder="Search location..."
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                />
+                <CommandList>
+                  <CommandEmpty>No location found.</CommandEmpty>
+                  {(() => {
+                    // If no search query, show city suggestions
+                    if (!searchValue.trim()) {
+                      const cities = Array.from(
+                        new Set(locations.map((loc) => loc.city))
+                      ).sort();
+                      return (
+                        <CommandGroup heading="Cities">
+                          {cities.map((city) => {
+                            const cityLocation = locations.find(
+                              (loc) => loc.city === city && !loc.district
+                            );
+                            return cityLocation ? (
+                              <CommandItem
+                                key={cityLocation.value}
+                                value={cityLocation.value}
+                                onSelect={(currentValue) => {
+                                  setSelectedLocation(
+                                    currentValue === selectedLocation
+                                      ? ""
+                                      : currentValue
+                                  );
+                                  setLocationOpen(false);
+                                  setSearchValue("");
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedLocation === cityLocation.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {city}
+                              </CommandItem>
+                            ) : null;
+                          })}
+                        </CommandGroup>
+                      );
+                    }
+
+                    // Group locations by city when searching
+                    const groupedLocations = locations.reduce(
+                      (groups, location) => {
+                        if (!groups[location.city]) {
+                          groups[location.city] = [];
+                        }
+                        groups[location.city].push(location);
+                        return groups;
+                      },
+                      {} as Record<string, Location[]>
                     );
-                  }
 
-                  // Group locations by city when searching
-                  const groupedLocations = locations.reduce(
-                    (groups, location) => {
-                      if (!groups[location.city]) {
-                        groups[location.city] = [];
-                      }
-                      groups[location.city].push(location);
-                      return groups;
-                    },
-                    {} as Record<string, Location[]>
-                  );
-
-                  return Object.entries(groupedLocations)
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([city, cityLocations]) => (
-                      <CommandGroup key={city} heading={city}>
-                        {cityLocations
-                          .sort((a, b) => a.label.localeCompare(b.label))
-                          .map((location) => (
-                            <CommandItem
-                              key={location.value}
-                              value={location.value}
-                              onSelect={(currentValue) => {
-                                setSelectedLocation(
-                                  currentValue === selectedLocation
-                                    ? ""
-                                    : currentValue
-                                );
-                                setLocationOpen(false);
-                                setSearchValue("");
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedLocation === location.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              <div className="flex flex-col">
-                                <span>{location.label}</span>
-                                {location.district && (
-                                  <span className="text-xs text-muted-foreground">
-                                    {location.district}
-                                  </span>
-                                )}
-                              </div>
-                            </CommandItem>
-                          ))}
-                      </CommandGroup>
-                    ));
-                })()}
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+                    return Object.entries(groupedLocations)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([city, cityLocations]) => (
+                        <CommandGroup key={city} heading={city}>
+                          {cityLocations
+                            .sort((a, b) => a.label.localeCompare(b.label))
+                            .map((location) => (
+                              <CommandItem
+                                key={location.value}
+                                value={location.value}
+                                onSelect={(currentValue) => {
+                                  setSelectedLocation(
+                                    currentValue === selectedLocation
+                                      ? ""
+                                      : currentValue
+                                  );
+                                  setLocationOpen(false);
+                                  setSearchValue("");
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedLocation === location.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span>{location.label}</span>
+                                  {location.district && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {location.district}
+                                    </span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      ));
+                  })()}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
         <div className="flex-1 relative">
           <TagInput
             tags={selectedTags}
@@ -597,12 +742,14 @@ function SearchInputContent({
             activeTagIndex={activeTagIndex}
             setActiveTagIndex={setActiveTagIndex}
             className={cn(
-              "border-0 rounded-l-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+              "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
+              "md:rounded-l-none", // Only remove left border radius on desktop
               sizeClasses[size]
             )}
             styleClasses={{
               inlineTagsContainer: cn(
-                "border-0 rounded-l-none bg-background shadow-none focus-within:ring-0 p-1 gap-1 pl-4",
+                "border-0 shadow-none focus-within:ring-0 p-1 gap-1 pl-4",
+                "md:rounded-l-none bg-background", // Only remove left border radius on desktop
                 sizeClasses[size]
               ),
               input:
