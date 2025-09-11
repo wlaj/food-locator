@@ -56,7 +56,7 @@ interface SearchInputProps {
 }
 
 function SearchInputContent({
-  placeholder = "Search restaurants...",
+  placeholder = "Restaurants, @ users or # preferences",
   className,
   size = "md",
   locations,
