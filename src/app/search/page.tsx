@@ -18,7 +18,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!query && !tags) {
     return (
-      <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
+      <div className="mt-24 md:mt-16 max-w-7xl mx-auto px-4 md:px-6">
         <div className="mt-28 mb-8">
           <h1 className="text-3xl font-bold">{t('search.title')}</h1>
           <p className="text-muted-foreground mt-2">
@@ -37,8 +37,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const tagsContext = tagsArray.length > 0 ? `${t('search.with')} ${tagsArray.map(tag => `#${tag}`).join(", ")}` : "";
 
   return (
-    <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
-      <div className="mt-28 mb-8">
+    <div className="mt-48 md:mt-28 max-w-7xl mx-auto px-4 md:px-6">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold">
           {isLocationOnlySearch ? t('search.browseRestaurants') : t('search.results')}
         </h1>
