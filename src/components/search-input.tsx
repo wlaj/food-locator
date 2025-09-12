@@ -20,9 +20,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { IconLocation } from "@tabler/icons-react";
-import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/types/supabase";
 import { TagInput, type Tag } from "emblor";
+import { useCuisines, useDietaryOptions, useUsers } from "@/lib/queries";
 
 type Location = Tables<"locations">;
 
@@ -70,141 +70,61 @@ function SearchInputContent({
   const [selectedLocation, setSelectedLocation] = React.useState("amsterdam");
   const [searchValue, setSearchValue] = React.useState("");
   const [mobileSearchValue, setMobileSearchValue] = React.useState("");
-  const [users, setUsers] = React.useState<User[]>([]);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
-  const [isLoadingUsers, setIsLoadingUsers] = React.useState(false);
   const [userSearchTerm, setUserSearchTerm] = React.useState("");
   // New state for tags and hashtag functionality
   const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(
     null
   );
-  const [searchOptions, setSearchOptions] = React.useState<SearchOption[]>([]);
   const [showHashtagDropdown, setShowHashtagDropdown] = React.useState(false);
-  const [isLoadingSearchOptions, setIsLoadingSearchOptions] =
-    React.useState(false);
   const [hashtagSearchTerm, setHashtagSearchTerm] = React.useState("");
-  const supabase = createClient();
-  const userDebounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const hashtagDebounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  // Use cached queries
+  const { data: users = [], isLoading: isLoadingUsers } = useUsers();
+  const { data: cuisines = [], isLoading: isLoadingCuisines } = useCuisines();
+  const { data: dietaryOptions = [], isLoading: isLoadingDietary } = useDietaryOptions();
+  const isLoadingSearchOptions = isLoadingCuisines || isLoadingDietary;
 
-  // Fetch cuisines and dietary options for hashtag search
-  const fetchSearchOptions = React.useCallback(
-    (query: string) => {
-      // Clear any existing timeout
-      if (hashtagDebounceTimerRef.current) {
-        clearTimeout(hashtagDebounceTimerRef.current);
-        hashtagDebounceTimerRef.current = null;
-      }
+  // Filter cached data for hashtag search
+  const searchOptions = React.useMemo(() => {
+    const query = hashtagSearchTerm.toLowerCase();
+    
+    if (!query.trim()) {
+      // Return all options when no search term
+      const allCuisines: SearchOption[] = cuisines.map((c) => ({ ...c, type: "cuisine" as const }));
+      const allDietary: SearchOption[] = dietaryOptions.map((d) => ({ ...d, type: "dietary" as const }));
+      return [...allCuisines, ...allDietary].slice(0, 10); // Limit to 10 items
+    }
 
-      // Set a new timeout
-      hashtagDebounceTimerRef.current = setTimeout(async () => {
-        setIsLoadingSearchOptions(true);
-        try {
-          // Fetch both cuisines and dietary options
-          const [cuisinesResponse, dietaryResponse] = await Promise.all([
-            supabase
-              .from("cuisines")
-              .select("id, name, description")
-              .ilike("name", query.trim() ? `%${query.toLowerCase()}%` : "%")
-              .order("name", { ascending: true })
-              .limit(5),
-            supabase
-              .from("dietary_options")
-              .select("id, name, description")
-              .ilike("name", query.trim() ? `%${query.toLowerCase()}%` : "%")
-              .order("name", { ascending: true })
-              .limit(5),
-          ]);
+    // Filter based on search term
+    const filteredCuisines = cuisines.filter(c => 
+      c.name.toLowerCase().includes(query)
+    ).slice(0, 5);
+    
+    const filteredDietary = dietaryOptions.filter(d => 
+      d.name.toLowerCase().includes(query)
+    ).slice(0, 5);
 
-          const cuisines = cuisinesResponse.data || [];
-          const dietary = dietaryResponse.data || [];
+    const options: SearchOption[] = [
+      ...filteredCuisines.map((c) => ({ ...c, type: "cuisine" as const })),
+      ...filteredDietary.map((d) => ({ ...d, type: "dietary" as const })),
+    ];
 
-          // Combine and format the results
-          const options: SearchOption[] = [
-            ...cuisines.map((c) => ({ ...c, type: "cuisine" as const })),
-            ...dietary.map((d) => ({ ...d, type: "dietary" as const })),
-          ];
+    return options;
+  }, [hashtagSearchTerm, cuisines, dietaryOptions]);
 
-          setSearchOptions(options);
-        } catch (error) {
-          console.error("Error fetching search options:", error);
-          setSearchOptions([]);
-        } finally {
-          setIsLoadingSearchOptions(false);
-        }
-      }, 300); // 300ms debounce
-    },
-    [supabase]
-  );
+  // Filter cached users for dropdown suggestions
+  const filteredUsers = React.useMemo(() => {
+    if (!userSearchTerm.trim()) {
+      return users.slice(0, 10); // Return first 10 users when no search term
+    }
+    
+    return users.filter(user => 
+      user.username.toLowerCase().includes(userSearchTerm.toLowerCase())
+    ).slice(0, 10);
+  }, [userSearchTerm, users]);
 
-  // Fetch users for dropdown suggestions with debouncing
-  const fetchUsers = React.useCallback(
-    (query: string) => {
-      // Clear any existing timeout
-      if (userDebounceTimerRef.current) {
-        clearTimeout(userDebounceTimerRef.current);
-        userDebounceTimerRef.current = null;
-      }
-
-      // Set a new timeout
-      userDebounceTimerRef.current = setTimeout(async () => {
-        setIsLoadingUsers(true);
-        try {
-          // Query the users_with_usernames view which gives us all users who have usernames
-          let supabaseQuery = supabase
-            .from("users_with_usernames")
-            .select("user_id, email, username")
-            .limit(10);
-
-          // Add filter if query is provided
-          if (query.trim()) {
-            supabaseQuery = supabaseQuery.ilike(
-              "username",
-              `%${query.toLowerCase()}%`
-            );
-          }
-
-          const { data, error } = await supabaseQuery;
-
-          if (error) {
-            console.error("Error fetching users:", error);
-            setUsers([]);
-          } else {
-            // Map the data to match our User type, with null checks
-            const users = (data || [])
-              .filter(item => item && item.user_id && item.username)
-              .map((item) => ({
-                id: item.user_id,
-                email: item.email || '',
-                username: item.username,
-              }));
-            setUsers(users);
-          }
-        } catch (error) {
-          console.error("Error fetching users:", error);
-          setUsers([]);
-        } finally {
-          setIsLoadingUsers(false);
-        }
-      }, 300); // 300ms debounce
-    },
-    [supabase]
-  );
-
-  // Cleanup timeouts on unmount
-  React.useEffect(() => {
-    return () => {
-      if (userDebounceTimerRef.current) {
-        clearTimeout(userDebounceTimerRef.current);
-        userDebounceTimerRef.current = null;
-      }
-      if (hashtagDebounceTimerRef.current) {
-        clearTimeout(hashtagDebounceTimerRef.current);
-        hashtagDebounceTimerRef.current = null;
-      }
-    };
-  }, []);
 
   // Sync state with URL parameters
   React.useEffect(() => {
@@ -256,20 +176,13 @@ function SearchInputContent({
       if (atIndex === 0 || beforeAt.endsWith(" ")) {
         setUserSearchTerm(afterAt);
         setShowUserDropdown(true);
-
-        if (afterAt.length >= 1) {
-          fetchUsers(afterAt);
-        } else {
-          fetchUsers(""); // Fetch all users when just @ is typed
-        }
       } else {
         setShowUserDropdown(false);
       }
     } else {
       setShowUserDropdown(false);
-      setUsers([]);
     }
-  }, [searchQuery, fetchUsers]);
+  }, [searchQuery]);
 
   // Handle hashtag search when # is typed
   React.useEffect(() => {
@@ -284,20 +197,13 @@ function SearchInputContent({
       if (hashIndex === 0 || beforeHash.endsWith(" ")) {
         setHashtagSearchTerm(afterHash);
         setShowHashtagDropdown(true);
-
-        if (afterHash.length >= 1) {
-          fetchSearchOptions(afterHash);
-        } else {
-          fetchSearchOptions(""); // Fetch all options when just # is typed
-        }
       } else {
         setShowHashtagDropdown(false);
       }
     } else {
       setShowHashtagDropdown(false);
-      setSearchOptions([]);
     }
-  }, [searchQuery, fetchSearchOptions]);
+  }, [searchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -756,36 +662,34 @@ function SearchInputContent({
       </form>
 
       {/* User Dropdown */}
-      {showUserDropdown && users && Array.isArray(users) && (
+      {showUserDropdown && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
           <Command>
             <CommandList>
               {isLoadingUsers ? (
                 <CommandEmpty>Loading users...</CommandEmpty>
-              ) : users.length === 0 ? (
+              ) : filteredUsers.length === 0 ? (
                 <CommandEmpty>
                   No users found matching &quot;{userSearchTerm}&quot;
                 </CommandEmpty>
               ) : (
                 <CommandGroup heading="Users">
                   <ScrollArea className="h-[200px]">
-                    {users
-                      .filter(user => user && user.id && user.username)
-                      .map((user) => (
-                        <CommandItem
-                          key={user.id}
-                          value={user.username}
-                          onSelect={() => handleUserSelect(user)}
-                          className="cursor-pointer"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">@{user.username}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {user.email}
-                            </span>
-                          </div>
-                        </CommandItem>
-                      ))}
+                    {filteredUsers.map((user) => (
+                      <CommandItem
+                        key={user.id}
+                        value={user.username}
+                        onSelect={() => handleUserSelect(user)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">@{user.username}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {user.email}
+                          </span>
+                        </div>
+                      </CommandItem>
+                    ))}
                   </ScrollArea>
                 </CommandGroup>
               )}
@@ -795,7 +699,7 @@ function SearchInputContent({
       )}
 
       {/* Hashtag Dropdown */}
-      {showHashtagDropdown && searchOptions && Array.isArray(searchOptions) && (
+      {showHashtagDropdown && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
           <Command>
             <CommandList>

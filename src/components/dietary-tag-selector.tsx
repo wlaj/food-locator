@@ -4,8 +4,7 @@ import { useId, useState, useEffect } from "react"
 import { Tag, TagInput } from "emblor"
 
 import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { getDietaryOptions } from "@/lib/actions"
+import { useDietaryOptions } from "@/lib/queries"
 
 interface DietaryOption {
   id: string
@@ -25,28 +24,11 @@ export default function DietaryTagSelector({
   placeholder = "Add dietary option"
 }: DietaryTagSelectorProps) {
   const id = useId()
-  const [availableOptions, setAvailableOptions] = useState<DietaryOption[]>([])
   const [selectedTags, setSelectedTags] = useState<Tag[]>([])
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchDietaryOptions() {
-      try {
-        setIsLoading(true)
-        const options = await getDietaryOptions()
-        console.log('Fetched dietary options:', options) // Debug log
-        if (options) {
-          setAvailableOptions(options)
-        }
-      } catch (error) {
-        console.error('Error fetching dietary options:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchDietaryOptions()
-  }, [])
+  
+  // Use cached dietary options
+  const { data: availableOptions = [], isLoading } = useDietaryOptions()
 
   useEffect(() => {
     if (defaultValues.length > 0 && availableOptions.length > 0) {

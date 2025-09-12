@@ -3,6 +3,8 @@ import { RestaurantMap } from "@/components/restaurant-map";
 import { searchRestaurants } from "@/lib/actions";
 import { getTranslations } from 'next-intl/server';
 
+export const revalidate = 3600; // Cache for 1 hour
+
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;

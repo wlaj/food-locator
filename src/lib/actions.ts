@@ -3,6 +3,7 @@
 import { createClient } from "./supabase/server";
 import { Tables, TablesInsert, TablesUpdate } from './types/supabase'
 import { revalidatePath } from 'next/cache'
+import { cache } from 'react'
 
 type Location = Tables<"locations">;
 
@@ -21,7 +22,10 @@ export async function getRestaurants(limit: number = 10): Promise<Restaurant[] |
   return data;
 }
 
-export async function getLocations(limit: number = 50): Promise<Location[] | null> {
+export const getLocations = cache(async (limit: number = 50): Promise<Location[] | null> => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CACHE] 🔄 getLocations called - fetching from database', { limit, timestamp: new Date().toISOString() });
+  }
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -33,8 +37,11 @@ export async function getLocations(limit: number = 50): Promise<Location[] | nul
     console.error('Error fetching locations:', error);
   }
 
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CACHE] ✅ getLocations completed', { count: data?.length, timestamp: new Date().toISOString() });
+  }
   return data;
-}
+});
 
 export async function getUserRestaurants(limit: number = 50): Promise<Restaurant[] | null> {
   const supabase = await createClient();
@@ -312,7 +319,10 @@ export async function deleteRestaurant(id: string) {
   return { success: true }
 }
 
-export async function getDietaryOptions() {
+export const getDietaryOptions = cache(async () => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CACHE] 🔄 getDietaryOptions called - fetching from database', { timestamp: new Date().toISOString() });
+  }
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -325,8 +335,33 @@ export async function getDietaryOptions() {
     return null
   }
 
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CACHE] ✅ getDietaryOptions completed', { count: data?.length, timestamp: new Date().toISOString() });
+  }
   return data
-}
+});
+
+export const getCuisines = cache(async () => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CACHE] 🔄 getCuisines called - fetching from database', { timestamp: new Date().toISOString() });
+  }
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('cuisines')
+    .select('id, name, description')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching cuisines:', error)
+    return null
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[CACHE] ✅ getCuisines completed', { count: data?.length, timestamp: new Date().toISOString() });
+  }
+  return data
+});
 
 export async function uploadRestaurantImage(file: File): Promise<{ url?: string, error?: string }> {
   const supabase = await createClient();
