@@ -625,7 +625,7 @@ function SearchInputContent({
                 setSelectedTags(newTags);
               }
             }}
-            placeholder={placeholder}
+            placeholder={selectedTags.length > 0 ? '' : placeholder}
             activeTagIndex={activeTagIndex}
             setActiveTagIndex={setActiveTagIndex}
             className={cn(

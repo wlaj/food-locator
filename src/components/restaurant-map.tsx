@@ -167,16 +167,18 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
       // Create custom restaurant pin icon with cuisine-specific emoji
       const createCustomIcon = (isAward: boolean, cuisine: string | null) => {
         const cuisineEmoji = getCuisineIcon(cuisine);
+        const isDefaultIcon = cuisineEmoji === '🍽️';
+        const markerColor = isAward ? '#fbbf24' : (isDefaultIcon ? '#374151' : '#3b82f6');
         
         return new DivIcon({
           html: `
             <div class="custom-marker ${isAward ? 'award-marker' : ''}">
               <div class="marker-inner">
-                <svg width="40" height="50" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="70" height="87" viewBox="0 0 70 87" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <!-- Map pin background -->
-                  <path d="M20 2C14.48 2 10 6.48 10 12c0 9 10 32 10 32s10-23 10-32c0-5.52-4.48-10-10-10z" fill="${isAward ? '#fbbf24' : '#3b82f6'}" stroke="white" stroke-width="2"/>
+                  <path d="M35 5C25.6 5 18 12.6 18 22c0 15.75 17 56 17 56s17-40.25 17-56c0-9.4-7.6-17-17-17z" fill="${markerColor}" stroke="white" stroke-width="3"/>
                   <!-- White circle background for icon -->
-                  <circle cx="20" cy="12" r="8" fill="white"/>
+                  <circle cx="35" cy="22" r="14" fill="white"/>
                 </svg>
                 <div class="cuisine-icon-overlay">
                   ${isAward ? '⭐' : cuisineEmoji}
@@ -194,29 +196,29 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
               }
               .cuisine-icon-overlay {
                 position: absolute;
-                top: 4px;
+                top: 8px;
                 left: 50%;
                 transform: translateX(-50%);
-                font-size: 16px;
+                font-size: 30px;
                 line-height: 1;
                 pointer-events: none;
                 z-index: 10;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 16px;
-                height: 16px;
+                width: 30px;
+                height: 30px;
               }
               .marker-shadow {
                 position: absolute;
-                top: 45px;
+                top: 78px;
                 left: 50%;
                 transform: translateX(-50%);
-                width: 12px;
-                height: 6px;
+                width: 24px;
+                height: 12px;
                 background: rgba(0,0,0,0.3);
                 border-radius: 50%;
-                filter: blur(2px);
+                filter: blur(3px);
               }
               .award-marker svg path {
                 fill: #fbbf24;
@@ -228,9 +230,9 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
             </style>
           `,
           className: 'custom-marker-container',
-          iconSize: [40, 50],
-          iconAnchor: [20, 50],
-          popupAnchor: [0, -50]
+          iconSize: [70, 87],
+          iconAnchor: [35, 87],
+          popupAnchor: [0, -87]
         });
       }
 
