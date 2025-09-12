@@ -25,17 +25,6 @@ export default async function NavbarAuth() {
     )
   }
 
-  // If user is anonymous, show different CTA
-  if (user.is_anonymous === true) {
-    return (
-      <div className="flex items-center gap-2">
-        <Button asChild variant='secondary'>
-          <Link href="/signup">Create Account</Link>
-        </Button>
-      </div>
-    )
-  }
-
   const initials = user.user_metadata?.full_name
     ?.split(' ')
     .map((n: string) => n[0])

@@ -4,19 +4,12 @@ import ToastHandler from '@/components/toast-handler'
 import { Suspense } from 'react'
 import { SignupForm } from '@/components/signup-form'
 
-interface SignupPageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default async function SignupPage({ searchParams }: SignupPageProps) {
+export default async function SignupPage() {
   const user = await getUser()
   
-  // Allow anonymous users to access signup page to create a proper account
-  if (user && user.is_anonymous !== true) {
+  if (user) {
     redirect('/dashboard')
   }
-
-  const message = typeof searchParams.message === 'string' ? searchParams.message : null
 
   return (
     <>
@@ -24,15 +17,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         <ToastHandler />
       </Suspense>
       <div className="flex min-h-screen w-full mt-18 items-center justify-center px-4">
-        <div className="w-full max-w-md space-y-4">
-          {message && (
-            <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800 border border-blue-200">
-              <p className="font-medium">Account Required</p>
-              <p>{message}</p>
-            </div>
-          )}
-          <SignupForm />
-        </div>
+        <SignupForm />
       </div>
     </>
   )
