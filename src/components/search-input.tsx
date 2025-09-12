@@ -74,7 +74,6 @@ function SearchInputContent({
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = React.useState(false);
   const [userSearchTerm, setUserSearchTerm] = React.useState("");
-  const [isUserTyping, setIsUserTyping] = React.useState(false);
   // New state for tags and hashtag functionality
   const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(
@@ -85,21 +84,21 @@ function SearchInputContent({
   const [isLoadingSearchOptions, setIsLoadingSearchOptions] =
     React.useState(false);
   const [hashtagSearchTerm, setHashtagSearchTerm] = React.useState("");
-  const [isHashtagTyping, setIsHashtagTyping] = React.useState(false);
   const supabase = createClient();
-  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const userDebounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const hashtagDebounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Fetch cuisines and dietary options for hashtag search
   const fetchSearchOptions = React.useCallback(
     (query: string) => {
       // Clear any existing timeout
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (hashtagDebounceTimerRef.current) {
+        clearTimeout(hashtagDebounceTimerRef.current);
+        hashtagDebounceTimerRef.current = null;
       }
 
       // Set a new timeout
-      debounceTimerRef.current = setTimeout(async () => {
+      hashtagDebounceTimerRef.current = setTimeout(async () => {
         setIsLoadingSearchOptions(true);
         try {
           // Fetch both cuisines and dietary options
@@ -143,13 +142,13 @@ function SearchInputContent({
   const fetchUsers = React.useCallback(
     (query: string) => {
       // Clear any existing timeout
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (userDebounceTimerRef.current) {
+        clearTimeout(userDebounceTimerRef.current);
+        userDebounceTimerRef.current = null;
       }
 
       // Set a new timeout
-      debounceTimerRef.current = setTimeout(async () => {
+      userDebounceTimerRef.current = setTimeout(async () => {
         setIsLoadingUsers(true);
         try {
           // Query the users_with_usernames view which gives us all users who have usernames
@@ -172,12 +171,14 @@ function SearchInputContent({
             console.error("Error fetching users:", error);
             setUsers([]);
           } else {
-            // Map the data to match our User type
-            const users = (data || []).map((item) => ({
-              id: item.user_id,
-              email: item.email,
-              username: item.username,
-            }));
+            // Map the data to match our User type, with null checks
+            const users = (data || [])
+              .filter(item => item && item.user_id && item.username)
+              .map((item) => ({
+                id: item.user_id,
+                email: item.email || '',
+                username: item.username,
+              }));
             setUsers(users);
           }
         } catch (error) {
@@ -191,12 +192,16 @@ function SearchInputContent({
     [supabase]
   );
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   React.useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (userDebounceTimerRef.current) {
+        clearTimeout(userDebounceTimerRef.current);
+        userDebounceTimerRef.current = null;
+      }
+      if (hashtagDebounceTimerRef.current) {
+        clearTimeout(hashtagDebounceTimerRef.current);
+        hashtagDebounceTimerRef.current = null;
       }
     };
   }, []);
@@ -238,14 +243,8 @@ function SearchInputContent({
     }
   }, [searchParams, pathname, locations]);
 
-  // Handle user search when @ is typed (only when user is actively typing)
+  // Handle user search when @ is typed
   React.useEffect(() => {
-    // Only show dropdown if user is actively typing
-    if (!isUserTyping) {
-      setShowUserDropdown(false);
-      return;
-    }
-
     const query = searchQuery.trim();
     const atIndex = query.lastIndexOf("@");
 
@@ -270,16 +269,10 @@ function SearchInputContent({
       setShowUserDropdown(false);
       setUsers([]);
     }
-  }, [searchQuery, fetchUsers, isUserTyping]);
+  }, [searchQuery, fetchUsers]);
 
-  // Handle hashtag search when # is typed (only when user is actively typing)
+  // Handle hashtag search when # is typed
   React.useEffect(() => {
-    // Only show dropdown if user is actively typing
-    if (!isHashtagTyping) {
-      setShowHashtagDropdown(false);
-      return;
-    }
-
     const query = searchQuery.trim();
     const hashIndex = query.lastIndexOf("#");
 
@@ -304,7 +297,7 @@ function SearchInputContent({
       setShowHashtagDropdown(false);
       setSearchOptions([]);
     }
-  }, [searchQuery, fetchSearchOptions, isHashtagTyping]);
+  }, [searchQuery, fetchSearchOptions]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -409,39 +402,23 @@ function SearchInputContent({
     if (e.key === "Escape") {
       setShowUserDropdown(false);
       setShowHashtagDropdown(false);
-      setIsUserTyping(false);
-      setIsHashtagTyping(false);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setIsUserTyping(true);
-    setIsHashtagTyping(true);
-
-    // Reset typing state after user stops typing for 500ms
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(() => {
-      setIsUserTyping(false);
-      setIsHashtagTyping(false);
-    }, 500);
   };
 
   const handleInputFocus = () => {
-    setIsUserTyping(true);
-    setIsHashtagTyping(true);
+    // Focus handler - dropdowns will be managed by searchQuery changes
   };
 
   const handleInputBlur = () => {
     // Delay hiding to allow clicking on dropdown items
     setTimeout(() => {
-      setIsUserTyping(false);
-      setIsHashtagTyping(false);
       setShowUserDropdown(false);
       setShowHashtagDropdown(false);
-    }, 150);
+    }, 200);
   };
 
   const sizeClasses = {
@@ -779,7 +756,7 @@ function SearchInputContent({
       </form>
 
       {/* User Dropdown */}
-      {showUserDropdown && (
+      {showUserDropdown && users && Array.isArray(users) && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
           <Command>
             <CommandList>
@@ -792,21 +769,23 @@ function SearchInputContent({
               ) : (
                 <CommandGroup heading="Users">
                   <ScrollArea className="h-[200px]">
-                    {users.map((user) => (
-                      <CommandItem
-                        key={user.id}
-                        value={user.username}
-                        onSelect={() => handleUserSelect(user)}
-                        className="cursor-pointer"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">@{user.username}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {user.email}
-                          </span>
-                        </div>
-                      </CommandItem>
-                    ))}
+                    {users
+                      .filter(user => user && user.id && user.username)
+                      .map((user) => (
+                        <CommandItem
+                          key={user.id}
+                          value={user.username}
+                          onSelect={() => handleUserSelect(user)}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">@{user.username}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {user.email}
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
                   </ScrollArea>
                 </CommandGroup>
               )}
@@ -816,7 +795,7 @@ function SearchInputContent({
       )}
 
       {/* Hashtag Dropdown */}
-      {showHashtagDropdown && (
+      {showHashtagDropdown && searchOptions && Array.isArray(searchOptions) && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
           <Command>
             <CommandList>
@@ -828,12 +807,13 @@ function SearchInputContent({
                 </CommandEmpty>
               ) : (
                 <>
-                  {searchOptions.filter((option) => option.type === "cuisine")
+                  {searchOptions
+                    .filter((option) => option && option.type === "cuisine")
                     .length > 0 && (
                     <CommandGroup heading="Cuisines">
                       <ScrollArea className="max-h-[100px]">
                         {searchOptions
-                          .filter((option) => option.type === "cuisine")
+                          .filter((option) => option && option.type === "cuisine" && option.id && option.name)
                           .map((option) => (
                             <CommandItem
                               key={option.id}
@@ -856,12 +836,13 @@ function SearchInputContent({
                       </ScrollArea>
                     </CommandGroup>
                   )}
-                  {searchOptions.filter((option) => option.type === "dietary")
+                  {searchOptions
+                    .filter((option) => option && option.type === "dietary")
                     .length > 0 && (
                     <CommandGroup heading="Dietary Options">
                       <ScrollArea className="max-h-[100px]">
                         {searchOptions
-                          .filter((option) => option.type === "dietary")
+                          .filter((option) => option && option.type === "dietary" && option.id && option.name)
                           .map((option) => (
                             <CommandItem
                               key={option.id}
