@@ -110,7 +110,6 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
         if (locationError) {
           console.error('Error fetching locations:', locationError)
         } else if (locationData) {
-          console.log('Fetched locations:', locationData)
           setLocations(locationData.map(l => l.label))
         }
       } catch (error) {

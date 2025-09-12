@@ -171,12 +171,6 @@ export async function searchRestaurants(
     return null;
   }
 
-  if (location && data) {
-    console.log(`Location search: ${location}`);
-    console.log(`Found ${data.length} restaurants matching location`);
-    console.log(data.map(r => ({ name: r.name, location: r.location })));
-  }
-
   return data;
 }
 

@@ -48,8 +48,6 @@ export default function DietaryTagSelector({
     text: option.name,
   }))
 
-  console.log('Available options for autocomplete:', autocompleteData) // Debug log
-
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>Dietary Options</Label>
@@ -60,7 +58,6 @@ export default function DietaryTagSelector({
           id={id}
           tags={selectedTags}
           setTags={(newTags) => {
-            console.log('Tags updated:', newTags) // Debug log
             setSelectedTags(newTags)
           }}
           placeholder={placeholder}

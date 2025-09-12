@@ -1,29 +1,31 @@
-import { getUser } from '@/lib/auth'
-import { signOut } from '@/lib/auth-actions'
-import { Button } from '@/components/ui/button'
-import ProtectedRoute from '@/components/protected-route'
-import ProfileEditDialog from '@/components/profile-edit-dialog'
-import ToastHandler from '@/components/toast-handler'
-import RestaurantTable from '@/components/restaurant-table'
-import { getUserRestaurants } from '@/lib/actions'
-import VotesTable from '@/components/votes-table'
-import { getAllVotes } from '@/lib/vote-actions'
-import { isUserAdmin } from '@/lib/auth-server'
-import { Suspense } from 'react'
+import { getUser } from "@/lib/auth";
+import { signOut } from "@/lib/auth-actions";
+import { Button } from "@/components/ui/button";
+import ProtectedRoute from "@/components/protected-route";
+import ProfileEditDialog from "@/components/profile-edit-dialog";
+import ToastHandler from "@/components/toast-handler";
+import RestaurantTable from "@/components/restaurant-table";
+import { getUserRestaurants } from "@/lib/actions";
+import VotesTable from "@/components/votes-table";
+import { getAllVotes } from "@/lib/vote-actions";
+import { isUserAdmin } from "@/lib/auth-server";
+import { Suspense } from "react";
 
 export default async function DashboardPage() {
-  const user = await getUser()
-  const restaurants = await getUserRestaurants(50) || []
-  
+  const user = await getUser();
+  const restaurants = (await getUserRestaurants(50)) || [];
+
   // Check if user is admin server-side
-  const userIsAdmin = user ? await isUserAdmin(user.id) : false
-  
+  const userIsAdmin = user ? await isUserAdmin(user.id) : false;
+
   // Only fetch votes if user is admin
-  let votes: CommunityVote[] = []
+  let votes: CommunityVote[] = [];
   if (userIsAdmin) {
-    const votesResult = await getAllVotes()
+    const votesResult = await getAllVotes();
     if (votesResult?.success && votesResult.data) {
-      votes = Array.isArray(votesResult.data) ? votesResult.data : [votesResult.data]
+      votes = Array.isArray(votesResult.data)
+        ? votesResult.data
+        : [votesResult.data];
     }
   }
 
@@ -49,38 +51,62 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-
           <div className="space-y-8">
             <RestaurantTable restaurants={restaurants} />
-            
+
             {userIsAdmin && <VotesTable initialVotes={votes} />}
-            
+
             <div className="grid gap-6 md:grid-cols-2">
               <div className="rounded-lg border bg-card p-6">
-                <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                  Profile Information
+                </h2>
                 <div className="space-y-2">
                   {user?.user_metadata?.avatar_url && (
                     <div className="mb-4">
-                      <img 
-                        src={user.user_metadata.avatar_url} 
-                        alt="Profile" 
+                      <img
+                        src={user.user_metadata.avatar_url}
+                        alt="Profile"
                         className="w-16 h-16 rounded-full object-cover"
                       />
                     </div>
                   )}
-                  <p><span className="font-medium">Email:</span> {user?.email}</p>
-                  <p><span className="font-medium">Name:</span> {user?.user_metadata?.full_name || 'Not set'}</p>
-                  <p><span className="font-medium">Username:</span> {user?.user_metadata?.username || 'Not set'}</p>
-                  <p><span className="font-medium">Website:</span> {user?.user_metadata?.website || 'Not set'}</p>
+                  <p>
+                    <span className="font-medium">Email:</span> {user?.email}
+                  </p>
+                  <p>
+                    <span className="font-medium">Name:</span>{" "}
+                    {user?.user_metadata?.full_name || "Not set"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Username:</span>{" "}
+                    {user?.user_metadata?.username || "Not set"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Website:</span>{" "}
+                    {user?.user_metadata?.website || "Not set"}
+                  </p>
                 </div>
               </div>
 
               <div className="rounded-lg border bg-card p-6">
                 <h2 className="text-xl font-semibold mb-4">Account Details</h2>
                 <div className="space-y-2">
-                  <p><span className="font-medium">User ID:</span> {user?.id}</p>
-                  <p><span className="font-medium">Created:</span> {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}</p>
-                  <p><span className="font-medium">Last Sign In:</span> {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Unknown'}</p>
+                  <p>
+                    <span className="font-medium">User ID:</span> {user?.id}
+                  </p>
+                  <p>
+                    <span className="font-medium">Created:</span>{" "}
+                    {user?.created_at
+                      ? new Date(user.created_at).toLocaleDateString()
+                      : "Unknown"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Last Sign In:</span>{" "}
+                    {user?.last_sign_in_at
+                      ? new Date(user.last_sign_in_at).toLocaleDateString()
+                      : "Unknown"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -88,5 +114,5 @@ export default async function DashboardPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

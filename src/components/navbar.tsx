@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getLocations } from "@/lib/actions";
 
 export default async function Navbar() {
-  const locations = await getLocations()
+  const locations = await getLocations();
   return (
     <header className="border-b z-20 fixed top-0 right-0 bg-white w-full">
       {/* Main navbar row */}
@@ -23,14 +23,19 @@ export default async function Navbar() {
         </div>
         {/* Right side */}
         <div className="flex flex-shrink-0 md:flex-1 items-center justify-end gap-1 md:gap-2">
-          <Button asChild variant="ghost" size="sm" className="text-xs md:text-sm px-2 md:px-3">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="text-xs md:text-sm px-2 md:px-3"
+          >
             <Link href="/community">Community</Link>
           </Button>
           <NavbarAuth />
           {/* <ThemeToggle /> */}
         </div>
       </div>
-      
+
       {/* Mobile search row - full width */}
       <div className="sm:hidden px-4 pb-3">
         <NavbarClient locations={locations} />
