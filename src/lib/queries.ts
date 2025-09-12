@@ -5,8 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
 
-// Client-side cached queries for static data that rarely changes
-
 export function useCuisines() {
   return useQuery({
     queryKey: ['cuisines'],

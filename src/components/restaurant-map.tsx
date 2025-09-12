@@ -4,6 +4,95 @@ import { useEffect, useState } from 'react'
 import { ThumbsUp } from "lucide-react";
 import { IconAwardFilled } from "@tabler/icons-react";
 
+// Function to get cuisine-specific emoji/icon
+function getCuisineIcon(cuisine: string | null): string {
+  if (!cuisine) return '🍽️';
+  
+  const cuisineLower = cuisine.toLowerCase();
+  
+  // Comprehensive cuisine to emoji mapping
+  const iconMap: Record<string, string> = {
+    // Asian cuisines
+    'chinese': '🥢',
+    'japanese': '🍣',
+    'sushi': '🍣',
+    'korean': '🍲',
+    'thai': '🌶️',
+    'vietnamese': '🍜',
+    'indian': '🍛',
+    'asian': '🥢',
+    'indonesian': '🍲',
+    'malaysian': '🍲',
+    'filipino': '🍲',
+    
+    // European cuisines
+    'italian': '🍕',
+    'french': '🧀',
+    'spanish': '🥘',
+    'greek': '🥗',
+    'german': '🍖',
+    'british': '🍖',
+    'mediterranean': '🥗',
+    'european': '🍽️',
+    
+    // American cuisines
+    'american': '🍔',
+    'mexican': '🌮',
+    'tex-mex': '🌮',
+    'bbq': '🔥',
+    'burger': '🍔',
+    'fast food': '🍟',
+    'southern': '🔥',
+    
+    // Middle Eastern & African
+    'middle eastern': '🥙',
+    'moroccan': '🍖',
+    'turkish': '🥙',
+    'lebanese': '🥗',
+    'ethiopian': '🌶️',
+    'african': '🍖',
+    
+    // Other categories
+    'vegetarian': '🥗',
+    'vegan': '🥬',
+    'healthy': '🍎',
+    'seafood': '🐟',
+    'steakhouse': '🥩',
+    'bakery': '🍰',
+    'cafe': '☕',
+    'coffee': '☕',
+    'dessert': '🍨',
+    'ice cream': '🍨',
+    'pizza': '🍕',
+    'sandwich': '🥪',
+    'soup': '🍲',
+    'salad': '🥗',
+    'breakfast': '🍳',
+    'brunch': '🍳',
+    'diner': '🍳',
+    'pub': '🍺',
+    'bar': '🍺',
+    'fusion': '🍽️',
+    'international': '🍽️',
+    'fine dining': '🍽️'
+  };
+  
+  // Try exact match first
+  if (iconMap[cuisineLower]) {
+    return iconMap[cuisineLower];
+  }
+  
+  // Try partial matches
+  for (const [key, icon] of Object.entries(iconMap)) {
+    if (cuisineLower.includes(key) || key.includes(cuisineLower)) {
+      return icon;
+    }
+  }
+  
+  // Default icon
+  return '🍽️';
+}
+
 interface RestaurantMapProps {
   restaurants: Restaurant[]
   height?: string
@@ -21,7 +110,7 @@ interface MapComponents {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Popup: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createCustomIcon: (isAward: boolean) => any
+  createCustomIcon: (isAward: boolean, cuisine: string | null) => any
 }
 
 function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
@@ -39,27 +128,111 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
         link.rel = 'stylesheet'
         link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
         document.head.appendChild(link)
+        
+        // Add custom styles for zoom controls
+        const customStyles = document.createElement('style')
+        customStyles.textContent = `
+          .leaflet-control-zoom {
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+          }
+          .leaflet-control-zoom a {
+            background-color: white !important;
+            color: #374151 !important;
+            border: none !important;
+            width: 36px !important;
+            height: 36px !important;
+            line-height: 36px !important;
+            font-size: 20px !important;
+            font-weight: bold !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s ease !important;
+          }
+          .leaflet-control-zoom a:hover {
+            background-color: #f9fafb !important;
+            color: #111827 !important;
+          }
+          .leaflet-control-zoom a:first-child {
+            border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+          }
+        `
+        document.head.appendChild(customStyles)
       }
 
-      // Create custom restaurant pin icon
-      const createCustomIcon = (isAward: boolean) => new DivIcon({
-        html: `
-          <div class="custom-marker ${isAward ? 'award-marker' : ''}">
-            <div class="marker-inner">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="currentColor"/>
-                <circle cx="12" cy="9" r="3" fill="white"/>
-                ${isAward ? '<path d="M12 6l1 2 2 0-1.5 1.5L14 12l-2-1-2 1 0.5-2.5L9 8h2l1-2z" fill="currentColor"/>' : '<circle cx="12" cy="9" r="1.5" fill="currentColor"/>'}
-              </svg>
+      // Create custom restaurant pin icon with cuisine-specific emoji
+      const createCustomIcon = (isAward: boolean, cuisine: string | null) => {
+        const cuisineEmoji = getCuisineIcon(cuisine);
+        
+        return new DivIcon({
+          html: `
+            <div class="custom-marker ${isAward ? 'award-marker' : ''}">
+              <div class="marker-inner">
+                <svg width="40" height="50" viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Map pin background -->
+                  <path d="M20 2C14.48 2 10 6.48 10 12c0 9 10 32 10 32s10-23 10-32c0-5.52-4.48-10-10-10z" fill="${isAward ? '#fbbf24' : '#3b82f6'}" stroke="white" stroke-width="2"/>
+                  <!-- White circle background for icon -->
+                  <circle cx="20" cy="12" r="8" fill="white"/>
+                </svg>
+                <div class="cuisine-icon-overlay">
+                  ${isAward ? '⭐' : cuisineEmoji}
+                </div>
+              </div>
+              <div class="marker-shadow"></div>
             </div>
-            <div class="marker-shadow"></div>
-          </div>
-        `,
-        className: 'custom-marker-container',
-        iconSize: [32, 40],
-        iconAnchor: [16, 40],
-        popupAnchor: [0, -40]
-      })
+            <style>
+              .custom-marker {
+                position: relative;
+                filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+              }
+              .marker-inner {
+                position: relative;
+              }
+              .cuisine-icon-overlay {
+                position: absolute;
+                top: 4px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 16px;
+                line-height: 1;
+                pointer-events: none;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+              }
+              .marker-shadow {
+                position: absolute;
+                top: 45px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 12px;
+                height: 6px;
+                background: rgba(0,0,0,0.3);
+                border-radius: 50%;
+                filter: blur(2px);
+              }
+              .award-marker svg path {
+                fill: #fbbf24;
+              }
+              .custom-marker-container {
+                background: transparent !important;
+                border: none !important;
+              }
+            </style>
+          `,
+          className: 'custom-marker-container',
+          iconSize: [40, 50],
+          iconAnchor: [20, 50],
+          popupAnchor: [0, -50]
+        });
+      }
 
       setMapComponents({ MapContainer, TileLayer, Marker, Popup, createCustomIcon })
     }
@@ -135,7 +308,7 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
             <Marker
               key={restaurant.id}
               position={[restaurant.latitude!, restaurant.longitude!]}
-              icon={createCustomIcon(hasAward)}
+              icon={createCustomIcon(hasAward, restaurant.cuisine)}
             >
               <Popup className="custom-popup" minWidth={280}>
                 <div className="p-2 bg-background">
