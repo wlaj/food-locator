@@ -99,11 +99,11 @@ function SearchInputContent({
 
     // Filter based on search term
     const filteredCuisines = cuisines.filter(c => 
-      c.name.toLowerCase().includes(query)
+      c && c.name && c.name.toLowerCase().includes(query)
     ).slice(0, 5);
     
     const filteredDietary = dietaryOptions.filter(d => 
-      d.name.toLowerCase().includes(query)
+      d && d.name && d.name.toLowerCase().includes(query)
     ).slice(0, 5);
 
     const options: SearchOption[] = [
@@ -116,12 +116,16 @@ function SearchInputContent({
 
   // Filter cached users for dropdown suggestions
   const filteredUsers = React.useMemo(() => {
+    if (users.length === 0) {
+      return []; // Return empty array if no users data yet
+    }
+    
     if (!userSearchTerm.trim()) {
       return users.slice(0, 10); // Return first 10 users when no search term
     }
     
     return users.filter(user => 
-      user.username.toLowerCase().includes(userSearchTerm.toLowerCase())
+      user && user.username && user.username.toLowerCase().includes(userSearchTerm.toLowerCase())
     ).slice(0, 10);
   }, [userSearchTerm, users]);
 
@@ -675,7 +679,9 @@ function SearchInputContent({
               ) : (
                 <CommandGroup heading="Users">
                   <ScrollArea className="h-[200px]">
-                    {filteredUsers.map((user) => (
+                    {filteredUsers
+                      .filter(user => user && user.id && user.username)
+                      .map((user) => (
                       <CommandItem
                         key={user.id}
                         value={user.username}

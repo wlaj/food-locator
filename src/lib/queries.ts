@@ -79,7 +79,7 @@ export function useUsers() {
         id: item.user_id,
         email: item.email || '',
         username: item.username,
-      })) || [];
+      })).filter(user => user.id && user.username) || [];
 
       if (process.env.NODE_ENV === 'development') {
         console.log('[CLIENT CACHE] ✅ useUsers completed', { count: users.length, timestamp: new Date().toISOString() });
