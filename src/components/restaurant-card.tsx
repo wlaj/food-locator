@@ -1,9 +1,8 @@
-import { ThumbsUp } from "lucide-react";
+import { ArrowRightIcon, ThumbsUp } from "lucide-react";
 import React, { useState, useTransition } from "react";
 import { likeRestaurant } from "@/lib/actions";
-import {
-  IconAwardFilled,
-} from "@tabler/icons-react";
+import { IconAwardFilled } from "@tabler/icons-react";
+import { createGoogleMapsSearchUrl } from "@/lib/utils/maps";
 
 const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
   const [likes, setLikes] = useState(restaurant.likes || 0);
@@ -46,7 +45,7 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
 
   return (
     <div className="group flex flex-col justify-between">
-      <a href={restaurant.name || ""} className="flex flex-col justify-between">
+      <a href={createGoogleMapsSearchUrl(restaurant.name || "")} target="_blank" rel="noopener noreferrer" className="flex flex-col justify-between">
         <div>
           <div className="aspect-3/2 flex overflow-clip rounded-xl relative">
             <div className="flex-1">
@@ -69,24 +68,25 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
                     <IconAwardFilled className="size-7" />
                   </div>
                 )}
-
-                {/* Likes Button Overlay */}
-                <button
-                  onClick={handleLike}
-                  disabled={isLiked || isPending}
-                  className={`absolute bottom-2 right-2 z-10 flex items-center gap-1 px-3 py-1 rounded-full shadow-lg transition-all duration-200 ${
-                    isLiked
-                      ? "bg-primary text-foreground scale-110"
-                      : "bg-white/90 hover:bg-white hover:scale-105 text-neutral-700 backdrop-blur-sm"
-                  } ${isPending ? "opacity-70 cursor-not-allowed" : ""}`}
-                >
-                  <ThumbsUp
-                    className={`size-4 transition-colors ${
-                      isLiked ? "fill-current" : ""
-                    } ${isPending ? "animate-pulse" : ""}`}
-                  />
-                  <span className="text-xs font-medium">{likes}</span>
-                </button>
+                <div>
+                  {/* Likes Button Overlay */}
+                  <button
+                    onClick={handleLike}
+                    disabled={isLiked || isPending}
+                    className={`absolute bottom-2 right-2 z-10 flex items-center gap-1 px-3 py-1 rounded-full shadow-lg transition-all duration-200 ${
+                      isLiked
+                        ? "bg-primary text-foreground scale-110"
+                        : "bg-white/90 hover:bg-white hover:scale-105 text-neutral-700 backdrop-blur-sm"
+                    } ${isPending ? "opacity-70 cursor-not-allowed" : ""}`}
+                  >
+                    <ThumbsUp
+                      className={`size-4 transition-colors ${
+                        isLiked ? "fill-current" : ""
+                      } ${isPending ? "animate-pulse" : ""}`}
+                    />
+                    <span className="text-xs font-medium">{likes}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -96,6 +96,10 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
         </div>
         <div className="text-muted-foreground mb-8 line-clamp-2 text-sm md:mb-12 md:text-base lg:mb-9">
           {restaurant.cuisine}
+        </div>
+        <div className="flex items-center text-sm">
+          Navigate{" "}
+          <ArrowRightIcon className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
         </div>
       </a>
     </div>
