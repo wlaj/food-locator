@@ -23,6 +23,7 @@ import { IconLocation } from "@tabler/icons-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/types/supabase";
 import { TagInput, type Tag } from "emblor";
+import { getUserPreferences } from "@/lib/auth-actions";
 
 type Location = Tables<"locations">;
 
@@ -88,18 +89,20 @@ function SearchInputContent({
   const [isHashtagTyping, setIsHashtagTyping] = React.useState(false);
   const supabase = createClient();
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const fetchUsersTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const fetchOptionsTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Fetch cuisines and dietary options for hashtag search
   const fetchSearchOptions = React.useCallback(
     (query: string) => {
       // Clear any existing timeout
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (fetchOptionsTimerRef.current) {
+        clearTimeout(fetchOptionsTimerRef.current);
+        fetchOptionsTimerRef.current = null;
       }
 
       // Set a new timeout
-      debounceTimerRef.current = setTimeout(async () => {
+      fetchOptionsTimerRef.current = setTimeout(async () => {
         setIsLoadingSearchOptions(true);
         try {
           // Fetch both cuisines and dietary options
@@ -143,13 +146,13 @@ function SearchInputContent({
   const fetchUsers = React.useCallback(
     (query: string) => {
       // Clear any existing timeout
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
+      if (fetchUsersTimerRef.current) {
+        clearTimeout(fetchUsersTimerRef.current);
+        fetchUsersTimerRef.current = null;
       }
 
       // Set a new timeout
-      debounceTimerRef.current = setTimeout(async () => {
+      fetchUsersTimerRef.current = setTimeout(async () => {
         setIsLoadingUsers(true);
         try {
           // Query the users_with_usernames view which gives us all users who have usernames
@@ -191,12 +194,94 @@ function SearchInputContent({
     [supabase]
   );
 
-  // Cleanup timeout on unmount
+  // Load user preferences as default tags (only once on mount)
+  const [preferencesLoaded, setPreferencesLoaded] = React.useState(false);
+  const [preferencesTagsSet, setPreferencesTagsSet] = React.useState(false);
+  
+  React.useEffect(() => {
+    async function loadUserPreferenceTags() {
+      if (preferencesLoaded || pathname === '/search') return;
+      
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const preferences = await getUserPreferences();
+          if (preferences) {
+            const preferenceTags: Tag[] = [];
+            
+            // Add dietary options as tags
+            if (preferences.dietary_options && preferences.dietary_options.length > 0) {
+              preferences.dietary_options.forEach((dietary: string, index: number) => {
+                // Normalize dietary option - handle both underscore and hyphen formats
+                const normalizedDietary = dietary.replace(/_/g, '-');
+                preferenceTags.push({
+                  id: `dietary-${index}`,
+                  text: `${normalizedDietary} ⭐` // Star indicates it's a preference
+                });
+              });
+            }
+            
+            // Add spice level as tag if not mild
+            if (preferences.spice_level && preferences.spice_level !== 'mild') {
+              const spiceLevelLabels: Record<string, string> = {
+                'medium': 'medium spice',
+                'hot': 'hot spice', 
+                'very_hot': 'very hot spice'
+              };
+              const spiceLabel = spiceLevelLabels[preferences.spice_level] || preferences.spice_level;
+              preferenceTags.push({
+                id: 'spice-level',
+                text: `${spiceLabel} ⭐` // Star indicates it's a preference
+              });
+            }
+            
+            // Only update tags if there are no current tags and no URL tags
+            const urlTags = searchParams.get("tags");
+            if (!urlTags && selectedTags.length === 0 && preferenceTags.length > 0) {
+              setSelectedTags(preferenceTags);
+              setPreferencesTagsSet(true);
+            }
+            
+            // Auto-select user's preferred location if no location is already selected
+            if (preferences.location && selectedLocation === "amsterdam") {
+              const matchingLocation = locations.find(
+                (loc) => loc.value === preferences.location || loc.label === preferences.location
+              );
+              if (matchingLocation) {
+                setSelectedLocation(matchingLocation.value);
+              }
+            }
+          }
+        }
+        setPreferencesLoaded(true);
+      } catch (error) {
+        console.error('Failed to load user preference tags:', error);
+        setPreferencesLoaded(true);
+      }
+    }
+    
+    // Only load if we have locations data and haven't loaded yet
+    if (locations.length > 0 && !preferencesLoaded) {
+      loadUserPreferenceTags();
+    }
+  }, [locations, preferencesLoaded, pathname, searchParams, selectedTags.length, selectedLocation, preferencesTagsSet]);
+
+  // Cleanup timeouts on unmount
   React.useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
+      }
+      if (fetchUsersTimerRef.current) {
+        clearTimeout(fetchUsersTimerRef.current);
+        fetchUsersTimerRef.current = null;
+      }
+      if (fetchOptionsTimerRef.current) {
+        clearTimeout(fetchOptionsTimerRef.current);
+        fetchOptionsTimerRef.current = null;
       }
     };
   }, []);
@@ -222,8 +307,8 @@ function SearchInputContent({
         text: tagName.trim(),
       }));
       setSelectedTags(tags);
-    } else if (pathname !== "/search") {
-      // Clear tags if not on search page
+    } else if (pathname !== "/search" && preferencesLoaded && !preferencesTagsSet) {
+      // Clear tags if not on search page (but only after preferences have loaded and if we haven't set preference tags)
       setSelectedTags([]);
     }
 
@@ -236,16 +321,10 @@ function SearchInputContent({
         setSelectedLocation(matchingLocation.value);
       }
     }
-  }, [searchParams, pathname, locations]);
+  }, [searchParams, pathname, locations, preferencesLoaded, preferencesTagsSet]);
 
-  // Handle user search when @ is typed (only when user is actively typing)
+  // Handle user search when @ is typed
   React.useEffect(() => {
-    // Only show dropdown if user is actively typing
-    if (!isUserTyping) {
-      setShowUserDropdown(false);
-      return;
-    }
-
     const query = searchQuery.trim();
     const atIndex = query.lastIndexOf("@");
 
@@ -270,16 +349,10 @@ function SearchInputContent({
       setShowUserDropdown(false);
       setUsers([]);
     }
-  }, [searchQuery, fetchUsers, isUserTyping]);
+  }, [searchQuery, fetchUsers]);
 
-  // Handle hashtag search when # is typed (only when user is actively typing)
+  // Handle hashtag search when # is typed
   React.useEffect(() => {
-    // Only show dropdown if user is actively typing
-    if (!isHashtagTyping) {
-      setShowHashtagDropdown(false);
-      return;
-    }
-
     const query = searchQuery.trim();
     const hashIndex = query.lastIndexOf("#");
 
@@ -304,7 +377,7 @@ function SearchInputContent({
       setShowHashtagDropdown(false);
       setSearchOptions([]);
     }
-  }, [searchQuery, fetchSearchOptions, isHashtagTyping]);
+  }, [searchQuery, fetchSearchOptions]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -322,7 +395,7 @@ function SearchInputContent({
       .filter((tagName) => !existingTagNames.includes(tagName));
 
     const allTagNames = [
-      ...selectedTags.map((tag) => tag.text),
+      ...selectedTags.map((tag) => tag.text.replace(' ⭐', '')), // Remove star from preference tags
       ...newTagsFromQuery,
     ];
 
@@ -419,14 +492,14 @@ function SearchInputContent({
     setIsUserTyping(true);
     setIsHashtagTyping(true);
 
-    // Reset typing state after user stops typing for 500ms
+    // Reset typing state after user stops typing for 1 second
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     debounceTimerRef.current = setTimeout(() => {
       setIsUserTyping(false);
       setIsHashtagTyping(false);
-    }, 500);
+    }, 1000);
   };
 
   const handleInputFocus = () => {
@@ -439,9 +512,18 @@ function SearchInputContent({
     setTimeout(() => {
       setIsUserTyping(false);
       setIsHashtagTyping(false);
-      setShowUserDropdown(false);
-      setShowHashtagDropdown(false);
-    }, 150);
+      // Only hide dropdowns if user isn't focused on them
+      const query = searchQuery.trim();
+      const hasAt = query.lastIndexOf("@") !== -1;
+      const hasHash = query.lastIndexOf("#") !== -1;
+      
+      if (!hasAt) {
+        setShowUserDropdown(false);
+      }
+      if (!hasHash) {
+        setShowHashtagDropdown(false);
+      }
+    }, 200);
   };
 
   const sizeClasses = {
@@ -738,7 +820,7 @@ function SearchInputContent({
                 setSelectedTags(newTags);
               }
             }}
-            placeholder={placeholder}
+            placeholder={selectedTags.length > 0 ? '' : placeholder}
             activeTagIndex={activeTagIndex}
             setActiveTagIndex={setActiveTagIndex}
             className={cn(
@@ -755,7 +837,7 @@ function SearchInputContent({
               input:
                 "w-full min-w-[80px] shadow-none px-2 border-0 focus:outline-none focus:ring-0",
               tag: {
-                body: "h-6 relative bg-primary/10 text-primary border-0 hover:bg-primary/20 rounded-md font-medium text-xs px-2 pe-6",
+                body: "h-6 relative bg-primary/10 text-primary border-0 hover:bg-primary/20 rounded-md font-medium text-xs px-2 pe-6 data-[is-preference='true']:bg-green-100 data-[is-preference='true']:text-green-700 data-[is-preference='true']:hover:bg-green-200",
                 closeButton:
                   "absolute -inset-y-px -end-px p-0 rounded-e-md flex size-6 transition-colors outline-none text-primary/70 hover:text-primary items-center justify-center",
               },
@@ -792,7 +874,7 @@ function SearchInputContent({
               ) : (
                 <CommandGroup heading="Users">
                   <ScrollArea className="h-[200px]">
-                    {users.map((user) => (
+                    {users.filter(user => user && user.id && user.username).map((user) => (
                       <CommandItem
                         key={user.id}
                         value={user.username}
@@ -828,12 +910,12 @@ function SearchInputContent({
                 </CommandEmpty>
               ) : (
                 <>
-                  {searchOptions.filter((option) => option.type === "cuisine")
+                  {searchOptions.filter((option) => option && option.type === "cuisine" && option.id && option.name)
                     .length > 0 && (
                     <CommandGroup heading="Cuisines">
                       <ScrollArea className="max-h-[100px]">
                         {searchOptions
-                          .filter((option) => option.type === "cuisine")
+                          .filter((option) => option && option.type === "cuisine" && option.id && option.name)
                           .map((option) => (
                             <CommandItem
                               key={option.id}
@@ -856,12 +938,12 @@ function SearchInputContent({
                       </ScrollArea>
                     </CommandGroup>
                   )}
-                  {searchOptions.filter((option) => option.type === "dietary")
+                  {searchOptions.filter((option) => option && option.type === "dietary" && option.id && option.name)
                     .length > 0 && (
                     <CommandGroup heading="Dietary Options">
                       <ScrollArea className="max-h-[100px]">
                         {searchOptions
-                          .filter((option) => option.type === "dietary")
+                          .filter((option) => option && option.type === "dietary" && option.id && option.name)
                           .map((option) => (
                             <CommandItem
                               key={option.id}

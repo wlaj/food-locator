@@ -13,3 +13,11 @@ export async function getUser() {
     return null
   }
 }
+
+export async function isAnonymousUser() {
+  const user = await getUser()
+  if (!user) return false
+  
+  // Check if the user is anonymous by looking at the is_anonymous claim
+  return user.is_anonymous === true
+}

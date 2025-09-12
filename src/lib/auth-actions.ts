@@ -52,6 +52,61 @@ export async function signOut() {
   redirect('/login')
 }
 
+export async function updateUserPreferences(preferences: {
+  dietary_options: string[]
+  location: string
+  spice_level: string
+}) {
+  const supabase = await createClient()
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    throw new Error('Authentication required to save preferences')
+  }
+
+  // Upsert user preferences
+  const { error } = await supabase
+    .from('user_preferences')
+    .upsert({
+      user_id: user.id,
+      dietary_options: preferences.dietary_options,
+      location: preferences.location,
+      spice_level: preferences.spice_level,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id'
+    })
+
+  if (error) {
+    console.error('Error updating preferences:', error)
+    throw new Error('Failed to update preferences')
+  }
+  
+  revalidatePath('/', 'layout')
+}
+
+export async function getUserPreferences() {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('user_preferences')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
+    console.error('Error fetching preferences:', error)
+    return null
+  }
+
+  return data
+}
+
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
   
