@@ -36,9 +36,15 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     isValid: boolean | null;
     error: string | null;
   }>({ isChecking: false, isValid: null, error: null })
+  const [addressValidation, setAddressValidation] = useState<{
+    isChecking: boolean;
+    coordinates: { lat: number; lng: number } | null;
+    error: string | null;
+  }>({ isChecking: false, coordinates: null, error: null })
   const ratingId = useId()
   const nameRef = useRef<HTMLInputElement>(null)
   const nameTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   const isEditing = !!restaurant
 
@@ -70,6 +76,48 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     }
   }, [isEditing, restaurant?.id])
 
+  const debouncedAddressCheck = useCallback(async (address: string) => {
+    if (!address.trim()) {
+      setAddressValidation({ isChecking: false, coordinates: null, error: null })
+      return
+    }
+
+    setAddressValidation({ isChecking: true, coordinates: null, error: null })
+    
+    try {
+      const encodedAddress = encodeURIComponent(address)
+      const response = await fetch(`/api/geocode?q=${encodedAddress}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch coordinates')
+      }
+      
+      const data = await response.json()
+      
+      if (data && data.results && data.results.length > 0 && data.results[0].geometry) {
+        const { lat, lng } = data.results[0].geometry
+        setAddressValidation({ 
+          isChecking: false, 
+          coordinates: { lat: parseFloat(lat), lng: parseFloat(lng) }, 
+          error: null 
+        })
+      } else {
+        setAddressValidation({ 
+          isChecking: false, 
+          coordinates: null, 
+          error: 'Could not find coordinates for this address' 
+        })
+      }
+    } catch (error) {
+      console.error('Address validation error:', error)
+      setAddressValidation({ 
+        isChecking: false, 
+        coordinates: null, 
+        error: 'Failed to validate address' 
+      })
+    }
+  }, [])
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value
     
@@ -85,6 +133,23 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     nameTimeoutRef.current = setTimeout(() => {
       debouncedNameCheck(name)
     }, 500)
+  }
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const address = e.target.value
+    
+    if (addressTimeoutRef.current) {
+      clearTimeout(addressTimeoutRef.current)
+    }
+    
+    if (!address.trim()) {
+      setAddressValidation({ isChecking: false, coordinates: null, error: null })
+      return
+    }
+    
+    addressTimeoutRef.current = setTimeout(() => {
+      debouncedAddressCheck(address)
+    }, 1000)
   }
 
   useEffect(() => {
@@ -126,6 +191,9 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
       if (nameTimeoutRef.current) {
         clearTimeout(nameTimeoutRef.current)
       }
+      if (addressTimeoutRef.current) {
+        clearTimeout(addressTimeoutRef.current)
+      }
     }
   }, [])
 
@@ -141,6 +209,18 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
     if (nameValidation.isChecking) {
       toast.error('Please wait for name validation to complete')
       return
+    }
+    
+    // If address validation is still in progress, wait a bit
+    if (addressValidation.isChecking) {
+      toast.error('Please wait for address validation to complete')
+      return
+    }
+    
+    // Add coordinates to form data if available from address validation
+    if (addressValidation.coordinates) {
+      formData.set('latitude', addressValidation.coordinates.lat.toString())
+      formData.set('longitude', addressValidation.coordinates.lng.toString())
     }
     
     setLoading(true)
@@ -310,39 +390,44 @@ export default function RestaurantDialog({ restaurant, trigger }: RestaurantDial
             </div>
             
             <div className="space-y-2">
-              <Label>Coordinates (Optional)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label htmlFor="latitude" className="text-xs text-muted-foreground">Latitude</Label>
-                  <Input
-                    id="latitude"
-                    name="latitude"
-                    type="number"
-                    step="0.000001"
-                    min="0"
-                    max="90"
-                    placeholder="52.370216"
-                    defaultValue={restaurant?.latitude?.toString() || ''}
-                    title="Enter latitude (0-90)"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="longitude" className="text-xs text-muted-foreground">Longitude</Label>
-                  <Input
-                    id="longitude"
-                    name="longitude"
-                    type="number"
-                    step="0.000001"
-                    min="-180"
-                    max="180"
-                    placeholder="4.895168"
-                    defaultValue={restaurant?.longitude?.toString() || ''}
-                    title="Enter longitude (-180 to 180)"
-                  />
+              <Label htmlFor="address">Address (Optional)</Label>
+              <div className="relative">
+                <Input
+                  id="address"
+                  name="address"
+                  className={`peer pe-9 ${addressValidation.error ? 'aria-invalid' : ''}`}
+                  placeholder="Ijburglaan 500, Amsterdam"
+                  onChange={handleAddressChange}
+                  aria-invalid={!!addressValidation.error}
+                />
+                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 peer-disabled:opacity-50">
+                  {addressValidation.isChecking && (
+                    <LoaderCircleIcon size={16} className="animate-spin" aria-hidden="true" />
+                  )}
+                  {!addressValidation.isChecking && addressValidation.coordinates && (
+                    <CheckIcon size={16} className="text-green-500" aria-hidden="true" />
+                  )}
+                  {!addressValidation.isChecking && addressValidation.error && (
+                    <TriangleAlertIcon size={16} className="text-destructive" aria-hidden="true" />
+                  )}
                 </div>
               </div>
+              {addressValidation.error && (
+                <p
+                  className="text-destructive mt-2 text-xs"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {addressValidation.error}
+                </p>
+              )}
+              {addressValidation.coordinates && (
+                <p className="text-xs text-muted-foreground">
+                  Coordinates found: {addressValidation.coordinates.lat.toFixed(6)}, {addressValidation.coordinates.lng.toFixed(6)}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
-                Coordinates can help with location-based searches. Leave empty if unknown.
+                Enter an address or the restaurant&apos;s name to automatically generate coordinates for location-based searches.
               </p>
             </div>
             
