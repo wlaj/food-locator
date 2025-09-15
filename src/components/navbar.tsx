@@ -18,7 +18,7 @@ export default async function Navbar() {
           </Link>
         </div>
         {/* Middle area - desktop only */}
-        <div className="hidden sm:block flex-1 md:flex-none">
+        <div className="hidden sm:block flex-1">
           <NavbarClient locations={locations} />
         </div>
         {/* Right side */}

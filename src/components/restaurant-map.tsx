@@ -129,9 +129,16 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
         link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
         document.head.appendChild(link)
         
-        // Add custom styles for zoom controls
+        // Add custom styles for zoom controls and z-index management
         const customStyles = document.createElement('style')
         customStyles.textContent = `
+          .leaflet-control-container,
+          .leaflet-control-zoom,
+          .leaflet-popup-pane,
+          .leaflet-marker-pane,
+          .leaflet-tile-pane {
+            z-index: 10 !important;
+          }
           .leaflet-control-zoom {
             border-radius: 8px !important;
             overflow: hidden !important;
@@ -288,14 +295,14 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
     : [52.3676, 4.9041] // Amsterdam default
 
   return (
-    <div className={className} style={{ height }}>
+    <div className={`${className} relative z-10`} style={{ height }}>
       <MapContainer
         bounds={validRestaurants.length > 1 ? bounds : undefined}
         center={validRestaurants.length === 1 ? center : undefined}
         zoom={validRestaurants.length === 1 ? 15 : 10}
         scrollWheelZoom={true}
         className="h-full w-full rounded-xl border border-border/50"
-        style={{ borderRadius: '12px' }}
+        style={{ borderRadius: '12px', zIndex: 10 }}
       >
         <TileLayer
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'

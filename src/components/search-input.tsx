@@ -650,13 +650,13 @@ function SearchInputContent({
               onBlur: handleInputBlur,
             }}
           />
-          <button
+          <Button
             type="submit"
-            className="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute inset-y-0.5 right-0.5 flex items-center justify-center w-10 hover:opacity-90 transition-colors"
             aria-label="Search"
           >
             <SearchIcon className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </form>
 
