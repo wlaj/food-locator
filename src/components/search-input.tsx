@@ -327,9 +327,9 @@ function SearchInputContent({
   };
 
   const sizeClasses = {
-    sm: "h-8 text-sm",
-    md: "h-10",
-    lg: "h-12 text-lg",
+    sm: "min-h-8 text-sm",
+    md: "min-h-10",
+    lg: "min-h-12 text-lg",
   };
 
   return (
@@ -630,14 +630,15 @@ function SearchInputContent({
             )}
             styleClasses={{
               inlineTagsContainer: cn(
-                "border-0 shadow-none focus-within:ring-0 p-1 gap-1 pl-4",
+                "border-0 shadow-none focus-within:ring-0 p-1 gap-1 pl-4 flex-wrap",
                 "md:rounded-l-none bg-background", // Only remove left border radius on desktop
+                selectedTags.length > 2 ? "items-start" : "items-center", // Use items-start only when many tags
                 sizeClasses[size]
               ),
               input:
-                "w-full min-w-[80px] shadow-none px-2 border-0 focus:outline-none focus:ring-0",
+                "w-full min-w-[80px] shadow-none px-2 py-1 border-0 focus:outline-none focus:ring-0",
               tag: {
-                body: "h-6 relative bg-primary/10 text-primary border-0 hover:bg-primary/20 rounded-md font-medium text-xs px-2 pe-6",
+                body: "h-6 relative bg-primary/10 text-primary border-0 hover:bg-primary/20 rounded-md font-medium text-xs px-2 pe-6 flex-shrink-0 my-0.5",
                 closeButton:
                   "absolute -inset-y-px -end-px p-0 rounded-e-md flex size-6 transition-colors outline-none text-primary/70 hover:text-primary items-center justify-center",
               },
@@ -652,7 +653,10 @@ function SearchInputContent({
           />
           <Button
             type="submit"
-            className="absolute inset-y-0.5 right-0.5 flex items-center justify-center w-10 hover:opacity-90 transition-colors"
+            className={cn(
+              "absolute top-0.5 right-0.5 bottom-0.5 flex justify-center w-10 hover:opacity-90 transition-colors",
+              selectedTags.length > 2 ? "items-start pt-2" : "items-center"
+            )}
             aria-label="Search"
           >
             <SearchIcon className="h-4 w-4" />

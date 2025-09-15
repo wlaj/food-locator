@@ -23,7 +23,7 @@ export default function NavbarClient({
       {/* Desktop version */}
       <div
         className={cn(
-          "hidden sm:block mx-auto max-w-4xl transition-all duration-300 ease-in-out",
+          "hidden sm:block mx-auto max-w-xl transition-all duration-300 ease-in-out",
           !isAtTop || pathname !== "/"
             ? "opacity-100 scale-100"
             : "opacity-0 scale-95 pointer-events-none"

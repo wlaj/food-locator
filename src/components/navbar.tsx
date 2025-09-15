@@ -12,17 +12,17 @@ export default async function Navbar() {
       {/* Main navbar row */}
       <div className="flex h-14 md:h-16 items-center justify-between gap-2 md:gap-4 px-4 md:px-6">
         {/* Logo */}
-        <div className="flex-shrink-0 md:flex-1">
+        <div className="flex-shrink-0">
           <Link href="/" className="text-foreground flex gap-2 items-center">
             <IconInnerShadowBottomRightFilled className="size-7 md:size-9 hover:rotate-45 transition-all duration-500" />
           </Link>
         </div>
         {/* Middle area - desktop only */}
-        <div className="hidden sm:block flex-1">
+        <div className="hidden sm:block flex-1 mx-4">
           <NavbarClient locations={locations} />
         </div>
         {/* Right side */}
-        <div className="flex flex-shrink-0 md:flex-1 items-center justify-end gap-1 md:gap-2">
+        <div className="flex flex-shrink-0 items-center justify-end gap-1 md:gap-2">
           <Button
             asChild
             variant="ghost"
