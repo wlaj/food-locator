@@ -177,7 +177,12 @@ function SearchInputContent({
       const beforeAt = query.substring(0, atIndex);
 
       // Only show dropdown if @ is at the start or after a space
-      if (atIndex === 0 || beforeAt.endsWith(" ")) {
+      // AND if we're not on search page with a complete username (no spaces after @)
+      const isCompleteUsername = afterAt && !afterAt.includes(" ") && afterAt.length > 0;
+      const isOnSearchPage = pathname === "/search";
+      
+      if ((atIndex === 0 || beforeAt.endsWith(" ")) && 
+          !(isOnSearchPage && isCompleteUsername)) {
         setUserSearchTerm(afterAt);
         setShowUserDropdown(true);
       } else {
@@ -186,7 +191,7 @@ function SearchInputContent({
     } else {
       setShowUserDropdown(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, pathname]);
 
   // Handle hashtag search when # is typed
   React.useEffect(() => {
@@ -212,6 +217,7 @@ function SearchInputContent({
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowUserDropdown(false);
+    setShowHashtagDropdown(false);
     const selectedLocationData = locations.find(
       (loc) => loc.value === selectedLocation
     );
@@ -268,18 +274,7 @@ function SearchInputContent({
 
     setSearchQuery(newQuery);
     setShowUserDropdown(false);
-
-    // Automatically trigger the search
-    const selectedLocationData = locations.find(
-      (loc) => loc.value === selectedLocation
-    );
-    const searchParams = new URLSearchParams({
-      q: newQuery,
-      ...(selectedLocationData && {
-        location: selectedLocationData.label,
-      }),
-    });
-    router.push(`/search?${searchParams.toString()}`);
+    // Don't automatically navigate - let user submit when ready
   };
 
   const handleHashtagSelect = (option: SearchOption) => {
@@ -328,7 +323,7 @@ function SearchInputContent({
     setTimeout(() => {
       setShowUserDropdown(false);
       setShowHashtagDropdown(false);
-    }, 200);
+    }, 150);
   };
 
   const sizeClasses = {
