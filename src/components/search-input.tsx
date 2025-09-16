@@ -649,6 +649,7 @@ function SearchInputContent({
               onKeyDown: handleInputKeyDown,
               onFocus: handleInputFocus,
               onBlur: handleInputBlur,
+              style: { fontSize: '16px' }, // Prevent zoom on mobile
             }}
           />
           <Button
