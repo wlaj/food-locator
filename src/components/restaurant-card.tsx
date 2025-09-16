@@ -3,6 +3,7 @@ import React, { useState, useTransition } from "react";
 import { likeRestaurant } from "@/lib/actions";
 import { IconAwardFilled } from "@tabler/icons-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
   const [likes, setLikes] = useState(restaurant.likes || 0);
@@ -51,10 +52,13 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
             <div className="flex-1">
               <div className="relative h-full w-full origin-bottom transition duration-300">
                 {restaurant.image_url ? (
-                  <img
+                  <Image
                     src={restaurant.image_url}
-                    alt={restaurant.name || ""}
-                    className="h-full w-full object-cover object-center"
+                    alt={`${restaurant.name} - ${restaurant.cuisine} restaurant in ${restaurant.location}`}
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={false}
                   />
                 ) : (
                   <div className="h-full w-full bg-gray-200 flex items-center justify-center">

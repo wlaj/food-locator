@@ -180,9 +180,10 @@ export default function DishPostCard({ post, currentUser }: DishPostCardProps) {
           <div className="relative w-full h-48 mb-3 rounded-lg overflow-hidden">
             <Image
               src={dish.image_url}
-              alt={dish.name}
+              alt={`${dish.name} dish from ${restaurant.name} restaurant`}
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
         )}

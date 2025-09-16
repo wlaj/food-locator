@@ -1,5 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
 import VoteCard from "@/components/vote-card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Community Votes - Food Locator",
+  description: "Join the community discussions and vote on restaurant recommendations, best dishes, and food experiences.",
+  keywords: ["community", "votes", "restaurant recommendations", "food discussions", "community polls"],
+  openGraph: {
+    title: "Community Votes - Food Locator",
+    description: "Join the community discussions and vote on restaurant recommendations, best dishes, and food experiences.",
+    type: "website",
+    url: "/community",
+  },
+  alternates: {
+    canonical: "/community",
+  },
+};
 
 interface Vote {
   topic_id: string;

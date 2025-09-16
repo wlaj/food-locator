@@ -6,6 +6,22 @@ import DishPostDialog from "@/components/dish-post-dialog";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Food Feed - Food Locator",
+  description: "Discover the latest dish posts, food experiences, and culinary discoveries from the community.",
+  keywords: ["food feed", "dish posts", "food experiences", "culinary discoveries", "food community"],
+  openGraph: {
+    title: "Food Feed - Food Locator",
+    description: "Discover the latest dish posts, food experiences, and culinary discoveries from the community.",
+    type: "website",
+    url: "/feed",
+  },
+  alternates: {
+    canonical: "/feed",
+  },
+};
 
 export const revalidate = 300; // Cache for 5 minutes
 

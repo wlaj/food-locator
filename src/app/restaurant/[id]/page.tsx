@@ -8,6 +8,8 @@ import DishPostCard from "@/components/dish-post-card";
 import DishPostDialog from "@/components/dish-post-dialog";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { cache } from "react";
 
 interface RestaurantPageProps {
   params: {
@@ -15,9 +17,65 @@ interface RestaurantPageProps {
   };
 }
 
-async function getRestaurant(id: string): Promise<Restaurant | null> {
+const getRestaurant = cache(async (id: string): Promise<Restaurant | null> => {
   const restaurants = await getRestaurants(1000); // Get all restaurants to find the one with matching ID
   return restaurants?.find(r => r.id === id) || null;
+});
+
+export async function generateMetadata({ params }: RestaurantPageProps): Promise<Metadata> {
+  const restaurant = await getRestaurant(params.id);
+  
+  if (!restaurant) {
+    return {
+      title: 'Restaurant Not Found',
+      description: 'The restaurant you are looking for could not be found.',
+    };
+  }
+
+  const title = `${restaurant.name} - ${restaurant.cuisine} Restaurant`;
+  const description = restaurant.description 
+    ? `${restaurant.description} Located in ${restaurant.location}. ${restaurant.cuisine} cuisine with a rating of ${restaurant.rating_score?.toFixed(1) || 'unrated'}.`
+    : `Discover ${restaurant.name}, a ${restaurant.cuisine} restaurant located in ${restaurant.location}. Find authentic dishes and reviews.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      restaurant.name || '',
+      restaurant.cuisine || '',
+      restaurant.location || '',
+      'restaurant',
+      'dining',
+      'food',
+      ...(restaurant.dietary || []),
+      ...(restaurant.favorite_dishes || []),
+    ].filter(Boolean),
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      locale: 'en_US',
+      url: `/restaurant/${params.id}`,
+      images: restaurant.image_url ? [
+        {
+          url: restaurant.image_url,
+          width: 1200,
+          height: 630,
+          alt: `${restaurant.name} restaurant`,
+        },
+      ] : [],
+      siteName: 'Food Locator',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: restaurant.image_url ? [restaurant.image_url] : [],
+    },
+    alternates: {
+      canonical: `/restaurant/${params.id}`,
+    },
+  };
 }
 
 export default async function RestaurantPage({ params }: RestaurantPageProps) {
@@ -41,8 +99,46 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
     return rating.toFixed(1);
   };
 
+  const restaurantSchema = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": restaurant.name,
+    "description": restaurant.description,
+    "image": restaurant.image_url,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": restaurant.location,
+      "addressCountry": "NL"
+    },
+    "geo": restaurant.latitude && restaurant.longitude ? {
+      "@type": "GeoCoordinates",
+      "latitude": restaurant.latitude,
+      "longitude": restaurant.longitude
+    } : undefined,
+    "servesCuisine": restaurant.cuisine,
+    "priceRange": restaurant.price ? '$'.repeat(restaurant.price) : undefined,
+    "aggregateRating": restaurant.rating_score ? {
+      "@type": "AggregateRating",
+      "ratingValue": restaurant.rating_score,
+      "ratingCount": restaurant.likes || 1
+    } : undefined,
+    "menu": restaurant.favorite_dishes?.map(dish => ({
+      "@type": "MenuItem",
+      "name": dish
+    })),
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://food-locator.com'}/restaurant/${restaurant.id}`,
+    "sameAs": []
+  };
+
   return (
-    <div className="mt-32 md:mt-16 max-w-6xl mx-auto px-4 py-12">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(restaurantSchema),
+        }}
+      />
+      <div className="mt-32 md:mt-16 max-w-6xl mx-auto px-4 py-12">
       {/* Restaurant Header */}
       <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-6">
@@ -182,6 +278,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

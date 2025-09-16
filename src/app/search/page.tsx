@@ -2,8 +2,45 @@ import { Gallery } from "@/components/gallery";
 import { RestaurantMap } from "@/components/restaurant-map";
 import { searchRestaurants } from "@/lib/actions";
 import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 
 export const revalidate = 3600; // Cache for 1 hour
+
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const { q: query, location, tags } = params;
+  
+  let title = 'Search Restaurants - Food Locator';
+  let description = 'Search for restaurants by cuisine, location, and dietary preferences.';
+  
+  if (query && query !== '*') {
+    title = `Search Results for "${query}" - Food Locator`;
+    description = `Find restaurants matching "${query}"`;
+    if (location) {
+      description += ` in ${location}`;
+    }
+    if (tags) {
+      description += ` with dietary options: ${tags.split(',').join(', ')}`;
+    }
+  } else if (location) {
+    title = `Restaurants in ${location} - Food Locator`;
+    description = `Discover the best restaurants in ${location}`;
+  }
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: '/search',
+    },
+    alternates: {
+      canonical: '/search',
+    },
+  };
+}
 
 interface SearchPageProps {
   searchParams: Promise<{
