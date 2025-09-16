@@ -44,6 +44,7 @@ import {
   LoaderCircleIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant;
@@ -395,10 +396,10 @@ export default function RestaurantDialog({
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="w-full p-0 max-h-[300px]" side="bottom" align="start">
                   <Command>
                     <CommandInput placeholder="Search cuisine..." />
-                    <CommandList>
+                    <CommandList className="max-h-[250px] overflow-y-auto">
                       <CommandEmpty>No cuisine found.</CommandEmpty>
                       <CommandGroup>
                         {cuisines.map((cuisine) => (
@@ -447,10 +448,10 @@ export default function RestaurantDialog({
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="w-full p-0 max-h-[300px]" side="bottom" align="start">
                   <Command>
                     <CommandInput placeholder="Search location..." />
-                    <CommandList>
+                    <CommandList className="max-h-[250px] overflow-y-auto">
                       <CommandEmpty>No location found.</CommandEmpty>
                       <CommandGroup>
                         {locations.map((location) => (

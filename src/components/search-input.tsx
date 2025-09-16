@@ -666,9 +666,9 @@ function SearchInputContent({
 
       {/* User Dropdown */}
       {showUserDropdown && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-hidden">
           <Command>
-            <CommandList>
+            <CommandList className="max-h-56 overflow-y-auto">
               {isLoadingUsers ? (
                 <CommandEmpty>Loading users...</CommandEmpty>
               ) : filteredUsers.length === 0 ? (
@@ -677,25 +677,23 @@ function SearchInputContent({
                 </CommandEmpty>
               ) : (
                 <CommandGroup heading="Users">
-                  <ScrollArea className="h-[200px]">
-                    {filteredUsers
-                      .filter(user => user && user.id && user.username)
-                      .map((user) => (
-                      <CommandItem
-                        key={user.id}
-                        value={user.username}
-                        onSelect={() => handleUserSelect(user)}
-                        className="cursor-pointer"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">@{user.username}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {user.email}
-                          </span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </ScrollArea>
+                  {filteredUsers
+                    .filter(user => user && user.id && user.username)
+                    .map((user) => (
+                    <CommandItem
+                      key={user.id}
+                      value={user.username}
+                      onSelect={() => handleUserSelect(user)}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">@{user.username}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {user.email}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               )}
             </CommandList>
@@ -705,9 +703,9 @@ function SearchInputContent({
 
       {/* Hashtag Dropdown */}
       {showHashtagDropdown && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-hidden">
           <Command>
-            <CommandList>
+            <CommandList className="max-h-56 overflow-y-auto">
               {isLoadingSearchOptions ? (
                 <CommandEmpty>Loading options...</CommandEmpty>
               ) : searchOptions.length === 0 ? (
@@ -720,58 +718,54 @@ function SearchInputContent({
                     .filter((option) => option && option.type === "cuisine")
                     .length > 0 && (
                     <CommandGroup heading="Cuisines">
-                      <ScrollArea className="max-h-[100px]">
-                        {searchOptions
-                          .filter((option) => option && option.type === "cuisine" && option.id && option.name)
-                          .map((option) => (
-                            <CommandItem
-                              key={option.id}
-                              value={option.name}
-                              onSelect={() => handleHashtagSelect(option)}
-                              className="cursor-pointer"
-                            >
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  #{option.name}
+                      {searchOptions
+                        .filter((option) => option && option.type === "cuisine" && option.id && option.name)
+                        .map((option) => (
+                          <CommandItem
+                            key={option.id}
+                            value={option.name}
+                            onSelect={() => handleHashtagSelect(option)}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                #{option.name}
+                              </span>
+                              {option.description && (
+                                <span className="text-xs text-muted-foreground">
+                                  {option.description}
                                 </span>
-                                {option.description && (
-                                  <span className="text-xs text-muted-foreground">
-                                    {option.description}
-                                  </span>
-                                )}
-                              </div>
-                            </CommandItem>
-                          ))}
-                      </ScrollArea>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
                     </CommandGroup>
                   )}
                   {searchOptions
                     .filter((option) => option && option.type === "dietary")
                     .length > 0 && (
                     <CommandGroup heading="Dietary Options">
-                      <ScrollArea className="max-h-[100px]">
-                        {searchOptions
-                          .filter((option) => option && option.type === "dietary" && option.id && option.name)
-                          .map((option) => (
-                            <CommandItem
-                              key={option.id}
-                              value={option.name}
-                              onSelect={() => handleHashtagSelect(option)}
-                              className="cursor-pointer"
-                            >
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  #{option.name}
+                      {searchOptions
+                        .filter((option) => option && option.type === "dietary" && option.id && option.name)
+                        .map((option) => (
+                          <CommandItem
+                            key={option.id}
+                            value={option.name}
+                            onSelect={() => handleHashtagSelect(option)}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                #{option.name}
+                              </span>
+                              {option.description && (
+                                <span className="text-xs text-muted-foreground">
+                                  {option.description}
                                 </span>
-                                {option.description && (
-                                  <span className="text-xs text-muted-foreground">
-                                    {option.description}
-                                  </span>
-                                )}
-                              </div>
-                            </CommandItem>
-                          ))}
-                      </ScrollArea>
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
                     </CommandGroup>
                   )}
                 </>
