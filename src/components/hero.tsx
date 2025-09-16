@@ -11,10 +11,11 @@ const Hero = async ({ className }: { className: string }) => {
   return (
     <section
       className={cn(
-        "p-4 md:p-8 flex flex-col rounded-lg h-64 sm:h-80 md:h-96 justify-center items-center relative bg-black",
+        "w-screen flex flex-col justify-center items-center relative bg-black px-4 md:px-8",
         className
       )}
       aria-label="Hero section with restaurant search"
+      style={{ height: 600 }}
     >
       <div
         className="absolute hidden sm:block top-0 right-0 w-2/3 sm:w-1/2 md:w-1/3 h-full"

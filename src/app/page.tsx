@@ -11,14 +11,16 @@ export default async function Home() {
   const t = await getTranslations();
 
   return (
-    <div className="mt-24 md:mt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <Hero className="mt-12 sm:mt-20 md:mt-28 bg-black" />
-      <Gallery
-        heading={t("gallery.restaurants")}
-        demoTitle={t("gallery.viewBasedOnLocation")}
-        restaurants={restaurants || []}
-      />
-      <HowItWorks heading={t("howItWorks.heading")} />
+    <div>
+      <Hero className="bg-black" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <Gallery
+          heading={t("gallery.restaurants")}
+          demoTitle={t("gallery.viewBasedOnLocation")}
+          restaurants={restaurants || []}
+        />
+        <HowItWorks heading={t("howItWorks.heading")} />
+      </div>
     </div>
   );
 }
