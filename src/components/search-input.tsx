@@ -253,11 +253,11 @@ function SearchInputContent({
     }
 
     // If no query, tags, or location, browse all restaurants
-    if (!baseQuery && allTagNames.length === 0 && selectedLocationData) {
+    if (!baseQuery && allTagNames.length === 0) {
       searchParams.set("q", "*");
     }
 
-    if (baseQuery || allTagNames.length > 0 || selectedLocationData) {
+    if (baseQuery || allTagNames.length > 0 || selectedLocationData || (!baseQuery && allTagNames.length === 0)) {
       router.push(`/search?${searchParams.toString()}`);
     }
   };
@@ -353,7 +353,7 @@ function SearchInputContent({
                 ? locations.find(
                     (location) => location.value === selectedLocation
                   )?.label
-                : "Select location..."}
+                : "All locations"}
             </span>
           </div>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
@@ -378,38 +378,61 @@ function SearchInputContent({
                         new Set(locations.map((loc) => loc.city))
                       ).sort();
                       return (
-                        <CommandGroup heading="Cities">
-                          {cities.map((city) => {
-                            const cityLocation = locations.find(
-                              (loc) => loc.city === city && !loc.district
-                            );
-                            return cityLocation ? (
-                              <CommandItem
-                                key={cityLocation.value}
-                                value={cityLocation.value}
-                                onSelect={(currentValue) => {
-                                  setSelectedLocation(
-                                    currentValue === selectedLocation
-                                      ? ""
-                                      : currentValue
-                                  );
-                                  setMobileLocationOpen(false);
-                                  setMobileSearchValue("");
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    selectedLocation === cityLocation.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {city}
-                              </CommandItem>
-                            ) : null;
-                          })}
-                        </CommandGroup>
+                        <>
+                          <CommandGroup heading="Options">
+                            <CommandItem
+                              key="no-location"
+                              value=""
+                              onSelect={() => {
+                                setSelectedLocation("");
+                                setMobileLocationOpen(false);
+                                setMobileSearchValue("");
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedLocation === ""
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              All locations
+                            </CommandItem>
+                          </CommandGroup>
+                          <CommandGroup heading="Cities">
+                            {cities.map((city) => {
+                              const cityLocation = locations.find(
+                                (loc) => loc.city === city && !loc.district
+                              );
+                              return cityLocation ? (
+                                <CommandItem
+                                  key={cityLocation.value}
+                                  value={cityLocation.value}
+                                  onSelect={(currentValue) => {
+                                    setSelectedLocation(
+                                      currentValue === selectedLocation
+                                        ? ""
+                                        : currentValue
+                                    );
+                                    setMobileLocationOpen(false);
+                                    setMobileSearchValue("");
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedLocation === cityLocation.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {city}
+                                </CommandItem>
+                              ) : null;
+                            })}
+                          </CommandGroup>
+                        </>
                       );
                     }
 
@@ -498,7 +521,7 @@ function SearchInputContent({
                   ? locations.find(
                       (location) => location.value === selectedLocation
                     )?.label
-                  : "Select location..."}
+                  : "All locations"}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -518,38 +541,61 @@ function SearchInputContent({
                         new Set(locations.map((loc) => loc.city))
                       ).sort();
                       return (
-                        <CommandGroup heading="Cities">
-                          {cities.map((city) => {
-                            const cityLocation = locations.find(
-                              (loc) => loc.city === city && !loc.district
-                            );
-                            return cityLocation ? (
-                              <CommandItem
-                                key={cityLocation.value}
-                                value={cityLocation.value}
-                                onSelect={(currentValue) => {
-                                  setSelectedLocation(
-                                    currentValue === selectedLocation
-                                      ? ""
-                                      : currentValue
-                                  );
-                                  setLocationOpen(false);
-                                  setSearchValue("");
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    selectedLocation === cityLocation.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {city}
-                              </CommandItem>
-                            ) : null;
-                          })}
-                        </CommandGroup>
+                        <>
+                          <CommandGroup heading="Options">
+                            <CommandItem
+                              key="no-location"
+                              value=""
+                              onSelect={() => {
+                                setSelectedLocation("");
+                                setLocationOpen(false);
+                                setSearchValue("");
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedLocation === ""
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              All locations
+                            </CommandItem>
+                          </CommandGroup>
+                          <CommandGroup heading="Cities">
+                            {cities.map((city) => {
+                              const cityLocation = locations.find(
+                                (loc) => loc.city === city && !loc.district
+                              );
+                              return cityLocation ? (
+                                <CommandItem
+                                  key={cityLocation.value}
+                                  value={cityLocation.value}
+                                  onSelect={(currentValue) => {
+                                    setSelectedLocation(
+                                      currentValue === selectedLocation
+                                        ? ""
+                                        : currentValue
+                                    );
+                                    setLocationOpen(false);
+                                    setSearchValue("");
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedLocation === cityLocation.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {city}
+                                </CommandItem>
+                              ) : null;
+                            })}
+                          </CommandGroup>
+                        </>
                       );
                     }
 
