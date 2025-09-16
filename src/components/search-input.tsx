@@ -432,6 +432,41 @@ function SearchInputContent({
                               ) : null;
                             })}
                           </CommandGroup>
+                          <CommandGroup heading="Districts">
+                            {locations
+                              .filter((loc) => loc.district)
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                              .map((location) => (
+                                <CommandItem
+                                  key={location.value}
+                                  value={location.value}
+                                  onSelect={(currentValue) => {
+                                    setSelectedLocation(
+                                      currentValue === selectedLocation
+                                        ? ""
+                                        : currentValue
+                                    );
+                                    setMobileLocationOpen(false);
+                                    setMobileSearchValue("");
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedLocation === location.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span>{location.label}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {location.city}
+                                    </span>
+                                  </div>
+                                </CommandItem>
+                              ))}
+                          </CommandGroup>
                         </>
                       );
                     }
@@ -594,6 +629,41 @@ function SearchInputContent({
                                 </CommandItem>
                               ) : null;
                             })}
+                          </CommandGroup>
+                          <CommandGroup heading="Districts">
+                            {locations
+                              .filter((loc) => loc.district)
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                              .map((location) => (
+                                <CommandItem
+                                  key={location.value}
+                                  value={location.value}
+                                  onSelect={(currentValue) => {
+                                    setSelectedLocation(
+                                      currentValue === selectedLocation
+                                        ? ""
+                                        : currentValue
+                                    );
+                                    setLocationOpen(false);
+                                    setSearchValue("");
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedLocation === location.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span>{location.label}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {location.city}
+                                    </span>
+                                  </div>
+                                </CommandItem>
+                              ))}
                           </CommandGroup>
                         </>
                       );
