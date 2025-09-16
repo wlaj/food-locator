@@ -38,7 +38,7 @@ export default function NavbarClient({
           <SearchInput
             locations={locations || []}
             className="w-full"
-            size="sm"
+            size="md"
           />
         </div>
       )}
