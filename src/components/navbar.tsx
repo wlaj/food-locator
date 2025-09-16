@@ -29,6 +29,14 @@ export default async function Navbar() {
             size="sm"
             className="text-xs md:text-sm px-2 md:px-3"
           >
+            <Link href="/feed">Feed</Link>
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="text-xs md:text-sm px-2 md:px-3"
+          >
             <Link href="/community">Community</Link>
           </Button>
           <NavbarAuth />

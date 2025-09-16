@@ -100,5 +100,14 @@
     "restaurantAdded": "Restaurant toegevoegd",
     "restaurantUpdated": "Restaurant bijgewerkt",
     "restaurantDeleted": "Restaurant verwijderd"
+  },
+  "feed": {
+    "title": "Gerechten Feed",
+    "description": "Ontdek geweldige gerechten gedeeld door de community",
+    "shareADish": "Deel een Gerecht",
+    "loginToShare": "Inloggen om te Delen",
+    "noDishPosts": "Nog geen gerechten geplaatst",
+    "beTheFirst": "Wees de eerste om een heerlijk gerecht te delen met de community!",
+    "shareTheFirstDish": "Deel het Eerste Gerecht"
   }
 }

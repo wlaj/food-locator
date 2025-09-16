@@ -59,6 +59,7 @@ export type Database = {
           created_by: string | null
           ends_at: string | null
           id: string
+          is_public: boolean
           max_selections: number | null
           option_description: string | null
           option_title: string
@@ -75,6 +76,7 @@ export type Database = {
           created_by?: string | null
           ends_at?: string | null
           id?: string
+          is_public?: boolean
           max_selections?: number | null
           option_description?: string | null
           option_title: string
@@ -91,6 +93,7 @@ export type Database = {
           created_by?: string | null
           ends_at?: string | null
           id?: string
+          is_public?: boolean
           max_selections?: number | null
           option_description?: string | null
           option_title?: string
@@ -154,6 +157,144 @@ export type Database = {
         }
         Relationships: []
       }
+      dish_posts: {
+        Row: {
+          created_at: string | null
+          dish_id: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dish_id: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dish_id?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dish_posts_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "dishes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dish_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dishes: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          file_name: string | null
+          file_size: number | null
+          id: string
+          image_path: string | null
+          image_url: string | null
+          is_active: boolean | null
+          mime_type: string | null
+          name: string
+          price: number | null
+          restaurant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          image_path?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          mime_type?: string | null
+          name: string
+          price?: number | null
+          restaurant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          image_path?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          mime_type?: string | null
+          name?: string
+          price?: number | null
+          restaurant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dishes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "dishes_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_cleanup_queue: {
+        Row: {
+          bucket_name: string
+          deletion_reason: string | null
+          error_message: string | null
+          file_path: string
+          id: string
+          marked_for_deletion_at: string | null
+          original_restaurant_id: string | null
+          processed: boolean | null
+          processed_at: string | null
+        }
+        Insert: {
+          bucket_name?: string
+          deletion_reason?: string | null
+          error_message?: string | null
+          file_path: string
+          id?: string
+          marked_for_deletion_at?: string | null
+          original_restaurant_id?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+        }
+        Update: {
+          bucket_name?: string
+          deletion_reason?: string | null
+          error_message?: string | null
+          file_path?: string
+          id?: string
+          marked_for_deletion_at?: string | null
+          original_restaurant_id?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           city: string
@@ -192,6 +333,116 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      posts: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          context: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          is_active: boolean | null
+          likes_count: number | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content?: string | null
+          context?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_active?: boolean | null
+          likes_count?: number | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string | null
+          context?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_active?: boolean | null
+          likes_count?: number | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      restaurant_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          display_order: number | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          image_type: string
+          is_active: boolean | null
+          mime_type: string | null
+          restaurant_id: string
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          image_type: string
+          is_active?: boolean | null
+          mime_type?: string | null
+          restaurant_id: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          image_type?: string
+          is_active?: boolean | null
+          mime_type?: string | null
+          restaurant_id?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_images_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_images_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       restaurants: {
         Row: {
@@ -311,6 +562,40 @@ export type Database = {
       }
     }
     Views: {
+      restaurant_images_active: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          display_order: number | null
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          id: string | null
+          image_type: string | null
+          is_active: boolean | null
+          mime_type: string | null
+          restaurant_id: string | null
+          restaurant_name: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_images_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restaurant_images_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       users_with_usernames: {
         Row: {
           email: string | null
@@ -353,11 +638,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_cleanup_queue_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_community_votes_with_counts: {
         Args: Record<PropertyKey, never>
         Returns: {
           created_at: string
           ends_at: string
+          is_public: boolean
           options: Json
           status: string
           topic_description: string
@@ -369,6 +659,21 @@ export type Database = {
       }
       get_my_role: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_restaurant_gallery_images: {
+        Args: { p_restaurant_id: string }
+        Returns: {
+          alt_text: string
+          created_at: string
+          display_order: number
+          file_name: string
+          file_path: string
+          id: string
+        }[]
+      }
+      get_restaurant_main_image: {
+        Args: { p_restaurant_id: string }
         Returns: string
       }
       get_restaurant_ownership_info: {
@@ -430,9 +735,29 @@ export type Database = {
         Args: { user_uuid?: string }
         Returns: boolean
       }
+      mark_orphaned_files_for_cleanup: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      migrate_existing_restaurant_images: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      process_file_cleanup_queue: {
+        Args: { batch_size?: number }
+        Returns: Json
+      }
       promote_to_admin: {
         Args: { target_user_id: string }
         Returns: undefined
+      }
+      reorder_gallery_images: {
+        Args: { p_image_orders: Json; p_restaurant_id: string }
+        Returns: undefined
+      }
+      scheduled_file_cleanup: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       user_owns_restaurant: {
         Args: { restaurant_id: string; user_uuid?: string }

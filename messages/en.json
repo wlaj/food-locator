@@ -100,5 +100,14 @@
     "restaurantAdded": "Restaurant added",
     "restaurantUpdated": "Restaurant updated",
     "restaurantDeleted": "Restaurant deleted"
+  },
+  "feed": {
+    "title": "Dish Feed",
+    "description": "Discover amazing dishes shared by the community",
+    "shareADish": "Share a Dish",
+    "loginToShare": "Login to Share",
+    "noDishPosts": "No dish posts yet",
+    "beTheFirst": "Be the first to share a delicious dish with the community!",
+    "shareTheFirstDish": "Share the First Dish"
   }
 }

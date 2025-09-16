@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   experimental: {
     useCache: true,
   },
+  images: {
+    remotePatterns: [new URL('https://gkjxlwsnwywidpacajzj.supabase.co/storage/v1/object/public/restaurant-images/**')],
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

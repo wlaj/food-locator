@@ -2,7 +2,7 @@ import { ArrowRightIcon, ThumbsUp } from "lucide-react";
 import React, { useState, useTransition } from "react";
 import { likeRestaurant } from "@/lib/actions";
 import { IconAwardFilled } from "@tabler/icons-react";
-import { createGoogleMapsSearchUrl } from "@/lib/utils/maps";
+import Link from "next/link";
 
 const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
   const [likes, setLikes] = useState(restaurant.likes || 0);
@@ -45,7 +45,7 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
 
   return (
     <div className="group flex flex-col justify-between">
-      <a href={createGoogleMapsSearchUrl(restaurant.name || "")} target="_blank" rel="noopener noreferrer" className="flex flex-col justify-between">
+      <Link href={`/restaurant/${restaurant.id}`} className="flex flex-col justify-between">
         <div>
           <div className="aspect-3/2 flex overflow-clip rounded-xl relative">
             <div className="flex-1">
@@ -98,10 +98,10 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
           {restaurant.cuisine}
         </div>
         <div className="flex items-center text-sm">
-          Navigate{" "}
+          View Details{" "}
           <ArrowRightIcon className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
         </div>
-      </a>
+      </Link>
     </div>
   );
 };
