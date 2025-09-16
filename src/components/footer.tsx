@@ -9,12 +9,6 @@ interface MenuItem {
 }
 
 interface FooterProps {
-  logo?: {
-    url: string;
-    src: string;
-    alt: string;
-    title: string;
-  };
   tagline?: string;
   menuItems?: MenuItem[];
   copyright?: string;
@@ -25,54 +19,46 @@ interface FooterProps {
 }
 
 const Footer = ({
-  logo = {
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg",
-    alt: "Software for B2B",
-    title: "digics.net",
-    url: "https://www.digics.net",
-  },
   tagline = "Food locator",
   menuItems = [
     {
       title: "Locations",
       links: [
-        { text: "Amsterdam Centrum", url: "#" },
-        { text: "Amsterdam Nieuw-West", url: "#" },
-        { text: "Amsterdam Noord", url: "#" },
-        { text: "Amsterdam Oost", url: "#" },
-        { text: "Amsterdam Zuid", url: "#" },
-        { text: "Rotterdam Centrum", url: "#" },
+        { text: "Amsterdam Centrum", url: "/search?q=*&location=Amsterdam Centrum" },
+        { text: "Amsterdam Nieuw-West", url: "/search?q=*&location=Amsterdam Nieuw-West" },
+        { text: "Amsterdam Noord", url: "/search?q=*&location=Amsterdam Noord" },
+        { text: "Amsterdam Oost", url: "/search?q=*&location=Amsterdam Oost" },
+        { text: "Amsterdam Zuid", url: "/search?q=*&location=Amsterdam Zuid" },
+        { text: "Rotterdam Centrum", url: "/search?q=*&location=Rotterdam Centrum" },
       ],
     },
     {
       title: "Company",
       links: [
-        { text: "Contact", url: "#" },
-        { text: "Terms & Conditions", url: "#" },
-        { text: "Privacy", url: "#" },
+        { text: "Terms & Conditions", url: "/terms" },
+        { text: "Privacy", url: "/privacy" },
       ],
     },
-    {
-      title: "Resources",
-      links: [
-        { text: "Help", url: "#" },
-        { text: "Sales", url: "#" },
-        { text: "Advertise", url: "#" },
-      ],
-    },
+    // {
+    //   title: "Resources",
+    //   links: [
+    //     { text: "Help", url: "#" },
+    //     { text: "Sales", url: "#" },
+    //     { text: "Advertise", url: "#" },
+    //   ],
+    // },
     {
       title: "Social",
       links: [
-        { text: "Twitter", url: "#" },
+        { text: "TikTok", url: "#" },
         { text: "Instagram", url: "#" },
-        { text: "LinkedIn", url: "#" },
       ],
     },
   ],
   copyright = "© 2025 Digics.net. All rights reserved.",
   bottomLinks = [
-    { text: "Terms and Conditions", url: "#" },
-    { text: "Privacy Policy", url: "#" },
+    { text: "Terms and Conditions", url: "/terms" },
+    { text: "Privacy Policy", url: "/privacy" },
   ],
 }: FooterProps) => {
   return (
