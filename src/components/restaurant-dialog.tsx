@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import RestaurantImageUpload from "@/components/restaurant-image-upload";
 import DietaryTagSelector from "@/components/dietary-tag-selector";
+import { RestaurantMap } from "@/components/restaurant-map";
 import {
   Check,
   ChevronsUpDown,
@@ -77,10 +78,12 @@ export default function RestaurantDialog({
   const [addressValidation, setAddressValidation] = useState<{
     isChecking: boolean;
     coordinates: { lat: number; lng: number } | null;
+    formattedAddress: string | null;
     error: string | null;
-  }>({ isChecking: false, coordinates: null, error: null });
+  }>({ isChecking: false, coordinates: null, formattedAddress: null, error: null });
   const ratingId = useId();
   const nameRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
   const nameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -125,12 +128,13 @@ export default function RestaurantDialog({
       setAddressValidation({
         isChecking: false,
         coordinates: null,
+        formattedAddress: null,
         error: null,
       });
       return;
     }
 
-    setAddressValidation({ isChecking: true, coordinates: null, error: null });
+    setAddressValidation({ isChecking: true, coordinates: null, formattedAddress: null, error: null });
 
     try {
       const encodedAddress = encodeURIComponent(address);
@@ -149,15 +153,23 @@ export default function RestaurantDialog({
         data.results[0].geometry
       ) {
         const { lat, lng } = data.results[0].geometry;
+        const formattedAddress = data.results[0].formatted;
         setAddressValidation({
           isChecking: false,
           coordinates: { lat: parseFloat(lat), lng: parseFloat(lng) },
+          formattedAddress,
           error: null,
         });
+        
+        // Update the input field with the formatted address
+        if (addressRef.current) {
+          addressRef.current.value = formattedAddress;
+        }
       } else {
         setAddressValidation({
           isChecking: false,
           coordinates: null,
+          formattedAddress: null,
           error: "Could not find coordinates for this address",
         });
       }
@@ -166,6 +178,7 @@ export default function RestaurantDialog({
       setAddressValidation({
         isChecking: false,
         coordinates: null,
+        formattedAddress: null,
         error: "Failed to validate address",
       });
     }
@@ -199,6 +212,7 @@ export default function RestaurantDialog({
       setAddressValidation({
         isChecking: false,
         coordinates: null,
+        formattedAddress: null,
         error: null,
       });
       return;
@@ -491,10 +505,12 @@ export default function RestaurantDialog({
                 <Input
                   id="address"
                   name="address"
+                  ref={addressRef}
                   className={`peer pe-9 ${
                     addressValidation.error ? "aria-invalid" : ""
                   }`}
                   placeholder="Ijburglaan 500, Amsterdam"
+                  defaultValue={restaurant?.address || ""}
                   onChange={handleAddressChange}
                   aria-invalid={!!addressValidation.error}
                 />
@@ -543,6 +559,39 @@ export default function RestaurantDialog({
                 Enter an address or the restaurant&apos;s name to automatically
                 generate coordinates for location-based searches.
               </p>
+              
+              {/* Map component to show the location */}
+              {addressValidation.coordinates && (
+                <div className="mt-4">
+                  <RestaurantMap
+                    restaurants={[{
+                      id: 'temp-location',
+                      name: addressValidation.formattedAddress || 'Selected Location',
+                      latitude: addressValidation.coordinates.lat,
+                      longitude: addressValidation.coordinates.lng,
+                      address: addressValidation.formattedAddress,
+                      cuisine: selectedCuisine || null,
+                      location: selectedLocation || null,
+                      rating_score: null,
+                      price: null,
+                      image_url: null,
+                      likes: 0,
+                      atmosphere: null,
+                      authenticity: null,
+                      created_at: null,
+                      created_by: null,
+                      description: null,
+                      dietary: null,
+                      favorite_dishes: null,
+                      persona_scores: null,
+                      updated_at: null,
+                      updated_by: null
+                    }]}
+                    height="200px"
+                    className="rounded-lg border border-border/50"
+                  />
+                </div>
+              )}
             </div>
 
             <fieldset className="space-y-4">

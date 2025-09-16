@@ -217,6 +217,7 @@ export async function createRestaurant(formData: FormData) {
   const image_url = formData.get('image_url') as string || null
   const dietary = formData.get('dietary') ? (formData.get('dietary') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const address = formData.get('address') as string || null
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
   const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
 
@@ -246,6 +247,7 @@ export async function createRestaurant(formData: FormData) {
     image_url,
     dietary,
     favorite_dishes,
+    address,
     latitude,
     longitude
   }
@@ -277,6 +279,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const image_url = formData.get('image_url') as string || null
   const dietary = formData.get('dietary') ? (formData.get('dietary') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const address = formData.get('address') as string || null
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
   const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
 
@@ -306,6 +309,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
     image_url,
     dietary,
     favorite_dishes,
+    address,
     latitude,
     longitude
   }
