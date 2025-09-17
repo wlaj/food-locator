@@ -154,8 +154,6 @@ export async function searchRestaurants(
   
   // If query is "*" or undefined, get all restaurants; otherwise search by query
   if (query && query !== "*") {
-    queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
-    
     // For cuisine search, we need to handle it separately since cuisine is now an array
     // Check if the query matches any cuisine names
     const { data: matchingCuisines } = await supabase
@@ -163,11 +161,15 @@ export async function searchRestaurants(
       .select('name')
       .ilike('name', `%${query}%`);
     
+    // Build the OR condition including cuisine matches if any
+    let orConditions = `name.ilike.%${query}%,description.ilike.%${query}%`;
+    
     if (matchingCuisines && matchingCuisines.length > 0) {
       const cuisineNames = matchingCuisines.map(c => c.name);
-      // Add an additional OR condition for cuisine matches
-      queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ov.{${cuisineNames.join(',')}}`);
+      orConditions += `,cuisine.ov.{${cuisineNames.join(',')}}`;
     }
+    
+    queryBuilder = queryBuilder.or(orConditions);
   }
 
   // Filter by location if provided

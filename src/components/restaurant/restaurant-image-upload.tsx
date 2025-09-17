@@ -1,7 +1,8 @@
 "use client"
 
 import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import Image from "next/image"
 
 import { useFileUpload } from "@/hooks/use-file-upload"
 import { Button } from "@/components/ui/button"
@@ -44,7 +45,7 @@ export default function RestaurantImageUpload({
   const previewUrl = (currentFile && 'preview' in currentFile ? currentFile.preview : null) || uploadedImageUrl || null
   const fileName = (currentFile && 'file' in currentFile ? currentFile.file.name : null)
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = useCallback(async (file: File) => {
     setIsUploading(true)
     try {
       const result = await uploadRestaurantImage(file)
@@ -61,7 +62,7 @@ export default function RestaurantImageUpload({
     } finally {
       setIsUploading(false)
     }
-  }
+  }, [onImageChange, files, removeFile])
 
   const handleRemoveImage = async () => {
     if (uploadedImageUrl && !files[0]) {
@@ -88,7 +89,7 @@ export default function RestaurantImageUpload({
     if (currentFile && 'file' in currentFile && !isUploading && !uploadedImageUrl) {
       handleFileUpload(currentFile.file)
     }
-  }, [currentFile, isUploading, uploadedImageUrl])
+  }, [currentFile, isUploading, uploadedImageUrl, handleFileUpload])
 
   return (
     <div className="flex flex-col gap-2">
@@ -116,10 +117,12 @@ export default function RestaurantImageUpload({
           />
           {previewUrl ? (
             <div className="absolute inset-0 flex items-center justify-center p-4">
-              <img
+              <Image
                 src={previewUrl}
                 alt={fileName || "Restaurant image"}
                 className="mx-auto max-h-full rounded object-contain"
+                width={400}
+                height={300}
               />
               {isUploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">

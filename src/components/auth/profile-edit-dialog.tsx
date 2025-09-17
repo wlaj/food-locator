@@ -3,6 +3,7 @@
 import { useId, useState } from "react"
 import { CheckIcon, ImagePlusIcon } from "lucide-react"
 import { User } from "@supabase/supabase-js"
+import Image from "next/image"
 
 import { useCharacterLimit } from "@/hooks/use-character-limit"
 import { Button } from "@/components/ui/button"
@@ -247,12 +248,12 @@ function Avatar({ user }: { user: User | null }) {
     <div className="mt-6 px-6">
       <div className="border-background bg-muted relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 shadow-xs shadow-black/10">
         {selectedImage && (
-          <img
+          <Image
             src={selectedImage}
+            alt="Profile preview"
             className="size-full object-cover"
             width={80}
             height={80}
-            alt="Profile image"
           />
         )}
         <button

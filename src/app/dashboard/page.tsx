@@ -8,6 +8,7 @@ import RestaurantTable from "@/components/restaurant/restaurant-table";
 import { getUserRestaurants } from "@/lib/actions";
 import VotesTable from "@/components/vote/votes-table";
 import { getAllVotes } from "@/lib/vote-actions";
+import Image from "next/image";
 import { isUserAdmin } from "@/lib/auth-server";
 import { Suspense } from "react";
 
@@ -64,9 +65,11 @@ export default async function DashboardPage() {
                 <div className="space-y-2">
                   {user?.user_metadata?.avatar_url && (
                     <div className="mb-4">
-                      <img
+                      <Image
                         src={user.user_metadata.avatar_url}
                         alt="Profile"
+                        width={64}
+                        height={64}
                         className="w-16 h-16 rounded-full object-cover"
                       />
                     </div>

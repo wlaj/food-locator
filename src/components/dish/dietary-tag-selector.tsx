@@ -6,11 +6,6 @@ import { Tag, TagInput } from "emblor"
 import { Label } from "@/components/ui/label"
 import { useDietaryOptions } from "@/lib/queries"
 
-interface DietaryOption {
-  id: string
-  name: string
-  description?: string
-}
 
 interface DietaryTagSelectorProps {
   defaultValues?: string[]

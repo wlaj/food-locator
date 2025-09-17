@@ -88,7 +88,7 @@ export async function updateUserProfile(formData: FormData) {
         .getPublicUrl(fileName)
 
       avatarUrl = urlData.publicUrl
-    } catch (error) {
+    } catch {
       redirect('/dashboard?error=' + encodeURIComponent('Avatar upload failed'))
     }
   }

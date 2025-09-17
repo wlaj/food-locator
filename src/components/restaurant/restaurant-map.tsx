@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ThumbsUp } from "lucide-react";
 import { IconAwardFilled } from "@tabler/icons-react";
+import Image from "next/image";
 
 // Function to get cuisine-specific emoji/icon
 function getCuisineIcon(cuisine: string[] | null): string {
@@ -324,10 +325,12 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
                   {/* Restaurant Image */}
                   <div className="aspect-3/2 flex overflow-clip rounded-lg mb-3 relative">
                     {restaurant.photos?.[0] ? (
-                      <img
+                      <Image
                         src={restaurant.photos[0]}
                         alt={restaurant.name || ""}
                         className="h-full w-full object-cover object-center"
+                        width={280}
+                        height={186}
                       />
                     ) : (
                       <div className="h-full w-full bg-muted/50 flex items-center justify-center rounded-lg">

@@ -2,9 +2,6 @@ import {
   IconCircle1,
   IconCircle2,
   IconCircle3,
-  IconNumber1,
-  IconNumber2,
-  IconNumber3,
 } from "@tabler/icons-react";
 import React from "react";
 import { getTranslations } from "next-intl/server";

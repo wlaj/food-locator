@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -27,11 +27,7 @@ export default function VotesTable({ initialVotes = [] }: VotesTableProps) {
   
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchVotes();
-  }, []);
-
-  const fetchVotes = async () => {
+  const fetchVotes = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('community_votes')
@@ -44,7 +40,11 @@ export default function VotesTable({ initialVotes = [] }: VotesTableProps) {
       console.error('Error fetching votes:', error);
       toast.error('Failed to load votes');
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchVotes();
+  }, [fetchVotes]);
 
   const handleRefresh = () => {
     fetchVotes(); // Refresh the list

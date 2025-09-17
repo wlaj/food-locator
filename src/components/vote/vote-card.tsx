@@ -36,7 +36,7 @@ export default function VoteCard({ vote }: VoteCardProps) {
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [user, setUser] = useState<{ id: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [anonymousVoted, setAnonymousVoted] = useState(false);
   const supabase = createClient();
 

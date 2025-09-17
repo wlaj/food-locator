@@ -66,10 +66,8 @@ import {
   Leaf,
   Star,
   Accessibility,
-  Car,
   ShoppingBag,
-  Truck,
-  ShoppingCart
+  Truck
 } from "lucide-react";
 
 interface RestaurantDialogProps {
@@ -124,21 +122,27 @@ export default function RestaurantDialog({
   const [waitTime, setWaitTime] = useState(restaurant?.wait_time || "");
   const [hiddenGemFlag, setHiddenGemFlag] = useState(restaurant?.hidden_gem_flag || false);
   const [seatingCapacity, setSeatingCapacity] = useState(
-    (restaurant?.seating_info as any)?.capacity?.toString() || ""
+    (restaurant?.seating_info as { capacity?: number })?.capacity?.toString() || ""
   );
   const [outdoorSeating, setOutdoorSeating] = useState(
-    (restaurant?.seating_info as any)?.outdoor || false
+    (restaurant?.seating_info as { outdoor?: boolean })?.outdoor || false
   );
   const [reservations, setReservations] = useState(
-    (restaurant?.seating_info as any)?.reservations || false
+    (restaurant?.seating_info as { reservations?: boolean })?.reservations || false
   );
   const [wheelchairAccessible, setWheelchairAccessible] = useState(
-    (restaurant?.accessibility as any)?.wheelchair || false
+    (restaurant?.accessibility as { wheelchair?: boolean })?.wheelchair || false
   );
   const [petFriendly, setPetFriendly] = useState(
-    (restaurant?.accessibility as any)?.pet_friendly || false
+    (restaurant?.accessibility as { pet_friendly?: boolean })?.pet_friendly || false
   );
   const ratingId = useId();
+  const accessibilityId1 = useId();
+  const accessibilityId2 = useId();
+  const ambienceId = useId();
+  const serviceId = useId();
+  const accessibilityId3 = useId();
+  const sustainabilityId = useId();
   const nameRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const nameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -889,8 +893,8 @@ export default function RestaurantDialog({
               {[
                 { label: "Wheelchair Accessible", icon: Accessibility },
                 { label: "Pet Friendly", icon: Heart }
-              ].map(({ label, icon: Icon }) => {
-                const accessibilityId = useId();
+              ].map(({ label, icon: Icon }, index) => {
+                const id = index === 0 ? accessibilityId1 : accessibilityId2;
                 const isChecked = label === "Wheelchair Accessible" ? wheelchairAccessible : petFriendly;
                 const onChange = label === "Wheelchair Accessible" ? setWheelchairAccessible : setPetFriendly;
                 
@@ -901,14 +905,14 @@ export default function RestaurantDialog({
                   >
                     <div className="flex justify-between gap-2">
                       <Checkbox
-                        id={`${accessibilityId}-${label}`}
+                        id={`${id}-${label}`}
                         className="order-1 after:absolute after:inset-0"
                         checked={isChecked}
                         onCheckedChange={(checked: boolean) => onChange(checked)}
                       />
                       <Icon className="opacity-60" size={16} aria-hidden="true" />
                     </div>
-                    <Label htmlFor={`${accessibilityId}-${label}`} className="text-sm">{label}</Label>
+                    <Label htmlFor={`${id}-${label}`} className="text-sm">{label}</Label>
                   </div>
                 );
               })}
@@ -947,8 +951,8 @@ export default function RestaurantDialog({
                 { label: "Lively", icon: Music },
                 { label: "Intimate", icon: Heart },
                 { label: "Spacious", icon: Building2 }
-              ].map(({ label, icon: Icon }) => {
-                const ambienceId = useId();
+              ].map(({ label, icon: Icon }, index) => {
+                const id = `${ambienceId}-${index}`;
                 return (
                   <div
                     key={label}
@@ -956,7 +960,7 @@ export default function RestaurantDialog({
                   >
                     <div className="flex justify-between gap-2">
                       <Checkbox
-                        id={`${ambienceId}-${label}`}
+                        id={id}
                         className="order-1 after:absolute after:inset-0"
                         checked={selectedAmbienceTags.includes(label)}
                         onCheckedChange={(checked: boolean) => {
@@ -969,7 +973,7 @@ export default function RestaurantDialog({
                       />
                       <Icon className="opacity-60" size={16} aria-hidden="true" />
                     </div>
-                    <Label htmlFor={`${ambienceId}-${label}`} className="text-sm">{label}</Label>
+                    <Label htmlFor={id} className="text-sm">{label}</Label>
                   </div>
                 );
               })}
@@ -984,8 +988,8 @@ export default function RestaurantDialog({
                 { label: "Dine-in", icon: Utensils },
                 { label: "Takeaway", icon: ShoppingBag },
                 { label: "Delivery", icon: Truck }
-              ].map(({ label, icon: Icon }) => {
-                const serviceId = useId();
+              ].map(({ label, icon: Icon }, index) => {
+                const id = `${serviceId}-${index}`;
                 return (
                   <div
                     key={label}
@@ -993,7 +997,7 @@ export default function RestaurantDialog({
                   >
                     <div className="flex justify-between gap-2">
                       <Checkbox
-                        id={`${serviceId}-${label}`}
+                        id={id}
                         className="order-1 after:absolute after:inset-0"
                         checked={selectedServiceOptions.includes(label)}
                         onCheckedChange={(checked: boolean) => {
@@ -1006,7 +1010,7 @@ export default function RestaurantDialog({
                       />
                       <Icon className="opacity-60" size={16} aria-hidden="true" />
                     </div>
-                    <Label htmlFor={`${serviceId}-${label}`} className="text-sm">{label}</Label>
+                    <Label htmlFor={id} className="text-sm">{label}</Label>
                   </div>
                 );
               })}
@@ -1072,8 +1076,8 @@ export default function RestaurantDialog({
                   {[
                     { label: "Wheelchair Accessible", icon: Accessibility },
                     { label: "Pet Friendly", icon: Heart }
-                  ].map(({ label, icon: Icon }) => {
-                    const accessibilityId = useId();
+                  ].map(({ label, icon: Icon }, index) => {
+                    const id = index === 0 ? accessibilityId3 : `${accessibilityId3}-2`;
                     const isChecked = label === "Wheelchair Accessible" ? wheelchairAccessible : petFriendly;
                     const onChange = label === "Wheelchair Accessible" ? setWheelchairAccessible : setPetFriendly;
                     
@@ -1084,14 +1088,14 @@ export default function RestaurantDialog({
                       >
                         <div className="flex justify-between gap-2">
                           <Checkbox
-                            id={`${accessibilityId}-${label}`}
+                            id={`${id}-${label}`}
                             className="order-1 after:absolute after:inset-0"
                             checked={isChecked}
                             onCheckedChange={(checked: boolean) => onChange(checked)}
                           />
                           <Icon className="opacity-60" size={16} aria-hidden="true" />
                         </div>
-                        <Label htmlFor={`${accessibilityId}-${label}`} className="text-sm">{label}</Label>
+                        <Label htmlFor={`${id}-${label}`} className="text-sm">{label}</Label>
                       </div>
                     );
                   })}
@@ -1113,8 +1117,8 @@ export default function RestaurantDialog({
                 { label: "Sustainable Packaging", icon: Leaf },
                 { label: "Fair Trade", icon: Star },
                 { label: "Zero Waste", icon: Leaf }
-              ].map(({ label, icon: Icon }) => {
-                const sustainabilityId = useId();
+              ].map(({ label, icon: Icon }, index) => {
+                const id = `${sustainabilityId}-${index}`;
                 return (
                   <div
                     key={label}
@@ -1122,7 +1126,7 @@ export default function RestaurantDialog({
                   >
                     <div className="flex justify-between gap-2">
                       <Checkbox
-                        id={`${sustainabilityId}-${label}`}
+                        id={id}
                         className="order-1 after:absolute after:inset-0"
                         checked={selectedSustainabilityTags.includes(label)}
                         onCheckedChange={(checked: boolean) => {
@@ -1135,7 +1139,7 @@ export default function RestaurantDialog({
                       />
                       <Icon className="opacity-60" size={16} aria-hidden="true" />
                     </div>
-                    <Label htmlFor={`${sustainabilityId}-${label}`} className="text-sm">{label}</Label>
+                    <Label htmlFor={id} className="text-sm">{label}</Label>
                   </div>
                 );
               })}

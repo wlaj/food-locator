@@ -1,4 +1,3 @@
-import { GalleryVerticalEnd } from "lucide-react"
 import { signUpWithEmail } from '@/lib/auth-actions'
 import Link from 'next/link'
 
