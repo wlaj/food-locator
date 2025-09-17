@@ -889,3 +889,152 @@ export async function updateDishPost(dishId: string, postId: string, formData: F
     return { error: 'Failed to update dish post' };
   }
 }
+
+// Comment actions
+export async function getComments(postId: string) {
+  const supabase = await createClient();
+  
+  const { data: comments, error } = await supabase
+    .from('comments')
+    .select(`
+      *,
+      users_with_usernames!comments_created_by_fkey (
+        user_id,
+        username,
+        email
+      )
+    `)
+    .eq('post_id', postId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching comments:', error);
+    return null;
+  }
+
+  return comments;
+}
+
+export async function createComment(postId: string, content: string, parentCommentId?: string) {
+  const supabase = await createClient();
+  
+  // Check authentication first
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be logged in to comment' };
+  }
+
+  if (!content || content.trim().length === 0) {
+    return { error: 'Comment content is required' };
+  }
+
+  const { data: comment, error } = await supabase
+    .from('comments')
+    .insert({
+      post_id: postId,
+      content: content.trim(),
+      parent_comment_id: parentCommentId,
+      created_by: user.id,
+    })
+    .select(`
+      *,
+      users_with_usernames!comments_created_by_fkey (
+        user_id,
+        username,
+        email
+      )
+    `)
+    .single();
+
+  if (error) {
+    console.error('Error creating comment:', error);
+    return { error: 'Failed to create comment' };
+  }
+
+  revalidatePath('/', 'layout');
+  return { success: true, comment };
+}
+
+export async function updateComment(commentId: string, content: string) {
+  const supabase = await createClient();
+  
+  // Check authentication first
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be logged in to update comments' };
+  }
+
+  if (!content || content.trim().length === 0) {
+    return { error: 'Comment content is required' };
+  }
+
+  // Check if user owns the comment
+  const { data: existingComment, error: fetchError } = await supabase
+    .from('comments')
+    .select('created_by')
+    .eq('id', commentId)
+    .single();
+
+  if (fetchError || !existingComment) {
+    return { error: 'Comment not found' };
+  }
+
+  if (existingComment.created_by !== user.id) {
+    return { error: 'You can only edit your own comments' };
+  }
+
+  const { error } = await supabase
+    .from('comments')
+    .update({
+      content: content.trim(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', commentId);
+
+  if (error) {
+    console.error('Error updating comment:', error);
+    return { error: 'Failed to update comment' };
+  }
+
+  revalidatePath('/', 'layout');
+  return { success: true };
+}
+
+export async function deleteComment(commentId: string) {
+  const supabase = await createClient();
+  
+  // Check authentication first
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { error: 'You must be logged in to delete comments' };
+  }
+
+  // Check if user owns the comment
+  const { data: existingComment, error: fetchError } = await supabase
+    .from('comments')
+    .select('created_by')
+    .eq('id', commentId)
+    .single();
+
+  if (fetchError || !existingComment) {
+    return { error: 'Comment not found' };
+  }
+
+  if (existingComment.created_by !== user.id) {
+    return { error: 'You can only delete your own comments' };
+  }
+
+  const { error } = await supabase
+    .from('comments')
+    .update({ is_active: false })
+    .eq('id', commentId);
+
+  if (error) {
+    console.error('Error deleting comment:', error);
+    return { error: 'Failed to delete comment' };
+  }
+
+  revalidatePath('/', 'layout');
+  return { success: true };
+}

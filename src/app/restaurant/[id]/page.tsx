@@ -12,9 +12,9 @@ import type { Metadata } from "next";
 import { cache } from "react";
 
 interface RestaurantPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const getRestaurant = cache(async (id: string): Promise<Restaurant | null> => {
@@ -23,7 +23,8 @@ const getRestaurant = cache(async (id: string): Promise<Restaurant | null> => {
 });
 
 export async function generateMetadata({ params }: RestaurantPageProps): Promise<Metadata> {
-  const restaurant = await getRestaurant(params.id);
+  const { id } = await params;
+  const restaurant = await getRestaurant(id);
   
   if (!restaurant) {
     return {
@@ -55,7 +56,7 @@ export async function generateMetadata({ params }: RestaurantPageProps): Promise
       description,
       type: 'website',
       locale: 'en_US',
-      url: `/restaurant/${params.id}`,
+      url: `/restaurant/${id}`,
       images: restaurant.image_url ? [
         {
           url: restaurant.image_url,
@@ -73,13 +74,14 @@ export async function generateMetadata({ params }: RestaurantPageProps): Promise
       images: restaurant.image_url ? [restaurant.image_url] : [],
     },
     alternates: {
-      canonical: `/restaurant/${params.id}`,
+      canonical: `/restaurant/${id}`,
     },
   };
 }
 
 export default async function RestaurantPage({ params }: RestaurantPageProps) {
-  const restaurant = await getRestaurant(params.id);
+  const { id } = await params;
+  const restaurant = await getRestaurant(id);
   
   if (!restaurant) {
     notFound();

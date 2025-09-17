@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import EditDishDialog from "@/components/edit-dish-dialog";
+import CommentSection from "@/components/comment-section";
 
 interface DishPost {
   id: string;
@@ -55,6 +56,7 @@ interface DishPostCardProps {
 export default function DishPostCard({ post, currentUser }: DishPostCardProps) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
+  const [showComments, setShowComments] = useState(false);
 
   const dish = post.dish_posts[0]?.dishes;
   const restaurant = dish?.restaurants;
@@ -238,7 +240,10 @@ export default function DishPostCard({ post, currentUser }: DishPostCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="flex items-center space-x-1 text-muted-foreground"
+              onClick={() => setShowComments(!showComments)}
+              className={`flex items-center space-x-1 ${
+                showComments ? 'text-blue-600' : 'text-muted-foreground'
+              }`}
             >
               <MessageCircle className="h-4 w-4" />
               <span className="text-sm">{post.comments_count || 0}</span>
@@ -246,6 +251,13 @@ export default function DishPostCard({ post, currentUser }: DishPostCardProps) {
           </div>
         </div>
       </CardFooter>
+      
+      {/* Comments Section */}
+      {showComments && (
+        <CardContent className="pt-0 border-t">
+          <CommentSection postId={post.id} currentUser={currentUser} />
+        </CardContent>
+      )}
     </Card>
   );
 }
