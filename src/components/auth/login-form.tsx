@@ -1,4 +1,7 @@
-import { signInWithEmail } from '@/lib/auth-actions'
+"use client"
+
+import { useSearchParams } from 'next/navigation'
+import { signInWithOtp } from '@/lib/auth-actions'
 import Link from 'next/link'
 
 import { cn } from "@/lib/utils"
@@ -10,9 +13,12 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const searchParams = useSearchParams()
+  const emailParam = searchParams.get('email')
+  
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form action={signInWithEmail}>
+      <form action={signInWithOtp}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
             <Link
@@ -37,21 +43,12 @@ export function LoginForm({
                 name="email"
                 type="email"
                 placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
+                defaultValue={emailParam || ''}
                 required
               />
             </div>
             <Button type="submit" className="w-full">
-              Login
+              Send OTP
             </Button>
           </div>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">

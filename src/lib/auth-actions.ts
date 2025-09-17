@@ -52,6 +52,45 @@ export async function signOut() {
   redirect('/login')
 }
 
+export async function signInWithOtp(formData: FormData) {
+  const supabase = await createClient()
+  
+  const email = formData.get('email') as string
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+    },
+  })
+
+  if (error) {
+    redirect('/login?error=' + encodeURIComponent('Could not send OTP. Please try again.'))
+  }
+
+  redirect('/verify-otp?email=' + encodeURIComponent(email))
+}
+
+export async function verifyOtp(formData: FormData) {
+  const supabase = await createClient()
+  
+  const email = formData.get('email') as string
+  const token = formData.get('token') as string
+
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  })
+
+  if (error) {
+    redirect('/verify-otp?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Invalid OTP. Please try again.'))
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/dashboard')
+}
+
 export async function updateUserProfile(formData: FormData) {
   const supabase = await createClient()
   
