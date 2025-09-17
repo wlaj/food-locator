@@ -14,6 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string
+          id: string
+          is_active: boolean | null
+          parent_comment_id: string | null
+          post_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_active?: boolean | null
+          parent_comment_id?: string | null
+          post_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_active?: boolean | null
+          parent_comment_id?: string | null
+          post_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users_with_usernames"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_user_votes: {
         Row: {
           created_at: string | null
@@ -446,73 +501,100 @@ export type Database = {
       }
       restaurants: {
         Row: {
+          accessibility: Json | null
           address: string | null
-          atmosphere: number | null
-          authenticity: number | null
+          alcohol_options: string | null
+          ambience_tags: string[] | null
+          atmosphere_score: number | null
+          authenticity_score: number | null
+          average_rating: number | null
           created_at: string | null
           created_by: string | null
-          cuisine: string | null
+          cuisine: string[] | null
           description: string | null
-          dietary: string[] | null
-          favorite_dishes: string[] | null
+          dietary_tags: string[] | null
+          hidden_gem_flag: boolean | null
           id: string
-          image_url: string | null
-          latitude: number | null
-          likes: number | null
-          location: string | null
-          longitude: number | null
+          like_count: number | null
+          location_lat: number | null
+          location_lng: number | null
           name: string | null
+          neighborhood: string | null
           persona_scores: Json | null
-          price: number | null
-          rating_score: number | null
+          photos: string[] | null
+          price_range: number | null
+          seating_info: Json | null
+          service_options: string[] | null
+          specialties: string[] | null
+          sustainability: string[] | null
           updated_at: string | null
           updated_by: string | null
+          verified: boolean | null
+          wait_time: string | null
         }
         Insert: {
+          accessibility?: Json | null
           address?: string | null
-          atmosphere?: number | null
-          authenticity?: number | null
+          alcohol_options?: string | null
+          ambience_tags?: string[] | null
+          atmosphere_score?: number | null
+          authenticity_score?: number | null
+          average_rating?: number | null
           created_at?: string | null
           created_by?: string | null
-          cuisine?: string | null
+          cuisine?: string[] | null
           description?: string | null
-          dietary?: string[] | null
-          favorite_dishes?: string[] | null
+          dietary_tags?: string[] | null
+          hidden_gem_flag?: boolean | null
           id: string
-          image_url?: string | null
-          latitude?: number | null
-          likes?: number | null
-          location?: string | null
-          longitude?: number | null
+          like_count?: number | null
+          location_lat?: number | null
+          location_lng?: number | null
           name?: string | null
+          neighborhood?: string | null
           persona_scores?: Json | null
-          price?: number | null
-          rating_score?: number | null
+          photos?: string[] | null
+          price_range?: number | null
+          seating_info?: Json | null
+          service_options?: string[] | null
+          specialties?: string[] | null
+          sustainability?: string[] | null
           updated_at?: string | null
           updated_by?: string | null
+          verified?: boolean | null
+          wait_time?: string | null
         }
         Update: {
+          accessibility?: Json | null
           address?: string | null
-          atmosphere?: number | null
-          authenticity?: number | null
+          alcohol_options?: string | null
+          ambience_tags?: string[] | null
+          atmosphere_score?: number | null
+          authenticity_score?: number | null
+          average_rating?: number | null
           created_at?: string | null
           created_by?: string | null
-          cuisine?: string | null
+          cuisine?: string[] | null
           description?: string | null
-          dietary?: string[] | null
-          favorite_dishes?: string[] | null
+          dietary_tags?: string[] | null
+          hidden_gem_flag?: boolean | null
           id?: string
-          image_url?: string | null
-          latitude?: number | null
-          likes?: number | null
-          location?: string | null
-          longitude?: number | null
+          like_count?: number | null
+          location_lat?: number | null
+          location_lng?: number | null
           name?: string | null
+          neighborhood?: string | null
           persona_scores?: Json | null
-          price?: number | null
-          rating_score?: number | null
+          photos?: string[] | null
+          price_range?: number | null
+          seating_info?: Json | null
+          service_options?: string[] | null
+          specialties?: string[] | null
+          sustainability?: string[] | null
           updated_at?: string | null
           updated_by?: string | null
+          verified?: boolean | null
+          wait_time?: string | null
         }
         Relationships: [
           {
@@ -898,3 +980,6 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// Convenience type alias for the Restaurant table
+export type Restaurant = Tables<'restaurants'>

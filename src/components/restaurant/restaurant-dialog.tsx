@@ -28,6 +28,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   createRestaurant,
   updateRestaurant,
@@ -45,6 +53,24 @@ import {
   LoaderCircleIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Building2,
+  Calendar,
+  Coffee,
+  Heart,
+  HomeIcon,
+  Music,
+  Users,
+  Utensils,
+  Wifi,
+  Leaf,
+  Star,
+  Accessibility,
+  Car,
+  ShoppingBag,
+  Truck,
+  ShoppingCart
+} from "lucide-react";
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant;
@@ -58,16 +84,16 @@ export default function RestaurantDialog({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
-    restaurant?.image_url || null
+    restaurant?.photos?.[0] || null
   );
   const [cuisineOpen, setCuisineOpen] = useState(false);
-  const [selectedCuisine, setSelectedCuisine] = useState(
-    restaurant?.cuisine || ""
+  const [selectedCuisines, setSelectedCuisines] = useState<string[]>(
+    restaurant?.cuisine || []
   );
   const [cuisines, setCuisines] = useState<string[]>([]);
   const [locationOpen, setLocationOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(
-    restaurant?.location || ""
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState(
+    restaurant?.neighborhood || ""
   );
   const [locations, setLocations] = useState<string[]>([]);
   const [nameValidation, setNameValidation] = useState<{
@@ -81,6 +107,37 @@ export default function RestaurantDialog({
     formattedAddress: string | null;
     error: string | null;
   }>({ isChecking: false, coordinates: null, formattedAddress: null, error: null });
+  const [verified, setVerified] = useState(restaurant?.verified || false);
+  const [selectedAmbienceTags, setSelectedAmbienceTags] = useState<string[]>(
+    restaurant?.ambience_tags || []
+  );
+  const [selectedServiceOptions, setSelectedServiceOptions] = useState<string[]>(
+    restaurant?.service_options || []
+  );
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [alcoholOptions, setAlcoholOptions] = useState(
+    restaurant?.alcohol_options || ""
+  );
+  const [selectedSustainabilityTags, setSelectedSustainabilityTags] = useState<string[]>(
+    restaurant?.sustainability || []
+  );
+  const [waitTime, setWaitTime] = useState(restaurant?.wait_time || "");
+  const [hiddenGemFlag, setHiddenGemFlag] = useState(restaurant?.hidden_gem_flag || false);
+  const [seatingCapacity, setSeatingCapacity] = useState(
+    (restaurant?.seating_info as any)?.capacity?.toString() || ""
+  );
+  const [outdoorSeating, setOutdoorSeating] = useState(
+    (restaurant?.seating_info as any)?.outdoor || false
+  );
+  const [reservations, setReservations] = useState(
+    (restaurant?.seating_info as any)?.reservations || false
+  );
+  const [wheelchairAccessible, setWheelchairAccessible] = useState(
+    (restaurant?.accessibility as any)?.wheelchair || false
+  );
+  const [petFriendly, setPetFriendly] = useState(
+    (restaurant?.accessibility as any)?.pet_friendly || false
+  );
   const ratingId = useId();
   const nameRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
@@ -229,6 +286,13 @@ export default function RestaurantDialog({
         const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
 
+        // Fetch user role
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: roleData } = await supabase.rpc('get_my_role');
+          setUserRole(roleData);
+        }
+
         // Fetch cuisines
         const { data: cuisineData } = await supabase
           .from("cuisines")
@@ -289,9 +353,57 @@ export default function RestaurantDialog({
 
     // Add coordinates to form data if available from address validation
     if (addressValidation.coordinates) {
-      formData.set("latitude", addressValidation.coordinates.lat.toString());
-      formData.set("longitude", addressValidation.coordinates.lng.toString());
+      formData.set("location_lat", addressValidation.coordinates.lat.toString());
+      formData.set("location_lng", addressValidation.coordinates.lng.toString());
     }
+    
+    // Handle cuisine array
+    formData.delete("cuisine");
+    selectedCuisines.forEach(cuisine => {
+      formData.append("cuisine", cuisine);
+    });
+
+    // Handle array fields
+    formData.delete("ambience_tags");
+    selectedAmbienceTags.forEach(tag => {
+      formData.append("ambience_tags", tag);
+    });
+
+    formData.delete("service_options");
+    selectedServiceOptions.forEach(option => {
+      formData.append("service_options", option);
+    });
+
+
+    formData.delete("sustainability");
+    selectedSustainabilityTags.forEach(tag => {
+      formData.append("sustainability", tag);
+    });
+
+    // Handle boolean fields (admin only)
+    if (userRole === 'admin') {
+      formData.set("verified", verified.toString());
+      formData.set("hidden_gem_flag", hiddenGemFlag.toString());
+    }
+
+    // Handle JSON fields - accessibility for all users
+    formData.set("accessibility", JSON.stringify({
+      wheelchair: wheelchairAccessible,
+      pet_friendly: petFriendly
+    }));
+
+    // Handle admin-only JSON fields
+    if (userRole === 'admin') {
+      formData.set("seating_info", JSON.stringify({
+        capacity: seatingCapacity ? parseInt(seatingCapacity) : null,
+        outdoor: outdoorSeating,
+        reservations: reservations
+      }));
+
+      // Handle single select fields
+      if (alcoholOptions) formData.set("alcohol_options", alcoholOptions);
+    }
+    if (waitTime) formData.set("wait_time", waitTime);
 
     setLoading(true);
 
@@ -405,7 +517,9 @@ export default function RestaurantDialog({
                     aria-expanded={cuisineOpen}
                     className="w-full justify-between"
                   >
-                    {selectedCuisine || "Select cuisine..."}
+                    {selectedCuisines.length > 0 
+                      ? `${selectedCuisines.length} cuisine${selectedCuisines.length > 1 ? 's' : ''} selected`
+                      : "Select cuisines..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -420,18 +534,17 @@ export default function RestaurantDialog({
                             key={cuisine}
                             value={cuisine}
                             onSelect={(currentValue) => {
-                              setSelectedCuisine(
-                                currentValue === selectedCuisine
-                                  ? ""
-                                  : currentValue
+                              setSelectedCuisines(prev => 
+                                prev.includes(currentValue)
+                                  ? prev.filter(c => c !== currentValue)
+                                  : [...prev, currentValue]
                               );
-                              setCuisineOpen(false);
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                selectedCuisine === cuisine
+                                selectedCuisines.includes(cuisine)
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
@@ -444,7 +557,25 @@ export default function RestaurantDialog({
                   </Command>
                 </PopoverContent>
               </Popover>
-              <input name="cuisine" type="hidden" value={selectedCuisine} />
+              {selectedCuisines.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedCuisines.map((cuisine) => (
+                    <span
+                      key={cuisine}
+                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary"
+                    >
+                      {cuisine}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCuisines(prev => prev.filter(c => c !== cuisine))}
+                        className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -457,7 +588,7 @@ export default function RestaurantDialog({
                     aria-expanded={locationOpen}
                     className="w-full justify-between"
                   >
-                    {selectedLocation || "Select location..."}
+                    {selectedNeighborhood || "Select neighborhood..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -472,8 +603,8 @@ export default function RestaurantDialog({
                             key={location}
                             value={location}
                             onSelect={(currentValue) => {
-                              setSelectedLocation(
-                                currentValue === selectedLocation
+                              setSelectedNeighborhood(
+                                currentValue === selectedNeighborhood
                                   ? ""
                                   : currentValue
                               );
@@ -483,7 +614,7 @@ export default function RestaurantDialog({
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                selectedLocation === location
+                                selectedNeighborhood === location
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
@@ -496,7 +627,7 @@ export default function RestaurantDialog({
                   </Command>
                 </PopoverContent>
               </Popover>
-              <input name="location" type="hidden" value={selectedLocation} />
+              <input name="neighborhood" type="hidden" value={selectedNeighborhood} />
             </div>
 
             <div className="space-y-2">
@@ -567,25 +698,34 @@ export default function RestaurantDialog({
                     restaurants={[{
                       id: 'temp-location',
                       name: addressValidation.formattedAddress || 'Selected Location',
-                      latitude: addressValidation.coordinates.lat,
-                      longitude: addressValidation.coordinates.lng,
+                      location_lat: addressValidation.coordinates.lat,
+                      location_lng: addressValidation.coordinates.lng,
                       address: addressValidation.formattedAddress,
-                      cuisine: selectedCuisine || null,
-                      location: selectedLocation || null,
-                      rating_score: null,
-                      price: null,
-                      image_url: null,
-                      likes: 0,
-                      atmosphere: null,
-                      authenticity: null,
+                      cuisine: selectedCuisines.length > 0 ? selectedCuisines : null,
+                      neighborhood: selectedNeighborhood || null,
+                      average_rating: null,
+                      price_range: null,
+                      photos: null,
+                      like_count: 0,
+                      atmosphere_score: null,
+                      authenticity_score: null,
                       created_at: null,
                       created_by: null,
                       description: null,
-                      dietary: null,
-                      favorite_dishes: null,
+                      dietary_tags: null,
+                      specialties: null,
                       persona_scores: null,
                       updated_at: null,
-                      updated_by: null
+                      updated_by: null,
+                      accessibility: null,
+                      alcohol_options: null,
+                      ambience_tags: null,
+                      hidden_gem_flag: null,
+                      seating_info: null,
+                      service_options: null,
+                      sustainability: null,
+                      verified: null,
+                      wait_time: null
                     }]}
                     height="200px"
                     className="rounded-lg border border-border/50"
@@ -600,8 +740,8 @@ export default function RestaurantDialog({
               </legend>
               <RadioGroup
                 className="flex gap-0 -space-x-px rounded-md shadow-xs"
-                name="price"
-                defaultValue={restaurant?.price?.toString() || ""}
+                name="price_range"
+                defaultValue={restaurant?.price_range?.toString() || ""}
               >
                 {["1", "2", "3", "4", "5"].map((value) => (
                   <label
@@ -628,8 +768,8 @@ export default function RestaurantDialog({
               </legend>
               <RadioGroup
                 className="flex gap-1.5 w-full"
-                name="rating_score"
-                defaultValue={restaurant?.rating_score?.toString() || ""}
+                name="average_rating"
+                defaultValue={restaurant?.average_rating?.toString() || ""}
               >
                 {[
                   { value: "1", label: "Terrible", icon: "😠" },
@@ -659,8 +799,8 @@ export default function RestaurantDialog({
               </legend>
               <RadioGroup
                 className="flex gap-0 -space-x-px rounded-md shadow-xs"
-                name="atmosphere"
-                defaultValue={restaurant?.atmosphere?.toString() || ""}
+                name="atmosphere_score"
+                defaultValue={restaurant?.atmosphere_score?.toString() || ""}
               >
                 {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map(
                   (value) => (
@@ -689,8 +829,8 @@ export default function RestaurantDialog({
               </legend>
               <RadioGroup
                 className="flex gap-0 -space-x-px rounded-md shadow-xs"
-                name="authenticity"
-                defaultValue={restaurant?.authenticity?.toString() || ""}
+                name="authenticity_score"
+                defaultValue={restaurant?.authenticity_score?.toString() || ""}
               >
                 {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map(
                   (value) => (
@@ -725,22 +865,309 @@ export default function RestaurantDialog({
           </div>
 
           <DietaryTagSelector
-            defaultValues={restaurant?.dietary || []}
-            name="dietary"
+            defaultValues={restaurant?.dietary_tags || []}
+            name="dietary_tags"
             placeholder="Add dietary option"
           />
 
           <div className="space-y-2">
-            <Label htmlFor="favorite_dishes">
-              Favorite Dishes (comma-separated)
+            <Label htmlFor="specialties">
+              Specialties (comma-separated)
             </Label>
             <Input
-              id="favorite_dishes"
-              name="favorite_dishes"
-              placeholder="pasta, pizza, salad"
-              defaultValue={restaurant?.favorite_dishes?.join(", ") || ""}
+              id="specialties"
+              name="specialties"
+              placeholder="nasi goreng, rendang, gado-gado"
+              defaultValue={restaurant?.specialties?.join(", ") || ""}
             />
           </div>
+
+          {/* Accessibility - For all users */}
+          <div className="space-y-4">
+            <Label className="text-sm font-medium">Accessibility</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Wheelchair Accessible", icon: Accessibility },
+                { label: "Pet Friendly", icon: Heart }
+              ].map(({ label, icon: Icon }) => {
+                const accessibilityId = useId();
+                const isChecked = label === "Wheelchair Accessible" ? wheelchairAccessible : petFriendly;
+                const onChange = label === "Wheelchair Accessible" ? setWheelchairAccessible : setPetFriendly;
+                
+                return (
+                  <div
+                    key={label}
+                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <Checkbox
+                        id={`${accessibilityId}-${label}`}
+                        className="order-1 after:absolute after:inset-0"
+                        checked={isChecked}
+                        onCheckedChange={(checked: boolean) => onChange(checked)}
+                      />
+                      <Icon className="opacity-60" size={16} aria-hidden="true" />
+                    </div>
+                    <Label htmlFor={`${accessibilityId}-${label}`} className="text-sm">{label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Admin-only fields */}
+          {userRole === 'admin' && (
+            <>
+              {/* Verified Status */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="verified"
+                  checked={verified}
+                  onCheckedChange={(checked: boolean) => setVerified(checked)}
+                />
+                <Label htmlFor="verified">Verified Restaurant</Label>
+              </div>
+            </>
+          )}
+
+          {/* Ambience Tags */}
+          <div className="space-y-2">
+            <Label>Ambience Tags</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Romantic", icon: Heart },
+                { label: "Family-friendly", icon: Users },
+                { label: "Casual", icon: Coffee },
+                { label: "Upscale", icon: Building2 },
+                { label: "Cozy", icon: HomeIcon },
+                { label: "Trendy", icon: Star },
+                { label: "Traditional", icon: Calendar },
+                { label: "Modern", icon: Wifi },
+                { label: "Quiet", icon: Calendar },
+                { label: "Lively", icon: Music },
+                { label: "Intimate", icon: Heart },
+                { label: "Spacious", icon: Building2 }
+              ].map(({ label, icon: Icon }) => {
+                const ambienceId = useId();
+                return (
+                  <div
+                    key={label}
+                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <Checkbox
+                        id={`${ambienceId}-${label}`}
+                        className="order-1 after:absolute after:inset-0"
+                        checked={selectedAmbienceTags.includes(label)}
+                        onCheckedChange={(checked: boolean) => {
+                          if (checked) {
+                            setSelectedAmbienceTags(prev => [...prev, label]);
+                          } else {
+                            setSelectedAmbienceTags(prev => prev.filter(t => t !== label));
+                          }
+                        }}
+                      />
+                      <Icon className="opacity-60" size={16} aria-hidden="true" />
+                    </div>
+                    <Label htmlFor={`${ambienceId}-${label}`} className="text-sm">{label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Service Options */}
+          <div className="space-y-2">
+            <Label>Service Options</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Dine-in", icon: Utensils },
+                { label: "Takeaway", icon: ShoppingBag },
+                { label: "Delivery", icon: Truck }
+              ].map(({ label, icon: Icon }) => {
+                const serviceId = useId();
+                return (
+                  <div
+                    key={label}
+                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <Checkbox
+                        id={`${serviceId}-${label}`}
+                        className="order-1 after:absolute after:inset-0"
+                        checked={selectedServiceOptions.includes(label)}
+                        onCheckedChange={(checked: boolean) => {
+                          if (checked) {
+                            setSelectedServiceOptions(prev => [...prev, label]);
+                          } else {
+                            setSelectedServiceOptions(prev => prev.filter(o => o !== label));
+                          }
+                        }}
+                      />
+                      <Icon className="opacity-60" size={16} aria-hidden="true" />
+                    </div>
+                    <Label htmlFor={`${serviceId}-${label}`} className="text-sm">{label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+
+          {/* Admin-only sections */}
+          {userRole === 'admin' && (
+            <>
+              {/* Alcohol Options */}
+              <div className="space-y-2">
+                <Label>Alcohol Options</Label>
+                <Select value={alcoholOptions} onValueChange={setAlcoholOptions}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select alcohol options" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Alcohol</SelectItem>
+                    <SelectItem value="beer_wine">Beer & Wine</SelectItem>
+                    <SelectItem value="full_bar">Full Bar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Seating Info */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Seating Information</Label>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="seating-capacity">Seating Capacity</Label>
+                    <Input
+                      id="seating-capacity"
+                      type="number"
+                      placeholder="e.g., 50"
+                      value={seatingCapacity}
+                      onChange={(e) => setSeatingCapacity(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="outdoor-seating"
+                      checked={outdoorSeating}
+                      onCheckedChange={(checked: boolean) => setOutdoorSeating(checked)}
+                    />
+                    <Label htmlFor="outdoor-seating">Outdoor Seating Available</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="reservations"
+                      checked={reservations}
+                      onCheckedChange={(checked: boolean) => setReservations(checked)}
+                    />
+                    <Label htmlFor="reservations">Accepts Reservations</Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Accessibility */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium">Accessibility</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Wheelchair Accessible", icon: Accessibility },
+                    { label: "Pet Friendly", icon: Heart }
+                  ].map(({ label, icon: Icon }) => {
+                    const accessibilityId = useId();
+                    const isChecked = label === "Wheelchair Accessible" ? wheelchairAccessible : petFriendly;
+                    const onChange = label === "Wheelchair Accessible" ? setWheelchairAccessible : setPetFriendly;
+                    
+                    return (
+                      <div
+                        key={label}
+                        className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
+                      >
+                        <div className="flex justify-between gap-2">
+                          <Checkbox
+                            id={`${accessibilityId}-${label}`}
+                            className="order-1 after:absolute after:inset-0"
+                            checked={isChecked}
+                            onCheckedChange={(checked: boolean) => onChange(checked)}
+                          />
+                          <Icon className="opacity-60" size={16} aria-hidden="true" />
+                        </div>
+                        <Label htmlFor={`${accessibilityId}-${label}`} className="text-sm">{label}</Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Sustainability Tags */}
+          <div className="space-y-2">
+            <Label>Sustainability</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Organic", icon: Leaf },
+                { label: "Local Sourcing", icon: Building2 },
+                { label: "Waste Reduction", icon: Leaf },
+                { label: "Energy Efficient", icon: Leaf },
+                { label: "Vegan Options", icon: Utensils },
+                { label: "Sustainable Packaging", icon: Leaf },
+                { label: "Fair Trade", icon: Star },
+                { label: "Zero Waste", icon: Leaf }
+              ].map(({ label, icon: Icon }) => {
+                const sustainabilityId = useId();
+                return (
+                  <div
+                    key={label}
+                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <Checkbox
+                        id={`${sustainabilityId}-${label}`}
+                        className="order-1 after:absolute after:inset-0"
+                        checked={selectedSustainabilityTags.includes(label)}
+                        onCheckedChange={(checked: boolean) => {
+                          if (checked) {
+                            setSelectedSustainabilityTags(prev => [...prev, label]);
+                          } else {
+                            setSelectedSustainabilityTags(prev => prev.filter(t => t !== label));
+                          }
+                        }}
+                      />
+                      <Icon className="opacity-60" size={16} aria-hidden="true" />
+                    </div>
+                    <Label htmlFor={`${sustainabilityId}-${label}`} className="text-sm">{label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Wait Time - Full Width */}
+          <div className="space-y-2 w-full">
+            <Label>Typical Wait Time</Label>
+            <Select value={waitTime} onValueChange={setWaitTime}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select wait time" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="short">Short (0-15 min)</SelectItem>
+                <SelectItem value="medium">Medium (15-30 min)</SelectItem>
+                <SelectItem value="long">Long (30+ min)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Hidden Gem Flag - Admin Only */}
+          {userRole === 'admin' && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="hidden-gem"
+                checked={hiddenGemFlag}
+                onCheckedChange={(checked: boolean) => setHiddenGemFlag(checked)}
+              />
+              <Label htmlFor="hidden-gem">Hidden Gem</Label>
+            </div>
+          )}
 
           <DialogFooter>
             <Button

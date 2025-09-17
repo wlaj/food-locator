@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
-  const [likes, setLikes] = useState(restaurant.likes || 0);
+  const [likes, setLikes] = useState(restaurant.like_count || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -51,10 +51,10 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
           <div className="aspect-3/2 flex overflow-clip rounded-xl relative">
             <div className="flex-1">
               <div className="relative h-full w-full origin-bottom transition duration-300">
-                {restaurant.image_url ? (
+                {restaurant.photos?.[0] ? (
                   <Image
-                    src={restaurant.image_url}
-                    alt={`${restaurant.name} - ${restaurant.cuisine} restaurant in ${restaurant.location}`}
+                    src={restaurant.photos[0]}
+                    alt={`${restaurant.name} - ${restaurant.cuisine?.join(', ') || 'restaurant'} restaurant in ${restaurant.neighborhood}`}
                     fill
                     className="object-cover object-center"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -99,7 +99,7 @@ const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
           {restaurant.name}
         </div>
         <div className="text-muted-foreground mb-8 line-clamp-2 text-sm md:mb-12 md:text-base lg:mb-9">
-          {restaurant.cuisine}
+          {restaurant.cuisine?.join(', ') || 'Restaurant'}
         </div>
         <div className="flex items-center text-sm">
           View Details{" "}

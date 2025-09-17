@@ -5,10 +5,10 @@ import { ThumbsUp } from "lucide-react";
 import { IconAwardFilled } from "@tabler/icons-react";
 
 // Function to get cuisine-specific emoji/icon
-function getCuisineIcon(cuisine: string | null): string {
-  if (!cuisine) return '🍽️';
+function getCuisineIcon(cuisine: string[] | null): string {
+  if (!cuisine || cuisine.length === 0) return '🍽️';
   
-  const cuisineLower = cuisine.toLowerCase();
+  const cuisineLower = cuisine[0].toLowerCase();
   
   // Comprehensive cuisine to emoji mapping
   const iconMap: Record<string, string> = {
@@ -110,7 +110,7 @@ interface MapComponents {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Popup: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createCustomIcon: (isAward: boolean, cuisine: string | null) => any
+  createCustomIcon: (isAward: boolean, cuisine: string[] | null) => any
 }
 
 function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
@@ -172,7 +172,7 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
       }
 
       // Create custom restaurant pin icon with cuisine-specific emoji
-      const createCustomIcon = (isAward: boolean, cuisine: string | null) => {
+      const createCustomIcon = (isAward: boolean, cuisine: string[] | null) => {
         const cuisineEmoji = getCuisineIcon(cuisine);
         const isDefaultIcon = cuisineEmoji === '🍽️';
         const markerColor = isAward ? '#fbbf24' : (isDefaultIcon ? '#374151' : '#3b82f6');
@@ -250,7 +250,7 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
   }, [])
 
   const validRestaurants = restaurants.filter(
-    restaurant => restaurant.latitude !== null && restaurant.longitude !== null
+    restaurant => restaurant.location_lat !== null && restaurant.location_lng !== null
   )
 
   if (!mapComponents) {
@@ -286,12 +286,12 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
 
   // Calculate bounds for the map to show all restaurants
   const bounds = validRestaurants.length === 1 
-    ? [[validRestaurants[0].latitude! - 0.01, validRestaurants[0].longitude! - 0.01], 
-       [validRestaurants[0].latitude! + 0.01, validRestaurants[0].longitude! + 0.01]]
-    : validRestaurants.map(restaurant => [restaurant.latitude!, restaurant.longitude!])
+    ? [[validRestaurants[0].location_lat! - 0.01, validRestaurants[0].location_lng! - 0.01], 
+       [validRestaurants[0].location_lat! + 0.01, validRestaurants[0].location_lng! + 0.01]]
+    : validRestaurants.map(restaurant => [restaurant.location_lat!, restaurant.location_lng!])
 
   const center = validRestaurants.length === 1
-    ? [validRestaurants[0].latitude!, validRestaurants[0].longitude!]
+    ? [validRestaurants[0].location_lat!, validRestaurants[0].location_lng!]
     : [52.3676, 4.9041] // Amsterdam default
 
   return (
@@ -311,21 +311,21 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
           maxZoom={20}
         />
         {validRestaurants.map((restaurant) => {
-          const hasAward = (restaurant.likes || 0) >= 10;
+          const hasAward = (restaurant.like_count || 0) >= 10;
           
           return (
             <Marker
               key={restaurant.id}
-              position={[restaurant.latitude!, restaurant.longitude!]}
+              position={[restaurant.location_lat!, restaurant.location_lng!]}
               icon={createCustomIcon(hasAward, restaurant.cuisine)}
             >
               <Popup className="custom-popup" minWidth={280}>
                 <div className="p-2 bg-background">
                   {/* Restaurant Image */}
                   <div className="aspect-3/2 flex overflow-clip rounded-lg mb-3 relative">
-                    {restaurant.image_url ? (
+                    {restaurant.photos?.[0] ? (
                       <img
-                        src={restaurant.image_url}
+                        src={restaurant.photos[0]}
                         alt={restaurant.name || ""}
                         className="h-full w-full object-cover object-center"
                       />
@@ -345,7 +345,7 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
                     {/* Likes Button */}
                     <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 backdrop-blur-sm text-neutral-700 shadow-sm">
                       <ThumbsUp className="size-3" />
-                      <span className="text-xs font-medium">{restaurant.likes || 0}</span>
+                      <span className="text-xs font-medium">{restaurant.like_count || 0}</span>
                     </div>
                   </div>
 
@@ -354,24 +354,24 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
                     <h3 className="font-semibold text-lg mb-2 line-clamp-2">{restaurant.name}</h3>
                     
                     <div className="space-y-1 text-sm text-muted-foreground">
-                      {restaurant.cuisine && (
-                        <p className="font-medium text-foreground">{restaurant.cuisine}</p>
+                      {restaurant.cuisine && restaurant.cuisine.length > 0 && (
+                        <p className="font-medium text-foreground">{restaurant.cuisine.join(', ')}</p>
                       )}
-                      {restaurant.location && (
-                        <p>{restaurant.location}</p>
+                      {restaurant.neighborhood && (
+                        <p>{restaurant.neighborhood}</p>
                       )}
                       <div className="flex items-center gap-3 pt-1">
-                        {restaurant.rating_score && (
+                        {restaurant.average_rating && (
                           <span className="inline-flex items-center gap-1">
                             <svg className="w-3 h-3 fill-primary" viewBox="0 0 20 20">
                               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
-                            {restaurant.rating_score}/5
+                            {restaurant.average_rating}/5
                           </span>
                         )}
-                        {restaurant.price && (
+                        {restaurant.price_range && (
                           <span className="font-medium text-foreground">
-                            {'€'.repeat(restaurant.price)}
+                            {'€'.repeat(restaurant.price_range)}
                           </span>
                         )}
                       </div>

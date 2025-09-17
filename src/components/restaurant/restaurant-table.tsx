@@ -56,7 +56,7 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Cuisine</TableHead>
-              <TableHead>Location</TableHead>
+              <TableHead>Neighborhood</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Rating</TableHead>
               <TableHead>Actions</TableHead>
@@ -85,14 +85,14 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{restaurant.cuisine || "-"}</TableCell>
-                  <TableCell>{restaurant.location || "-"}</TableCell>
+                  <TableCell>{restaurant.cuisine?.join(', ') || "-"}</TableCell>
+                  <TableCell>{restaurant.neighborhood || "-"}</TableCell>
                   <TableCell>
-                    {restaurant.price ? "$".repeat(restaurant.price) : "-"}
+                    {restaurant.price_range ? "$".repeat(restaurant.price_range) : "-"}
                   </TableCell>
                   <TableCell>
-                    {restaurant.rating_score
-                      ? `${restaurant.rating_score}/5`
+                    {restaurant.average_rating
+                      ? `${restaurant.average_rating}/5`
                       : "-"}
                   </TableCell>
                   <TableCell>

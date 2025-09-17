@@ -33,23 +33,23 @@ export async function generateMetadata({ params }: RestaurantPageProps): Promise
     };
   }
 
-  const title = `${restaurant.name} - ${restaurant.cuisine} Restaurant`;
+  const title = `${restaurant.name} - ${restaurant.cuisine?.[0] || 'Restaurant'} Restaurant`;
   const description = restaurant.description 
-    ? `${restaurant.description} Located in ${restaurant.location}. ${restaurant.cuisine} cuisine with a rating of ${restaurant.rating_score?.toFixed(1) || 'unrated'}.`
-    : `Discover ${restaurant.name}, a ${restaurant.cuisine} restaurant located in ${restaurant.location}. Find authentic dishes and reviews.`;
+    ? `${restaurant.description} Located in ${restaurant.neighborhood}. ${restaurant.cuisine?.[0] || 'Restaurant'} cuisine with a rating of ${restaurant.average_rating?.toFixed(1) || 'unrated'}.`
+    : `Discover ${restaurant.name}, a ${restaurant.cuisine?.[0] || 'restaurant'} restaurant located in ${restaurant.neighborhood}. Find authentic dishes and reviews.`;
 
   return {
     title,
     description,
     keywords: [
       restaurant.name || '',
-      restaurant.cuisine || '',
-      restaurant.location || '',
+      ...(restaurant.cuisine || []),
+      restaurant.neighborhood || '',
       'restaurant',
       'dining',
       'food',
-      ...(restaurant.dietary || []),
-      ...(restaurant.favorite_dishes || []),
+      ...(restaurant.dietary_tags || []),
+      ...(restaurant.specialties || []),
     ].filter(Boolean),
     openGraph: {
       title,
@@ -57,9 +57,9 @@ export async function generateMetadata({ params }: RestaurantPageProps): Promise
       type: 'website',
       locale: 'en_US',
       url: `/restaurant/${id}`,
-      images: restaurant.image_url ? [
+      images: restaurant.photos?.[0] ? [
         {
-          url: restaurant.image_url,
+          url: restaurant.photos[0],
           width: 1200,
           height: 630,
           alt: `${restaurant.name} restaurant`,
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: RestaurantPageProps): Promise
       card: 'summary_large_image',
       title,
       description,
-      images: restaurant.image_url ? [restaurant.image_url] : [],
+      images: restaurant.photos?.[0] ? [restaurant.photos[0]] : [],
     },
     alternates: {
       canonical: `/restaurant/${id}`,
@@ -106,25 +106,25 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
     "@type": "Restaurant",
     "name": restaurant.name,
     "description": restaurant.description,
-    "image": restaurant.image_url,
+    "image": restaurant.photos?.[0],
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": restaurant.location,
+      "addressLocality": restaurant.neighborhood,
       "addressCountry": "NL"
     },
-    "geo": restaurant.latitude && restaurant.longitude ? {
+    "geo": restaurant.location_lat && restaurant.location_lng ? {
       "@type": "GeoCoordinates",
-      "latitude": restaurant.latitude,
-      "longitude": restaurant.longitude
+      "latitude": restaurant.location_lat,
+      "longitude": restaurant.location_lng
     } : undefined,
     "servesCuisine": restaurant.cuisine,
-    "priceRange": restaurant.price ? '$'.repeat(restaurant.price) : undefined,
-    "aggregateRating": restaurant.rating_score ? {
+    "priceRange": restaurant.price_range ? '$'.repeat(restaurant.price_range) : undefined,
+    "aggregateRating": restaurant.average_rating ? {
       "@type": "AggregateRating",
-      "ratingValue": restaurant.rating_score,
-      "ratingCount": restaurant.likes || 1
+      "ratingValue": restaurant.average_rating,
+      "ratingCount": restaurant.like_count || 1
     } : undefined,
-    "menu": restaurant.favorite_dishes?.map(dish => ({
+    "menu": restaurant.specialties?.map(dish => ({
       "@type": "MenuItem",
       "name": dish
     })),
@@ -145,10 +145,10 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
       <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Restaurant Image */}
-          {restaurant.image_url && (
+          {restaurant.photos?.[0] && (
             <div className="w-full md:w-72 h-48 relative rounded-lg overflow-hidden">
               <Image
-                src={restaurant.image_url}
+                src={restaurant.photos[0]}
                 alt={restaurant.name || 'Restaurant'}
                 fill
                 className="object-cover"
@@ -163,7 +163,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
                 <div className="flex items-center text-muted-foreground mb-2">
                   <MapPin className="h-4 w-4 mr-1" />
-                  <span>{restaurant.location}</span>
+                  <span>{restaurant.neighborhood}</span>
                 </div>
               </div>
               {user ? (
@@ -192,42 +192,42 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
 
             {/* Restaurant Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              {restaurant.cuisine && (
+              {restaurant.cuisine && restaurant.cuisine.length > 0 && (
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-muted-foreground">Cuisine</div>
-                  <div className="font-medium">{restaurant.cuisine}</div>
+                  <div className="font-medium">{restaurant.cuisine.join(', ')}</div>
                 </div>
               )}
               
               <div className="text-center p-3 bg-gray-50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Price</div>
-                <div className="font-medium">{formatPrice(restaurant.price)}</div>
+                <div className="font-medium">{formatPrice(restaurant.price_range)}</div>
               </div>
 
-              {restaurant.rating_score && (
+              {restaurant.average_rating && (
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-muted-foreground">Rating</div>
                   <div className="font-medium flex items-center justify-center">
                     <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                    {formatRating(restaurant.rating_score)}
+                    {formatRating(restaurant.average_rating)}
                   </div>
                 </div>
               )}
 
               <div className="text-center p-3 bg-gray-50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Likes</div>
-                <div className="font-medium">{restaurant.likes || 0}</div>
+                <div className="font-medium">{restaurant.like_count || 0}</div>
               </div>
             </div>
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2">
-              {restaurant.dietary?.map((diet) => (
+              {restaurant.dietary_tags?.map((diet) => (
                 <Badge key={diet} variant="secondary">
                   {diet}
                 </Badge>
               ))}
-              {restaurant.favorite_dishes?.slice(0, 3).map((dish) => (
+              {restaurant.specialties?.slice(0, 3).map((dish) => (
                 <Badge key={dish} variant="outline">
                   {dish}
                 </Badge>

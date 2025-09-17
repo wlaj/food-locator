@@ -136,7 +136,7 @@ export async function searchRestaurants(
     
     // Filter by location if provided
     if (location) {
-      restaurantQueryBuilder = restaurantQueryBuilder.ilike('location', `%${location}%`);
+      restaurantQueryBuilder = restaurantQueryBuilder.ilike('neighborhood', `%${location}%`);
     }
     
     const { data: restaurantData, error: restaurantError } = await restaurantQueryBuilder;
@@ -154,12 +154,25 @@ export async function searchRestaurants(
   
   // If query is "*" or undefined, get all restaurants; otherwise search by query
   if (query && query !== "*") {
-    queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ilike.%${query}%`);
+    queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+    
+    // For cuisine search, we need to handle it separately since cuisine is now an array
+    // Check if the query matches any cuisine names
+    const { data: matchingCuisines } = await supabase
+      .from('cuisines')
+      .select('name')
+      .ilike('name', `%${query}%`);
+    
+    if (matchingCuisines && matchingCuisines.length > 0) {
+      const cuisineNames = matchingCuisines.map(c => c.name);
+      // Add an additional OR condition for cuisine matches
+      queryBuilder = queryBuilder.or(`name.ilike.%${query}%,description.ilike.%${query}%,cuisine.ov.{${cuisineNames.join(',')}}`);
+    }
   }
 
   // Filter by location if provided
   if (location) {
-    queryBuilder = queryBuilder.ilike('location', `%${location}%`);
+    queryBuilder = queryBuilder.ilike('neighborhood', `%${location}%`);
   }
 
   // Filter by tags if provided (cuisines and dietary options)
@@ -182,14 +195,14 @@ export async function searchRestaurants(
     
     // Apply cuisine filter (OR logic - any matching cuisine)
     if (cuisineNames.length > 0) {
-      const cuisineFilters = cuisineNames.map(name => `cuisine.ilike.%${name}%`);
-      queryBuilder = queryBuilder.or(cuisineFilters.join(','));
+      // For array fields, we use the overlaps operator (ov) to check if any element matches
+      queryBuilder = queryBuilder.overlaps('cuisine', cuisineNames);
     }
     
     // Apply dietary filter (AND logic - must contain all dietary options)
     if (dietaryNames.length > 0) {
       for (const dietaryName of dietaryNames) {
-        queryBuilder = queryBuilder.contains('dietary', [dietaryName]);
+        queryBuilder = queryBuilder.contains('dietary_tags', [dietaryName]);
       }
     }
   }
@@ -207,19 +220,19 @@ export async function searchRestaurants(
 
 export async function createRestaurant(formData: FormData) {
   const name = formData.get('name') as string
-  const cuisine = formData.get('cuisine') as string
-  const location = formData.get('location') as string
+  const cuisines = formData.getAll('cuisine') as string[]
+  const neighborhood = formData.get('neighborhood') as string
   const description = formData.get('description') as string
-  const price = formData.get('price') ? parseInt(formData.get('price') as string) : null
-  const rating_score = formData.get('rating_score') ? parseFloat(formData.get('rating_score') as string) : null
-  const atmosphere = formData.get('atmosphere') ? parseInt(formData.get('atmosphere') as string) : null
-  const authenticity = formData.get('authenticity') ? parseInt(formData.get('authenticity') as string) : null
+  const price_range = formData.get('price_range') ? parseInt(formData.get('price_range') as string) : null
+  const average_rating = formData.get('average_rating') ? parseFloat(formData.get('average_rating') as string) : null
+  const atmosphere_score = formData.get('atmosphere_score') ? parseFloat(formData.get('atmosphere_score') as string) : null
+  const authenticity_score = formData.get('authenticity_score') ? parseFloat(formData.get('authenticity_score') as string) : null
   const image_url = formData.get('image_url') as string || null
-  const dietary = formData.get('dietary') ? (formData.get('dietary') as string).split(',').map(d => d.trim()).filter(d => d) : null
-  const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const dietary_tags = formData.get('dietary_tags') ? (formData.get('dietary_tags') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const specialties = formData.get('specialties') ? (formData.get('specialties') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const address = formData.get('address') as string || null
-  const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
-  const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+  const location_lat = formData.get('location_lat') ? parseFloat(formData.get('location_lat') as string) : null
+  const location_lng = formData.get('location_lng') ? parseFloat(formData.get('location_lng') as string) : null
 
   const supabase = await createClient();
 
@@ -237,19 +250,19 @@ export async function createRestaurant(formData: FormData) {
   const restaurant: TablesInsert<'restaurants'> = {
     id: crypto.randomUUID(),
     name,
-    cuisine,
-    location,
+    cuisine: cuisines.length > 0 ? cuisines : null,
+    neighborhood,
     description,
-    price,
-    rating_score,
-    atmosphere,
-    authenticity,
-    image_url,
-    dietary,
-    favorite_dishes,
+    price_range,
+    average_rating,
+    atmosphere_score,
+    authenticity_score,
+    photos: image_url ? [image_url] : null,
+    dietary_tags,
+    specialties,
     address,
-    latitude,
-    longitude
+    location_lat,
+    location_lng
   }
 
   const { data, error } = await supabase
@@ -269,19 +282,19 @@ export async function createRestaurant(formData: FormData) {
 
 export async function updateRestaurant(id: string, formData: FormData) {
   const name = formData.get('name') as string
-  const cuisine = formData.get('cuisine') as string
-  const location = formData.get('location') as string
+  const cuisines = formData.getAll('cuisine') as string[]
+  const neighborhood = formData.get('neighborhood') as string
   const description = formData.get('description') as string
-  const price = formData.get('price') ? parseInt(formData.get('price') as string) : null
-  const rating_score = formData.get('rating_score') ? parseFloat(formData.get('rating_score') as string) : null
-  const atmosphere = formData.get('atmosphere') ? parseInt(formData.get('atmosphere') as string) : null
-  const authenticity = formData.get('authenticity') ? parseInt(formData.get('authenticity') as string) : null
+  const price_range = formData.get('price_range') ? parseInt(formData.get('price_range') as string) : null
+  const average_rating = formData.get('average_rating') ? parseFloat(formData.get('average_rating') as string) : null
+  const atmosphere_score = formData.get('atmosphere_score') ? parseFloat(formData.get('atmosphere_score') as string) : null
+  const authenticity_score = formData.get('authenticity_score') ? parseFloat(formData.get('authenticity_score') as string) : null
   const image_url = formData.get('image_url') as string || null
-  const dietary = formData.get('dietary') ? (formData.get('dietary') as string).split(',').map(d => d.trim()).filter(d => d) : null
-  const favorite_dishes = formData.get('favorite_dishes') ? (formData.get('favorite_dishes') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const dietary_tags = formData.get('dietary_tags') ? (formData.get('dietary_tags') as string).split(',').map(d => d.trim()).filter(d => d) : null
+  const specialties = formData.get('specialties') ? (formData.get('specialties') as string).split(',').map(d => d.trim()).filter(d => d) : null
   const address = formData.get('address') as string || null
-  const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
-  const longitude = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+  const location_lat = formData.get('location_lat') ? parseFloat(formData.get('location_lat') as string) : null
+  const location_lng = formData.get('location_lng') ? parseFloat(formData.get('location_lng') as string) : null
 
   const supabase = await createClient();
 
@@ -299,19 +312,19 @@ export async function updateRestaurant(id: string, formData: FormData) {
 
   const updates: TablesUpdate<'restaurants'> = {
     name,
-    cuisine,
-    location,
+    cuisine: cuisines.length > 0 ? cuisines : null,
+    neighborhood,
     description,
-    price,
-    rating_score,
-    atmosphere,
-    authenticity,
-    image_url,
-    dietary,
-    favorite_dishes,
+    price_range,
+    average_rating,
+    atmosphere_score,
+    authenticity_score,
+    photos: image_url ? [image_url] : null,
+    dietary_tags,
+    specialties,
     address,
-    latitude,
-    longitude
+    location_lat,
+    location_lng
   }
 
   const { data, error } = await supabase
@@ -697,7 +710,7 @@ export async function getDishPosts(limit: number = 20): Promise<DishPost[] | nul
           restaurants (
             id,
             name,
-            location
+            neighborhood
           )
         )
       ),
@@ -733,7 +746,7 @@ export async function getRestaurantDishPosts(restaurantId: string): Promise<Dish
           restaurants!inner (
             id,
             name,
-            location
+            neighborhood
           )
         )
       ),

@@ -242,7 +242,7 @@ export default function DishPostDialog({
               <SelectContent>
                 {restaurants.map((restaurant) => (
                   <SelectItem key={restaurant.id} value={restaurant.id}>
-                    {restaurant.name} - {restaurant.location}
+                    {restaurant.name} - {restaurant.neighborhood}
                   </SelectItem>
                 ))}
               </SelectContent>
