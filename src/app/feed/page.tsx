@@ -1,8 +1,8 @@
 import { getDishPosts } from "@/lib/actions";
-import DishPostCard from "@/components/dish-post-card";
+import DishPostCard from "@/components/dish/dish-post-card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import DishPostDialog from "@/components/dish-post-dialog";
+import DishPostDialog from "@/components/dish/dish-post-dialog";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";

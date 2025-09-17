@@ -1,5 +1,5 @@
 import { Gallery } from "@/components/gallery";
-import { RestaurantMap } from "@/components/restaurant-map";
+import { RestaurantMap } from "@/components/restaurant/restaurant-map";
 import { searchRestaurants } from "@/lib/actions";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";

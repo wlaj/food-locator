@@ -13,8 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import EditDishDialog from "@/components/edit-dish-dialog";
-import CommentSection from "@/components/comment-section";
+import EditDishDialog from "@/components/dish/edit-dish-dialog";
+import CommentSection from "@/components/comment/comment-section";
 
 interface DishPost {
   id: string;

@@ -2,7 +2,7 @@ import { getUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import ToastHandler from '@/components/toast-handler'
 import { Suspense } from 'react'
-import { LoginForm } from '@/components/login-form'
+import { LoginForm } from '@/components/auth/login-form'
 
 export default async function LoginPage() {
   const user = await getUser()

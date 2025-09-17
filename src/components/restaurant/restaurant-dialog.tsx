@@ -34,9 +34,9 @@ import {
   checkRestaurantName,
 } from "@/lib/actions";
 import { toast } from "sonner";
-import RestaurantImageUpload from "@/components/restaurant-image-upload";
-import DietaryTagSelector from "@/components/dietary-tag-selector";
-import { RestaurantMap } from "@/components/restaurant-map";
+import RestaurantImageUpload from "@/components/restaurant/restaurant-image-upload";
+import DietaryTagSelector from "@/components/dish/dietary-tag-selector";
+import { RestaurantMap } from "@/components/restaurant/restaurant-map";
 import {
   Check,
   ChevronsUpDown,

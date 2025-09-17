@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import VoteCard from "@/components/vote-card";
+import VoteCard from "@/components/vote/vote-card";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

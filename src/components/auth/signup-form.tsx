@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { PasswordStrengthInput } from "@/components/password-strength-input"
+import { PasswordStrengthInput } from "@/components/auth/password-strength-input"
 
 export function SignupForm({
   className,

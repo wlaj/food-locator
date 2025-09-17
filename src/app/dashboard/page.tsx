@@ -1,12 +1,12 @@
 import { getUser } from "@/lib/auth";
 import { signOut } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/button";
-import ProtectedRoute from "@/components/protected-route";
-import ProfileEditDialog from "@/components/profile-edit-dialog";
+import ProtectedRoute from "@/components/auth/protected-route";
+import ProfileEditDialog from "@/components/auth/profile-edit-dialog";
 import ToastHandler from "@/components/toast-handler";
-import RestaurantTable from "@/components/restaurant-table";
+import RestaurantTable from "@/components/restaurant/restaurant-table";
 import { getUserRestaurants } from "@/lib/actions";
-import VotesTable from "@/components/votes-table";
+import VotesTable from "@/components/vote/votes-table";
 import { getAllVotes } from "@/lib/vote-actions";
 import { isUserAdmin } from "@/lib/auth-server";
 import { Suspense } from "react";
