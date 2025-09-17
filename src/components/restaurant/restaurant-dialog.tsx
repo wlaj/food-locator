@@ -136,7 +136,6 @@ export default function RestaurantDialog({
   const [petFriendly, setPetFriendly] = useState(
     (restaurant?.accessibility as { pet_friendly?: boolean })?.pet_friendly || false
   );
-  const ratingId = useId();
   const accessibilityId1 = useId();
   const accessibilityId2 = useId();
   const ambienceId = useId();
@@ -768,33 +767,30 @@ export default function RestaurantDialog({
 
             <fieldset className="space-y-4">
               <legend className="text-foreground text-sm leading-none font-medium">
-                Rate your experience
+                Rate your experience (1-5)
               </legend>
               <RadioGroup
-                className="flex gap-1.5 w-full"
+                className="flex gap-0 -space-x-px rounded-md shadow-xs"
                 name="average_rating"
                 defaultValue={restaurant?.average_rating?.toString() || ""}
               >
-                {[
-                  { value: "1", label: "Terrible", icon: "😠" },
-                  { value: "2", label: "Bad", icon: "🙁" },
-                  { value: "3", label: "Okay", icon: "😐" },
-                  { value: "4", label: "Good", icon: "🙂" },
-                  { value: "5", label: "Amazing", icon: "😀" },
-                ].map((item) => (
+                {["1", "2", "3", "4", "5"].map((value) => (
                   <label
-                    key={`${ratingId}-${item.value}`}
-                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex h-9 flex-1 cursor-pointer flex-col items-center justify-center rounded-full border text-center text-xl shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50"
+                    key={value}
+                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border text-center text-sm font-medium transition-[color,box-shadow] outline-none first:rounded-s-md last:rounded-e-md has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50 has-data-[state=checked]:z-10"
                   >
                     <RadioGroupItem
-                      id={`${ratingId}-${item.value}`}
-                      value={item.value}
+                      value={value}
                       className="sr-only after:absolute after:inset-0"
                     />
-                    {item.icon}
+                    {value}
                   </label>
                 ))}
               </RadioGroup>
+              <div className="mt-1 flex justify-between text-xs font-medium">
+                <p>😠 Terrible</p>
+                <p>Amazing 😀</p>
+              </div>
             </fieldset>
 
             <fieldset className="space-y-4">
