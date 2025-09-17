@@ -176,13 +176,7 @@ function SearchInputContent({
       const afterAt = query.substring(atIndex + 1);
       const beforeAt = query.substring(0, atIndex);
 
-      // Only show dropdown if @ is at the start or after a space
-      // AND if we're not on search page with a complete username (no spaces after @)
-      const isCompleteUsername = afterAt && !afterAt.includes(" ") && afterAt.length > 0;
-      const isOnSearchPage = pathname === "/search";
-      
-      if ((atIndex === 0 || beforeAt.endsWith(" ")) && 
-          !(isOnSearchPage && isCompleteUsername)) {
+      if (atIndex === 0 || beforeAt.endsWith(" ")) {
         setUserSearchTerm(afterAt);
         setShowUserDropdown(true);
       } else {
@@ -328,7 +322,7 @@ function SearchInputContent({
 
   const sizeClasses = {
     sm: "min-h-8 text-sm",
-    md: "min-h-10",
+    md: "min-h-10 text-sm",
     lg: "min-h-12 text-lg",
   };
 
