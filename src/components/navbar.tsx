@@ -17,8 +17,8 @@ export default async function Navbar() {
             <IconInnerShadowBottomRightFilled className="size-7 md:size-9 hover:rotate-45 transition-all duration-500" />
           </Link>
         </div>
-        {/* Middle area - desktop only */}
-        <div className="hidden sm:block flex-1 mx-4">
+        {/* Middle area - desktop only - positioned absolutely to center on page */}
+        <div className="hidden sm:block absolute left-1/2 transform -translate-x-1/2 w-full max-w-xl px-4">
           <NavbarClient locations={locations} />
         </div>
         {/* Right side */}
