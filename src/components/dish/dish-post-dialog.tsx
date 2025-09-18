@@ -21,11 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createDishWithPost, uploadDishImage, getRestaurants } from "@/lib/actions";
+import { createDishWithPost, getRestaurants } from "@/lib/actions";
 import { toast } from "sonner";
-import { LoaderCircleIcon, Upload, X } from "lucide-react";
-import { useFileUpload } from "@/hooks/use-file-upload";
-import Image from "next/image";
+import { LoaderCircleIcon } from "lucide-react";
+import ImageUpload from "@/components/ui/image-upload";
 
 interface DishPostDialogProps {
   trigger: React.ReactNode;
@@ -42,54 +41,10 @@ export default function DishPostDialog({
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(
     preselectedRestaurantId || ""
   );
-  const [uploadedImage, setUploadedImage] = useState<{
-    url: string;
-    path: string;
-    file: File;
-  } | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [
-    { isDragging, errors },
-    { handleDragEnter, handleDragLeave, handleDragOver, handleDrop, getInputProps }
-  ] = useFileUpload({
-    accept: "image/*",
-    maxSize: 5 * 1024 * 1024, // 5MB
-    multiple: false,
-  });
-
-  const handleImageUpload = async (files: File[]) => {
-    if (files.length === 0) return;
-
-    const file = files[0];
-    setLoading(true);
-
-    try {
-      const result = await uploadDishImage(file);
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-
-      setUploadedImage({
-        url: result.url!,
-        path: result.path!,
-        file,
-      });
-      toast.success("Image uploaded successfully");
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Failed to upload image");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeImage = () => {
-    setUploadedImage(null);
-  };
 
   const loadRestaurants = async () => {
     try {
@@ -108,7 +63,7 @@ export default function DishPostDialog({
 
     const formData = new FormData(event.currentTarget);
     
-    if (!uploadedImage) {
+    if (!imageUrl) {
       toast.error("Please upload an image of the dish");
       setLoading(false);
       return;
@@ -121,11 +76,7 @@ export default function DishPostDialog({
     }
 
     // Add image and restaurant data to form
-    formData.append("imageUrl", uploadedImage.url);
-    formData.append("imagePath", uploadedImage.path);
-    formData.append("fileName", uploadedImage.file.name);
-    formData.append("fileSize", uploadedImage.file.size.toString());
-    formData.append("mimeType", uploadedImage.file.type);
+    formData.append("imageUrl", imageUrl);
     formData.append("restaurantId", selectedRestaurantId);
 
     try {
@@ -139,7 +90,7 @@ export default function DishPostDialog({
       toast.success("Dish post created successfully!");
       setOpen(false);
       formRef.current?.reset();
-      setUploadedImage(null);
+      setImageUrl(null);
       setSelectedRestaurantId(preselectedRestaurantId || "");
     } catch (error) {
       console.error("Error creating dish post:", error);
@@ -166,66 +117,11 @@ export default function DishPostDialog({
           {/* Image Upload */}
           <div className="space-y-2">
             <Label>Dish Photo *</Label>
-            {!uploadedImage ? (
-              <div
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={(e) => {
-                  handleDrop(e);
-                  const files = Array.from(e.dataTransfer.files);
-                  handleImageUpload(files);
-                }}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                  isDragging
-                    ? "border-primary bg-primary/5"
-                    : errors.length > 0
-                    ? "border-destructive bg-destructive/5"
-                    : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                }`}
-              >
-                <input
-                  {...getInputProps()}
-                  ref={fileInputRef}
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    handleImageUpload(files);
-                  }}
-                />
-                <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Drag & drop a dish photo here, or click to select
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Supports PNG, JPG, JPEG, WebP (max 5MB)
-                </p>
-              </div>
-            ) : (
-              <div className="relative">
-                <Image
-                  src={uploadedImage.url}
-                  alt="Uploaded dish"
-                  width={400}
-                  height={200}
-                  className="w-full h-32 object-cover rounded-lg"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={removeImage}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            {errors.length > 0 && (
-              <p className="text-sm text-destructive">
-                {errors[0]}
-              </p>
-            )}
+            <ImageUpload
+              type="dish"
+              onImageChange={setImageUrl}
+              name="imageUrl"
+            />
           </div>
 
           {/* Restaurant Selection */}
@@ -322,7 +218,7 @@ export default function DishPostDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !uploadedImage || !selectedRestaurantId}>
+            <Button type="submit" disabled={loading || !imageUrl || !selectedRestaurantId}>
               {loading && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
               Share Dish
             </Button>

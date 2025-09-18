@@ -16,9 +16,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateDishPost } from "@/lib/actions";
 import { toast } from "sonner";
-import { LoaderCircleIcon, Upload, X } from "lucide-react";
-import { useFileUpload } from "@/hooks/use-file-upload";
-import Image from "next/image";
+import { LoaderCircleIcon } from "lucide-react";
+import ImageUpload from "@/components/ui/image-upload";
 
 interface Dish {
   id: string;
@@ -45,30 +44,8 @@ export default function EditDishDialog({
 }: EditDishDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(dish.image_url || null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const initialFiles = dish.image_url ? [{
-    id: 'current',
-    name: 'Current image',
-    size: 0,
-    type: 'image',
-    url: dish.image_url
-  }] : [];
-
-  const [{ files, isDragging, errors }, { 
-    handleDragEnter, 
-    handleDragLeave, 
-    handleDragOver, 
-    handleDrop, 
-    openFileDialog, 
-    removeFile, 
-    getInputProps 
-  }] = useFileUpload({
-    accept: "image/*",
-    multiple: false,
-    maxSize: 2 * 1024 * 1024,
-    initialFiles
-  });
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,12 +54,11 @@ export default function EditDishDialog({
     const formData = new FormData(event.currentTarget);
 
     // Handle image updates
-    const newImageFile = files.find(file => 'file' in file);
-    if (newImageFile && 'file' in newImageFile) {
+    if (imageUrl && imageUrl !== dish.image_url) {
       // New image was uploaded
-      formData.append('image', newImageFile.file);
-    } else if (files.length === 0 && dish.image_url) {
-      // Image was removed (no files and there was originally an image)
+      formData.append('imageUrl', imageUrl);
+    } else if (!imageUrl && dish.image_url) {
+      // Image was removed
       formData.append('removeImage', 'true');
     }
 
@@ -160,80 +136,12 @@ export default function EditDishDialog({
           {/* Image Upload */}
           <div className="space-y-2">
             <Label>Dish Image</Label>
-            <div className="space-y-2">
-              {files.length > 0 && (
-                <div className="relative">
-                  {'url' in files[0] ? (
-                    <div className="relative w-full h-32 rounded-lg overflow-hidden">
-                      <Image
-                        src={files[0].url}
-                        alt="Current dish image"
-                        fill
-                        className="object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={() => removeFile(files[0].id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="relative w-full h-32 rounded-lg overflow-hidden">
-                      <Image
-                        src={files[0].preview}
-                        alt="New dish image"
-                        fill
-                        className="object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={() => removeFile(files[0].id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <div
-                className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                  isDragging
-                    ? "border-primary bg-primary/5"
-                    : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                }`}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onClick={openFileDialog}
-              >
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  {files.length > 0 ? "Click or drag to replace image" : "Click or drag to upload image"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Max file size: 2MB
-                </p>
-              </div>
-              
-              <input {...getInputProps()} />
-              
-              {errors.length > 0 && (
-                <div className="text-sm text-destructive">
-                  {errors.map((error, index) => (
-                    <p key={index}>{error}</p>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ImageUpload
+              type="dish"
+              defaultImageUrl={dish.image_url || undefined}
+              onImageChange={setImageUrl}
+              name="imageUrl"
+            />
           </div>
 
           {/* Review Content */}

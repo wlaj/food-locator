@@ -91,10 +91,10 @@ function SearchInputContent({
     const query = hashtagSearchTerm.toLowerCase();
     
     if (!query.trim()) {
-      // Return all options when no search term
-      const allCuisines: SearchOption[] = cuisines.map((c) => ({ ...c, type: "cuisine" as const }));
-      const allDietary: SearchOption[] = dietaryOptions.map((d) => ({ ...d, type: "dietary" as const }));
-      return [...allCuisines, ...allDietary].slice(0, 10); // Limit to 10 items
+      // Return limited options when no search term, ensuring both types are included
+      const limitedCuisines: SearchOption[] = cuisines.slice(0, 10).map((c) => ({ ...c, type: "cuisine" as const }));
+      const limitedDietary: SearchOption[] = dietaryOptions.slice(0, 10).map((d) => ({ ...d, type: "dietary" as const }));
+      return [...limitedCuisines, ...limitedDietary];
     }
 
     // Filter based on search term
@@ -825,60 +825,61 @@ function SearchInputContent({
                 </CommandEmpty>
               ) : (
                 <>
-                  {searchOptions
-                    .filter((option) => option && option.type === "cuisine")
-                    .length > 0 && (
-                    <CommandGroup heading="Cuisines">
-                      {searchOptions
-                        .filter((option) => option && option.type === "cuisine" && option.id && option.name)
-                        .map((option) => (
-                          <CommandItem
-                            key={option.id}
-                            value={option.name}
-                            onSelect={() => handleHashtagSelect(option)}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                #{option.name}
-                              </span>
-                              {option.description && (
-                                <span className="text-xs text-muted-foreground">
-                                  {option.description}
-                                </span>
-                              )}
-                            </div>
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                  )}
-                  {searchOptions
-                    .filter((option) => option && option.type === "dietary")
-                    .length > 0 && (
-                    <CommandGroup heading="Dietary Options">
-                      {searchOptions
-                        .filter((option) => option && option.type === "dietary" && option.id && option.name)
-                        .map((option) => (
-                          <CommandItem
-                            key={option.id}
-                            value={option.name}
-                            onSelect={() => handleHashtagSelect(option)}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                #{option.name}
-                              </span>
-                              {option.description && (
-                                <span className="text-xs text-muted-foreground">
-                                  {option.description}
-                                </span>
-                              )}
-                            </div>
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                  )}
+                  {(() => {
+                    const cuisineOptions = searchOptions.filter((option) => option && option.type === "cuisine" && option.id && option.name);
+                    const dietaryOptionsList = searchOptions.filter((option) => option && option.type === "dietary" && option.id && option.name);
+                    
+                    return (
+                      <>
+                        {cuisineOptions.length > 0 && (
+                          <CommandGroup heading="Cuisines">
+                            {cuisineOptions.map((option) => (
+                              <CommandItem
+                                key={option.id}
+                                value={option.name}
+                                onSelect={() => handleHashtagSelect(option)}
+                                className="cursor-pointer"
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    #{option.name}
+                                  </span>
+                                  {option.description && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {option.description}
+                                    </span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        )}
+                        {dietaryOptionsList.length > 0 && (
+                          <CommandGroup heading="Dietary Options">
+                            {dietaryOptionsList.map((option) => (
+                              <CommandItem
+                                key={option.id}
+                                value={option.name}
+                                onSelect={() => handleHashtagSelect(option)}
+                                className="cursor-pointer"
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    #{option.name}
+                                  </span>
+                                  {option.description && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {option.description}
+                                    </span>
+                                  )}
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        )}
+                      </>
+                    );
+                  })()}
                 </>
               )}
             </CommandList>

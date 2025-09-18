@@ -562,6 +562,31 @@ export async function uploadDishImage(file: File): Promise<{ url?: string, path?
   }
 }
 
+export async function deleteDishImage(imageUrl: string): Promise<{ success?: boolean, error?: string }> {
+  const supabase = await createClient();
+  
+  try {
+    // Extract file path from URL
+    const url = new URL(imageUrl);
+    const pathParts = url.pathname.split('/');
+    const filePath = pathParts.slice(-2).join('/'); // gets "dishes/filename.ext"
+    
+    const { error } = await supabase.storage
+      .from('restaurant-images')
+      .remove([filePath]);
+      
+    if (error) {
+      console.error('Error deleting dish image:', error);
+      return { error: 'Failed to delete image' };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteDishImage:', error);
+    return { error: 'Failed to delete image' };
+  }
+}
+
 export async function createDishWithPost(formData: FormData) {
   const supabase = await createClient();
 
