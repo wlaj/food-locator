@@ -140,8 +140,8 @@ export default function RestaurantDialog({
   const accessibilityId2 = useId();
   const ambienceId = useId();
   const serviceId = useId();
-  const accessibilityId3 = useId();
   const sustainabilityId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const nameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -424,6 +424,30 @@ export default function RestaurantDialog({
         toast.success(
           `Restaurant ${isEditing ? "updated" : "created"} successfully`
         );
+        
+        // Reset form after successful creation (not for editing)
+        if (!isEditing && formRef.current) {
+          formRef.current.reset();
+          // Reset state variables that aren't form inputs
+          setCurrentImageUrl(null);
+          setSelectedCuisines([]);
+          setSelectedNeighborhood("");
+          setNameValidation({ isChecking: false, isValid: null, error: null });
+          setAddressValidation({ isChecking: false, coordinates: null, formattedAddress: null, error: null });
+          setVerified(false);
+          setSelectedAmbienceTags([]);
+          setSelectedServiceOptions([]);
+          setAlcoholOptions("");
+          setSelectedSustainabilityTags([]);
+          setWaitTime("");
+          setHiddenGemFlag(false);
+          setSeatingCapacity("");
+          setOutdoorSeating(false);
+          setReservations(false);
+          setWheelchairAccessible(false);
+          setPetFriendly(false);
+        }
+        
         setOpen(false);
       }
     } catch {
@@ -448,7 +472,7 @@ export default function RestaurantDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form action={handleSubmit} className="space-y-4">
+        <form ref={formRef} action={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Restaurant Image</Label>
@@ -1065,38 +1089,6 @@ export default function RestaurantDialog({
                 </div>
               </div>
 
-              {/* Accessibility */}
-              <div className="space-y-4">
-                <Label className="text-sm font-medium">Accessibility</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Wheelchair Accessible", icon: Accessibility },
-                    { label: "Pet Friendly", icon: Heart }
-                  ].map(({ label, icon: Icon }, index) => {
-                    const id = index === 0 ? accessibilityId3 : `${accessibilityId3}-2`;
-                    const isChecked = label === "Wheelchair Accessible" ? wheelchairAccessible : petFriendly;
-                    const onChange = label === "Wheelchair Accessible" ? setWheelchairAccessible : setPetFriendly;
-                    
-                    return (
-                      <div
-                        key={label}
-                        className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
-                      >
-                        <div className="flex justify-between gap-2">
-                          <Checkbox
-                            id={`${id}-${label}`}
-                            className="order-1 after:absolute after:inset-0"
-                            checked={isChecked}
-                            onCheckedChange={(checked: boolean) => onChange(checked)}
-                          />
-                          <Icon className="opacity-60" size={16} aria-hidden="true" />
-                        </div>
-                        <Label htmlFor={`${id}-${label}`} className="text-sm">{label}</Label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             </>
           )}
 
