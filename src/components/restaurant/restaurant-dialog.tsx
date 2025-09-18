@@ -856,9 +856,7 @@ export default function RestaurantDialog({
               )}
             </div>
 
-            <div className="space-y-4">
-              <Label className="text-sm font-medium">Pricing Information</Label>
-              
+            <div className="space-y-4">              
               <div className="space-y-3">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -1068,24 +1066,9 @@ export default function RestaurantDialog({
             </div>
           </div>
 
-          {/* Admin-only fields */}
-          {userRole === 'admin' && (
-            <>
-              {/* Verified Status */}
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="verified"
-                  checked={verified}
-                  onCheckedChange={(checked: boolean) => setVerified(checked)}
-                />
-                <Label htmlFor="verified">Verified Restaurant</Label>
-              </div>
-            </>
-          )}
-
-          {/* Ambience Tags */}
+          {/* Ambience  */}
           <div className="space-y-2">
-            <Label>Ambience Tags</Label>
+            <Label>Ambience</Label>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { label: "Romantic", icon: Heart },
@@ -1166,61 +1149,6 @@ export default function RestaurantDialog({
             </div>
           </div>
 
-
-          {/* Admin-only sections */}
-          {userRole === 'admin' && (
-            <>
-              {/* Alcohol Options */}
-              <div className="space-y-2">
-                <Label>Alcohol Options</Label>
-                <Select value={alcoholOptions} onValueChange={setAlcoholOptions}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select alcohol options" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Alcohol</SelectItem>
-                    <SelectItem value="beer_wine">Beer & Wine</SelectItem>
-                    <SelectItem value="full_bar">Full Bar</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Seating Info */}
-              <div className="space-y-4">
-                <Label className="text-sm font-medium">Seating Information</Label>
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="seating-capacity">Seating Capacity</Label>
-                    <Input
-                      id="seating-capacity"
-                      type="number"
-                      placeholder="e.g., 50"
-                      value={seatingCapacity}
-                      onChange={(e) => setSeatingCapacity(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="outdoor-seating"
-                      checked={outdoorSeating}
-                      onCheckedChange={(checked: boolean) => setOutdoorSeating(checked)}
-                    />
-                    <Label htmlFor="outdoor-seating">Outdoor Seating Available</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="reservations"
-                      checked={reservations}
-                      onCheckedChange={(checked: boolean) => setReservations(checked)}
-                    />
-                    <Label htmlFor="reservations">Accepts Reservations</Label>
-                  </div>
-                </div>
-              </div>
-
-            </>
-          )}
-
           {/* Sustainability Tags */}
           <div className="space-y-2">
             <Label>Sustainability</Label>
@@ -1264,9 +1192,7 @@ export default function RestaurantDialog({
           </div>
 
           {/* Wait Times */}
-          <div className="space-y-4">
-            <Label className="text-sm font-medium">Wait Times</Label>
-            
+          <div className="space-y-4">            
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label>Seating Wait Time</Label>
@@ -1297,18 +1223,6 @@ export default function RestaurantDialog({
               </div>
             </div>
           </div>
-
-          {/* Hidden Gem Flag - Admin Only */}
-          {userRole === 'admin' && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="hidden-gem"
-                checked={hiddenGemFlag}
-                onCheckedChange={(checked: boolean) => setHiddenGemFlag(checked)}
-              />
-              <Label htmlFor="hidden-gem">Hidden Gem</Label>
-            </div>
-          )}
 
           <DialogFooter>
             <Button

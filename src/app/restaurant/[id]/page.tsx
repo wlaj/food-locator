@@ -108,12 +108,23 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
   } = await supabase.auth.getUser();
   const dishPosts = await getRestaurantDishPosts(restaurant.id);
 
-  const formatPrice = (priceSign: number | null, priceRange: string | null, currency: string | null) => {
+  const formatPrice = (
+    priceSign: number | null,
+    priceRange: string | null,
+    currency: string | null
+  ) => {
     if (priceRange) {
       return priceRange;
     }
     if (priceSign && currency) {
-      const currencySymbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'IDR' ? 'Rp' : currency;
+      const currencySymbol =
+        currency === "USD"
+          ? "$"
+          : currency === "EUR"
+          ? "€"
+          : currency === "IDR"
+          ? "Rp"
+          : currency;
       return currencySymbol.repeat(priceSign);
     }
     return "Price not available";
@@ -124,54 +135,8 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
     return rating.toFixed(1);
   };
 
-  const restaurantSchema = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    name: restaurant.name,
-    description: restaurant.description,
-    image: restaurant.photos?.[0],
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: restaurant.neighborhood,
-      addressCountry: "NL",
-    },
-    geo:
-      restaurant.location_lat && restaurant.location_lng
-        ? {
-            "@type": "GeoCoordinates",
-            latitude: restaurant.location_lat,
-            longitude: restaurant.location_lng,
-          }
-        : undefined,
-    servesCuisine: restaurant.cuisine,
-    priceRange: restaurant.price_sign
-      ? (restaurant.currency === 'USD' ? '$' : restaurant.currency === 'EUR' ? '€' : restaurant.currency === 'IDR' ? 'Rp' : '$').repeat(restaurant.price_sign)
-      : restaurant.price_range || undefined,
-    aggregateRating: restaurant.average_rating
-      ? {
-          "@type": "AggregateRating",
-          ratingValue: restaurant.average_rating,
-          ratingCount: restaurant.like_count || 1,
-        }
-      : undefined,
-    menu: restaurant.specialties?.map((dish) => ({
-      "@type": "MenuItem",
-      name: dish,
-    })),
-    url: `${
-      process.env.NEXT_PUBLIC_SITE_URL || "https://food-locator.com"
-    }/restaurant/${restaurant.id}`,
-    sameAs: [],
-  };
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(restaurantSchema),
-        }}
-      />
       <div className="mt-32 md:mt-16 max-w-6xl mx-auto px-4 py-12">
         {/* Restaurant Header */}
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
@@ -218,7 +183,12 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                     </Button>
                   )}
                   <Button variant="outline" asChild>
-                    <Link href={`https://www.google.com/maps/search/${restaurant.name?.replace(/\s+/g, '+')}`}>
+                    <Link
+                      href={`https://www.google.com/maps/search/${restaurant.name?.replace(
+                        /\s+/g,
+                        "+"
+                      )}`}
+                    >
                       <IconMapShare />
                     </Link>
                   </Button>
@@ -245,7 +215,11 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-muted-foreground">Price</div>
                   <div className="font-medium">
-                    {formatPrice(restaurant.price_sign, restaurant.price_range, restaurant.currency)}
+                    {formatPrice(
+                      restaurant.price_sign,
+                      restaurant.price_range,
+                      restaurant.currency
+                    )}
                   </div>
                 </div>
 

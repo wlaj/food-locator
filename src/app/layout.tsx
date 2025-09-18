@@ -86,39 +86,8 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "Food Locator",
-    "description": "Discover the best local restaurants, authentic cuisines, and hidden culinary gems in your area.",
-    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://food-locator.com",
-    "logo": `${process.env.NEXT_PUBLIC_SITE_URL || "https://food-locator.com"}/logo.png`,
-    "sameAs": [
-      "https://twitter.com/foodlocator",
-      "https://facebook.com/foodlocator",
-      "https://instagram.com/foodlocator"
-    ],
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "NL"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "150"
-    }
-  };
-
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationSchema),
-          }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
