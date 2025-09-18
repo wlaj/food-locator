@@ -108,9 +108,15 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
   } = await supabase.auth.getUser();
   const dishPosts = await getRestaurantDishPosts(restaurant.id);
 
-  const formatPrice = (price: number | null) => {
-    if (!price) return "Price not available";
-    return "$".repeat(price);
+  const formatPrice = (priceSign: number | null, priceRange: string | null, currency: string | null) => {
+    if (priceRange) {
+      return priceRange;
+    }
+    if (priceSign && currency) {
+      const currencySymbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'IDR' ? 'Rp' : currency;
+      return currencySymbol.repeat(priceSign);
+    }
+    return "Price not available";
   };
 
   const formatRating = (rating: number | null) => {
@@ -138,9 +144,9 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
           }
         : undefined,
     servesCuisine: restaurant.cuisine,
-    priceRange: restaurant.price_range
-      ? "$".repeat(restaurant.price_range)
-      : undefined,
+    priceRange: restaurant.price_sign
+      ? (restaurant.currency === 'USD' ? '$' : restaurant.currency === 'EUR' ? '€' : restaurant.currency === 'IDR' ? 'Rp' : '$').repeat(restaurant.price_sign)
+      : restaurant.price_range || undefined,
     aggregateRating: restaurant.average_rating
       ? {
           "@type": "AggregateRating",
@@ -239,7 +245,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-muted-foreground">Price</div>
                   <div className="font-medium">
-                    {formatPrice(restaurant.price_range)}
+                    {formatPrice(restaurant.price_sign, restaurant.price_range, restaurant.currency)}
                   </div>
                 </div>
 

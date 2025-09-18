@@ -372,9 +372,12 @@ function DynamicMap({ restaurants, height, className }: RestaurantMapProps) {
                             {restaurant.average_rating}/5
                           </span>
                         )}
-                        {restaurant.price_range && (
+                        {(restaurant.price_range || (restaurant.price_sign && restaurant.currency)) && (
                           <span className="font-medium text-foreground">
-                            {'€'.repeat(restaurant.price_range)}
+                            {restaurant.price_range ? restaurant.price_range : 
+                             restaurant.price_sign && restaurant.currency ? 
+                               (restaurant.currency === 'USD' ? '$' : restaurant.currency === 'EUR' ? '€' : restaurant.currency === 'IDR' ? 'Rp' : '$').repeat(restaurant.price_sign) : 
+                               ''}
                           </span>
                         )}
                       </div>

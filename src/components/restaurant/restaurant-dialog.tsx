@@ -41,6 +41,7 @@ import {
   updateRestaurant,
   checkRestaurantName,
 } from "@/lib/actions";
+import { WaitTimes } from "@/lib/types/supabase";
 import { toast } from "sonner";
 import RestaurantImageUpload from "@/components/restaurant/restaurant-image-upload";
 import DietaryTagSelector from "@/components/dish/dietary-tag-selector";
@@ -69,6 +70,8 @@ import {
   ShoppingBag,
   Truck
 } from "lucide-react";
+
+import { Restaurant } from "@/lib/types/supabase";
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant;
@@ -119,7 +122,26 @@ export default function RestaurantDialog({
   const [selectedSustainabilityTags, setSelectedSustainabilityTags] = useState<string[]>(
     restaurant?.sustainability || []
   );
-  const [waitTime, setWaitTime] = useState(restaurant?.wait_time || "");
+  const [waitTimes, setWaitTimes] = useState<WaitTimes>({
+    seating: (restaurant?.wait_times as WaitTimes)?.seating || "short",
+    food: (restaurant?.wait_times as WaitTimes)?.food || "normal"
+  });
+  const [priceFrom, setPriceFrom] = useState(() => {
+    if (restaurant?.price_range) {
+      const numbers = restaurant.price_range.match(/\d+/g);
+      return numbers && numbers.length > 0 ? numbers[0] : "";
+    }
+    return "";
+  });
+  const [priceTo, setPriceTo] = useState(() => {
+    if (restaurant?.price_range) {
+      const numbers = restaurant.price_range.match(/\d+/g);
+      return numbers && numbers.length > 1 ? numbers[1] : numbers && numbers.length === 1 ? numbers[0] : "";
+    }
+    return "";
+  });
+  const [currency, setCurrency] = useState(restaurant?.currency || "EUR");
+  const [calculatedPriceSign, setCalculatedPriceSign] = useState(restaurant?.price_sign || null);
   const [hiddenGemFlag, setHiddenGemFlag] = useState(restaurant?.hidden_gem_flag || false);
   const [seatingCapacity, setSeatingCapacity] = useState(
     (restaurant?.seating_info as { capacity?: number })?.capacity?.toString() || ""
@@ -324,6 +346,70 @@ export default function RestaurantDialog({
     }
   }, [open]);
 
+  // Function to calculate price sign from price range
+  const calculatePriceSign = useCallback((fromValue: string, toValue: string, currencyCode: string) => {
+    const from = fromValue ? parseInt(fromValue) : 0;
+    const to = toValue ? parseInt(toValue) : 0;
+    
+    if (!from && !to) {
+      setCalculatedPriceSign(null);
+      return;
+    }
+
+    // Get the average price or the single value
+    const avgPrice = from && to ? (from + to) / 2 : (from || to);
+
+    // Define price thresholds based on currency
+    let thresholds: number[];
+    switch (currencyCode) {
+      case 'EUR':
+        thresholds = [15, 30, 50]; // €0-15: 1, €15-30: 2, €30-50: 3, €50+: 4
+        break;
+      case 'USD':
+        thresholds = [15, 35, 60]; // $0-15: 1, $15-35: 2, $35-60: 3, $60+: 4
+        break;
+      case 'IDR':
+        thresholds = [150000, 300000, 500000]; // Rp0-150k: 1, Rp150k-300k: 2, etc.
+        break;
+      default:
+        thresholds = [15, 30, 50];
+    }
+
+    // Calculate price sign (1-4)
+    let sign = 1;
+    for (let i = 0; i < thresholds.length; i++) {
+      if (avgPrice > thresholds[i]) {
+        sign = i + 2;
+      } else {
+        break;
+      }
+    }
+    
+    setCalculatedPriceSign(Math.min(sign, 4));
+  }, []);
+
+  // Generate formatted price range for submission
+  const getFormattedPriceRange = useCallback(() => {
+    if (!priceFrom && !priceTo) return "";
+    
+    const currencySymbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'Rp';
+    const separator = currency === 'IDR' ? ' - ' : '–';
+    
+    if (priceFrom && priceTo) {
+      return `${currencySymbol}${priceFrom}${separator}${priceTo}`;
+    } else if (priceFrom) {
+      return `${currencySymbol}${priceFrom}+`;
+    } else if (priceTo) {
+      return `Up to ${currencySymbol}${priceTo}`;
+    }
+    return "";
+  }, [priceFrom, priceTo, currency]);
+
+  // Effect to recalculate price sign when price range or currency changes
+  useEffect(() => {
+    calculatePriceSign(priceFrom, priceTo, currency);
+  }, [priceFrom, priceTo, currency, calculatePriceSign]);
+
   useEffect(() => {
     return () => {
       if (nameTimeoutRef.current) {
@@ -406,7 +492,10 @@ export default function RestaurantDialog({
       // Handle single select fields
       if (alcoholOptions) formData.set("alcohol_options", alcoholOptions);
     }
-    if (waitTime) formData.set("wait_time", waitTime);
+    formData.set("wait_times", JSON.stringify(waitTimes));
+    if (calculatedPriceSign) formData.set("price_sign", calculatedPriceSign.toString());
+    formData.set("price_range", getFormattedPriceRange());
+    formData.set("currency", currency);
 
     setLoading(true);
 
@@ -439,7 +528,11 @@ export default function RestaurantDialog({
           setSelectedServiceOptions([]);
           setAlcoholOptions("");
           setSelectedSustainabilityTags([]);
-          setWaitTime("");
+          setWaitTimes({ seating: "short", food: "normal" });
+          setPriceFrom("");
+          setPriceTo("");
+          setCurrency("EUR");
+          setCalculatedPriceSign(null);
           setHiddenGemFlag(false);
           setSeatingCapacity("");
           setOutdoorSeating(false);
@@ -732,6 +825,9 @@ export default function RestaurantDialog({
                       neighborhood: selectedNeighborhood || null,
                       average_rating: null,
                       price_range: null,
+                      price_sign: null,
+                      currency: null,
+                      wait_times: null,
                       photos: null,
                       like_count: 0,
                       atmosphere_score: null,
@@ -751,8 +847,7 @@ export default function RestaurantDialog({
                       seating_info: null,
                       service_options: null,
                       sustainability: null,
-                      verified: null,
-                      wait_time: null
+                      verified: null
                     }]}
                     height="200px"
                     className="rounded-lg border border-border/50"
@@ -761,33 +856,67 @@ export default function RestaurantDialog({
               )}
             </div>
 
-            <fieldset className="space-y-4">
-              <legend className="text-foreground text-sm leading-none font-medium">
-                Price Level (1-5)
-              </legend>
-              <RadioGroup
-                className="flex gap-0 -space-x-px rounded-md shadow-xs"
-                name="price_range"
-                defaultValue={restaurant?.price_range?.toString() || ""}
-              >
-                {["1", "2", "3", "4", "5"].map((value) => (
-                  <label
-                    key={value}
-                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border text-center text-sm font-medium transition-[color,box-shadow] outline-none first:rounded-s-md last:rounded-e-md has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50 has-data-[state=checked]:z-10"
-                  >
-                    <RadioGroupItem
-                      value={value}
-                      className="sr-only after:absolute after:inset-0"
-                    />
-                    {value}
-                  </label>
-                ))}
-              </RadioGroup>
-              <div className="mt-1 flex justify-between text-xs font-medium">
-                <p>💰 Cheap</p>
-                <p>Expensive 💸</p>
+            <div className="space-y-4">
+              <Label className="text-sm font-medium">Pricing Information</Label>
+              
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Price Range</Label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currencies = ['EUR', 'USD', 'IDR'];
+                        const currentIndex = currencies.indexOf(currency);
+                        const nextIndex = (currentIndex + 1) % currencies.length;
+                        setCurrency(currencies[nextIndex]);
+                      }}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors border rounded px-2 py-1"
+                    >
+                      Switch to {currency === 'EUR' ? 'USD ($)' : currency === 'USD' ? 'IDR (Rp)' : 'EUR (€)'}
+                    </button>
+                  </div>
+                  <div className="flex">
+                    <div className="relative flex-1">
+                      <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm font-medium">
+                        {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'Rp'}
+                      </span>
+                      <Input
+                        className="flex-1 rounded-e-none ps-8 shadow-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                        placeholder="From"
+                        type="number"
+                        value={priceFrom}
+                        onChange={(e) => setPriceFrom(e.target.value)}
+                        aria-label="Min Price"
+                      />
+                    </div>
+                    <div className="relative flex-1">
+                      <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm font-medium">
+                        {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'Rp'}
+                      </span>
+                      <Input
+                        className="-ms-px flex-1 rounded-s-none ps-8 shadow-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                        placeholder="To"
+                        type="number"
+                        value={priceTo}
+                        onChange={(e) => setPriceTo(e.target.value)}
+                        aria-label="Max Price"
+                      />
+                    </div>
+                  </div>
+                  {calculatedPriceSign && (
+                    <p className="text-xs text-muted-foreground">
+                      Auto-calculated price level: {
+                        Array(calculatedPriceSign).fill(currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'IDR' ? 'Rp' : '$').join('')
+                      } (Level {calculatedPriceSign}/4)
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    💡 Enter minimum and maximum prices. Leave blank for open-ended ranges.
+                  </p>
+                </div>
               </div>
-            </fieldset>
+            </div>
 
             <fieldset className="space-y-4">
               <legend className="text-foreground text-sm leading-none font-medium">
@@ -1134,19 +1263,39 @@ export default function RestaurantDialog({
             </div>
           </div>
 
-          {/* Wait Time - Full Width */}
-          <div className="space-y-2 w-full">
-            <Label>Typical Wait Time</Label>
-            <Select value={waitTime} onValueChange={setWaitTime}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select wait time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="short">Short (0-15 min)</SelectItem>
-                <SelectItem value="medium">Medium (15-30 min)</SelectItem>
-                <SelectItem value="long">Long (30+ min)</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Wait Times */}
+          <div className="space-y-4">
+            <Label className="text-sm font-medium">Wait Times</Label>
+            
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label>Seating Wait Time</Label>
+                <Select value={waitTimes.seating} onValueChange={(value: "short" | "medium" | "long") => setWaitTimes(prev => ({ ...prev, seating: value }))}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select seating wait time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short (0-15 min)</SelectItem>
+                    <SelectItem value="medium">Medium (15-30 min)</SelectItem>
+                    <SelectItem value="long">Long (30+ min)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Food Wait Time</Label>
+                <Select value={waitTimes.food} onValueChange={(value: "short" | "normal" | "long") => setWaitTimes(prev => ({ ...prev, food: value }))}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select food wait time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short (10-20 min)</SelectItem>
+                    <SelectItem value="normal">Normal (20-35 min)</SelectItem>
+                    <SelectItem value="long">Long (35+ min)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
           {/* Hidden Gem Flag - Admin Only */}

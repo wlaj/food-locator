@@ -225,7 +225,10 @@ export async function createRestaurant(formData: FormData) {
   const cuisines = formData.getAll('cuisine') as string[]
   const neighborhood = formData.get('neighborhood') as string
   const description = formData.get('description') as string
-  const price_range = formData.get('price_range') ? parseInt(formData.get('price_range') as string) : null
+  const price_sign = formData.get('price_sign') ? parseInt(formData.get('price_sign') as string) : null
+  const price_range = formData.get('price_range') as string || null
+  const currency = formData.get('currency') as string || null
+  const wait_times = formData.get('wait_times') ? JSON.parse(formData.get('wait_times') as string) : null
   const average_rating = formData.get('average_rating') ? parseFloat(formData.get('average_rating') as string) : null
   const atmosphere_score = formData.get('atmosphere_score') ? parseFloat(formData.get('atmosphere_score') as string) : null
   const authenticity_score = formData.get('authenticity_score') ? parseFloat(formData.get('authenticity_score') as string) : null
@@ -255,7 +258,10 @@ export async function createRestaurant(formData: FormData) {
     cuisine: cuisines.length > 0 ? cuisines : null,
     neighborhood,
     description,
+    price_sign,
     price_range,
+    currency,
+    wait_times,
     average_rating,
     atmosphere_score,
     authenticity_score,
@@ -287,7 +293,10 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const cuisines = formData.getAll('cuisine') as string[]
   const neighborhood = formData.get('neighborhood') as string
   const description = formData.get('description') as string
-  const price_range = formData.get('price_range') ? parseInt(formData.get('price_range') as string) : null
+  const price_sign = formData.get('price_sign') ? parseInt(formData.get('price_sign') as string) : null
+  const price_range = formData.get('price_range') as string || null
+  const currency = formData.get('currency') as string || null
+  const wait_times = formData.get('wait_times') ? JSON.parse(formData.get('wait_times') as string) : null
   const average_rating = formData.get('average_rating') ? parseFloat(formData.get('average_rating') as string) : null
   const atmosphere_score = formData.get('atmosphere_score') ? parseFloat(formData.get('atmosphere_score') as string) : null
   const authenticity_score = formData.get('authenticity_score') ? parseFloat(formData.get('authenticity_score') as string) : null
@@ -317,7 +326,10 @@ export async function updateRestaurant(id: string, formData: FormData) {
     cuisine: cuisines.length > 0 ? cuisines : null,
     neighborhood,
     description,
+    price_sign,
     price_range,
+    currency,
+    wait_times,
     average_rating,
     atmosphere_score,
     authenticity_score,

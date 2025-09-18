@@ -88,7 +88,10 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                   <TableCell>{restaurant.cuisine?.join(', ') || "-"}</TableCell>
                   <TableCell>{restaurant.neighborhood || "-"}</TableCell>
                   <TableCell>
-                    {restaurant.price_range ? "$".repeat(restaurant.price_range) : "-"}
+                    {restaurant.price_range ? restaurant.price_range : 
+                     restaurant.price_sign && restaurant.currency ? 
+                       (restaurant.currency === 'USD' ? '$' : restaurant.currency === 'EUR' ? '€' : restaurant.currency === 'IDR' ? 'Rp' : '$').repeat(restaurant.price_sign) : 
+                       "-"}
                   </TableCell>
                   <TableCell>
                     {restaurant.average_rating

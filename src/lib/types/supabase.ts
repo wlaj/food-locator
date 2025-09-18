@@ -511,6 +511,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           cuisine: string[] | null
+          currency: string | null
           description: string | null
           dietary_tags: string[] | null
           hidden_gem_flag: boolean | null
@@ -522,7 +523,8 @@ export type Database = {
           neighborhood: string | null
           persona_scores: Json | null
           photos: string[] | null
-          price_range: number | null
+          price_range: string | null
+          price_sign: number | null
           seating_info: Json | null
           service_options: string[] | null
           specialties: string[] | null
@@ -530,7 +532,7 @@ export type Database = {
           updated_at: string | null
           updated_by: string | null
           verified: boolean | null
-          wait_time: string | null
+          wait_times: Json | null
         }
         Insert: {
           accessibility?: Json | null
@@ -543,6 +545,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           cuisine?: string[] | null
+          currency?: string | null
           description?: string | null
           dietary_tags?: string[] | null
           hidden_gem_flag?: boolean | null
@@ -554,7 +557,8 @@ export type Database = {
           neighborhood?: string | null
           persona_scores?: Json | null
           photos?: string[] | null
-          price_range?: number | null
+          price_range?: string | null
+          price_sign?: number | null
           seating_info?: Json | null
           service_options?: string[] | null
           specialties?: string[] | null
@@ -562,7 +566,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           verified?: boolean | null
-          wait_time?: string | null
+          wait_times?: Json | null
         }
         Update: {
           accessibility?: Json | null
@@ -575,6 +579,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           cuisine?: string[] | null
+          currency?: string | null
           description?: string | null
           dietary_tags?: string[] | null
           hidden_gem_flag?: boolean | null
@@ -586,7 +591,8 @@ export type Database = {
           neighborhood?: string | null
           persona_scores?: Json | null
           photos?: string[] | null
-          price_range?: number | null
+          price_range?: string | null
+          price_sign?: number | null
           seating_info?: Json | null
           service_options?: string[] | null
           specialties?: string[] | null
@@ -594,7 +600,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           verified?: boolean | null
-          wait_time?: string | null
+          wait_times?: Json | null
         }
         Relationships: [
           {
@@ -779,24 +785,24 @@ export type Database = {
           user_lng: number
         }
         Returns: {
-          atmosphere: number
-          authenticity: number
+          atmosphere_score: number
+          authenticity_score: number
+          average_rating: number
           created_at: string
           created_by: string
-          cuisine: string
+          cuisine: string[]
           description: string
-          dietary: string[]
+          dietary_tags: string[]
           distance_km: number
-          favorite_dishes: string[]
           id: string
-          image_url: string
-          latitude: number
-          location: string
-          longitude: number
+          location_lat: number
+          location_lng: number
           name: string
+          neighborhood: string
           persona_scores: Json
-          price: number
-          rating_score: number
+          photos: string[]
+          price_range: number
+          specialties: string[]
           updated_at: string
           updated_by: string
         }[]
@@ -804,12 +810,12 @@ export type Database = {
       get_user_restaurants: {
         Args: { user_uuid?: string }
         Returns: {
+          average_rating: number
           created_at: string
-          cuisine: string
+          cuisine: string[]
           id: string
-          location: string
           name: string
-          rating_score: number
+          neighborhood: string
         }[]
       }
       get_user_role: {
@@ -983,3 +989,9 @@ export const Constants = {
 
 // Convenience type alias for the Restaurant table
 export type Restaurant = Tables<'restaurants'>
+
+// Wait times type for the new jsonb structure
+export type WaitTimes = {
+  seating: "short" | "medium" | "long"
+  food: "short" | "normal" | "long"
+}
