@@ -503,7 +503,6 @@ export type Database = {
         Row: {
           accessibility: Json | null
           address: string | null
-          alcohol_options: string | null
           ambience_tags: string[] | null
           atmosphere_score: number | null
           authenticity_score: number | null
@@ -537,7 +536,6 @@ export type Database = {
         Insert: {
           accessibility?: Json | null
           address?: string | null
-          alcohol_options?: string | null
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
           authenticity_score?: number | null
@@ -571,7 +569,6 @@ export type Database = {
         Update: {
           accessibility?: Json | null
           address?: string | null
-          alcohol_options?: string | null
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
           authenticity_score?: number | null
@@ -986,12 +983,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
-// Convenience type alias for the Restaurant table
-export type Restaurant = Tables<'restaurants'>
-
-// Wait times type for the new jsonb structure
-export type WaitTimes = {
-  seating: "short" | "medium" | "long"
-  food: "short" | "normal" | "long"
-}

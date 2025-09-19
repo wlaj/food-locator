@@ -5,7 +5,12 @@ declare global {
   type CommunityVote = Database['public']['Tables']['community_votes']['Row'] & {
     is_public: boolean
   }
-
+  
+  interface WaitTimes {
+    seating: "short" | "medium" | "long"
+    food: "short" | "normal" | "long"
+  }
+  
   // Topic type for active topics
   interface Topic {
     topic_id: string;

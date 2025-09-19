@@ -41,7 +41,6 @@ import {
   updateRestaurant,
   checkRestaurantName,
 } from "@/lib/actions";
-import { WaitTimes } from "@/lib/types/supabase";
 import { toast } from "sonner";
 import RestaurantImageUpload from "@/components/restaurant/restaurant-image-upload";
 import DietaryTagSelector from "@/components/dish/dietary-tag-selector";
@@ -66,12 +65,10 @@ import {
   Wifi,
   Leaf,
   Star,
-  Accessibility,
   ShoppingBag,
   Truck
 } from "lucide-react";
 
-import { Restaurant } from "@/lib/types/supabase";
 
 interface RestaurantDialogProps {
   restaurant?: Restaurant;
@@ -116,15 +113,12 @@ export default function RestaurantDialog({
     restaurant?.service_options || []
   );
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [alcoholOptions, setAlcoholOptions] = useState(
-    restaurant?.alcohol_options || ""
-  );
   const [selectedSustainabilityTags, setSelectedSustainabilityTags] = useState<string[]>(
     restaurant?.sustainability || []
   );
   const [waitTimes, setWaitTimes] = useState<WaitTimes>({
-    seating: (restaurant?.wait_times as WaitTimes)?.seating || "short",
-    food: (restaurant?.wait_times as WaitTimes)?.food || "normal"
+    seating: ((restaurant?.wait_times as unknown as WaitTimes) || {})?.seating || "short",
+    food: ((restaurant?.wait_times as unknown as WaitTimes) || {})?.food || "normal"
   });
   const [priceFrom, setPriceFrom] = useState(() => {
     if (restaurant?.price_range) {
@@ -158,8 +152,6 @@ export default function RestaurantDialog({
   const [petFriendly, setPetFriendly] = useState(
     (restaurant?.accessibility as { pet_friendly?: boolean })?.pet_friendly || false
   );
-  const accessibilityId1 = useId();
-  const accessibilityId2 = useId();
   const ambienceId = useId();
   const serviceId = useId();
   const sustainabilityId = useId();
@@ -488,9 +480,6 @@ export default function RestaurantDialog({
         outdoor: outdoorSeating,
         reservations: reservations
       }));
-
-      // Handle single select fields
-      if (alcoholOptions) formData.set("alcohol_options", alcoholOptions);
     }
     formData.set("wait_times", JSON.stringify(waitTimes));
     if (calculatedPriceSign) formData.set("price_sign", calculatedPriceSign.toString());
@@ -526,7 +515,6 @@ export default function RestaurantDialog({
           setVerified(false);
           setSelectedAmbienceTags([]);
           setSelectedServiceOptions([]);
-          setAlcoholOptions("");
           setSelectedSustainabilityTags([]);
           setWaitTimes({ seating: "short", food: "normal" });
           setPriceFrom("");
@@ -841,7 +829,6 @@ export default function RestaurantDialog({
                       updated_at: null,
                       updated_by: null,
                       accessibility: null,
-                      alcohol_options: null,
                       ambience_tags: null,
                       hidden_gem_flag: null,
                       seating_info: null,
@@ -864,20 +851,20 @@ export default function RestaurantDialog({
                     <button
                       type="button"
                       onClick={() => {
-                        const currencies = ['EUR', 'USD', 'IDR'];
+                        const currencies = ['EUR', 'IDR'];
                         const currentIndex = currencies.indexOf(currency);
                         const nextIndex = (currentIndex + 1) % currencies.length;
                         setCurrency(currencies[nextIndex]);
                       }}
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors border rounded px-2 py-1"
                     >
-                      Switch to {currency === 'EUR' ? 'USD ($)' : currency === 'USD' ? 'IDR (Rp)' : 'EUR (€)'}
+                      Switch to {currency === 'EUR' ? 'IDR (Rp)' : 'EUR (€)'}
                     </button>
                   </div>
                   <div className="flex">
                     <div className="relative flex-1">
                       <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm font-medium">
-                        {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'Rp'}
+                        {currency === 'EUR' ? '€' : 'Rp'}
                       </span>
                       <Input
                         className="flex-1 rounded-e-none ps-8 shadow-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
@@ -890,7 +877,7 @@ export default function RestaurantDialog({
                     </div>
                     <div className="relative flex-1">
                       <span className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-sm font-medium">
-                        {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : 'Rp'}
+                        {currency === 'EUR' ? '€' : 'Rp'}
                       </span>
                       <Input
                         className="-ms-px flex-1 rounded-s-none ps-8 shadow-none [-moz-appearance:_textfield] focus:z-10 [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
@@ -1033,43 +1020,10 @@ export default function RestaurantDialog({
             />
           </div>
 
-          {/* Accessibility - For all users */}
-          <div className="space-y-4">
-            <Label className="text-sm font-medium">Accessibility</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Wheelchair Accessible", icon: Accessibility },
-                { label: "Pet Friendly", icon: Heart }
-              ].map(({ label, icon: Icon }, index) => {
-                const id = index === 0 ? accessibilityId1 : accessibilityId2;
-                const isChecked = label === "Wheelchair Accessible" ? wheelchairAccessible : petFriendly;
-                const onChange = label === "Wheelchair Accessible" ? setWheelchairAccessible : setPetFriendly;
-                
-                return (
-                  <div
-                    key={label}
-                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
-                  >
-                    <div className="flex justify-between gap-2">
-                      <Checkbox
-                        id={`${id}-${label}`}
-                        className="order-1 after:absolute after:inset-0"
-                        checked={isChecked}
-                        onCheckedChange={(checked: boolean) => onChange(checked)}
-                      />
-                      <Icon className="opacity-60" size={16} aria-hidden="true" />
-                    </div>
-                    <Label htmlFor={`${id}-${label}`} className="text-sm">{label}</Label>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Ambience  */}
           <div className="space-y-2">
             <Label>Ambience</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { label: "Romantic", icon: Heart },
                 { label: "Family-friendly", icon: Users },
@@ -1152,7 +1106,7 @@ export default function RestaurantDialog({
           {/* Sustainability Tags */}
           <div className="space-y-2">
             <Label>Sustainability</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { label: "Organic", icon: Leaf },
                 { label: "Local Sourcing", icon: Building2 },
@@ -1196,7 +1150,7 @@ export default function RestaurantDialog({
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label>Seating Wait Time</Label>
-                <Select value={waitTimes.seating} onValueChange={(value: "short" | "medium" | "long") => setWaitTimes(prev => ({ ...prev, seating: value }))}>
+                <Select value={waitTimes.seating} onValueChange={(value: "short" | "medium" | "long") => setWaitTimes((prev: WaitTimes) => ({ ...prev, seating: value }))}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select seating wait time" />
                   </SelectTrigger>
@@ -1210,7 +1164,7 @@ export default function RestaurantDialog({
               
               <div className="space-y-2">
                 <Label>Food Wait Time</Label>
-                <Select value={waitTimes.food} onValueChange={(value: "short" | "normal" | "long") => setWaitTimes(prev => ({ ...prev, food: value }))}>
+                <Select value={waitTimes.food} onValueChange={(value: "short" | "normal" | "long") => setWaitTimes((prev: WaitTimes) => ({ ...prev, food: value }))}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select food wait time" />
                   </SelectTrigger>
