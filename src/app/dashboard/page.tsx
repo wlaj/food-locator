@@ -1,6 +1,5 @@
 import { getUser } from "@/lib/auth";
 import { signOut } from "@/lib/auth-actions";
-import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/auth/protected-route";
 import ProfileEditDialog from "@/components/auth/profile-edit-dialog";
 import ToastHandler from "@/components/toast-handler";
@@ -11,6 +10,7 @@ import { getAllVotes } from "@/lib/vote-actions";
 import Image from "next/image";
 import { isUserAdmin } from "@/lib/auth-server";
 import { Suspense } from "react";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 export default async function DashboardPage() {
   const user = await getUser();
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
             <div className="flex items-center gap-4">
               <ProfileEditDialog user={user} />
               <form action={signOut}>
-                <Button variant="outline">Sign out</Button>
+                <SignOutButton variant="outline" />
               </form>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PasswordStrengthInput } from "@/components/auth/password-strength-input"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export function SignupForm({
   className,
@@ -50,9 +51,9 @@ export function SignupForm({
                 autoComplete="new-password"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full" pendingText="Creating account...">
               Create account
-            </Button>
+            </SubmitButton>
           </div>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">

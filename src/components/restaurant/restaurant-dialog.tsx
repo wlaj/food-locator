@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useId, useRef, useEffect, useCallback } from "react";
+import { useState, useId, useRef, useEffect, useCallback, useTransition } from "react";
 import {
   Dialog,
   DialogContent,
@@ -81,7 +81,7 @@ export default function RestaurantDialog({
   trigger,
 }: RestaurantDialogProps) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
     restaurant?.photos?.[0] || null
   );
@@ -467,52 +467,50 @@ export default function RestaurantDialog({
     formData.set("price_range", getFormattedPriceRange());
     formData.set("currency", currency);
 
-    setLoading(true);
-
-    try {
-      let result;
-      if (isEditing) {
-        result = await updateRestaurant(restaurant.id, formData);
-      } else {
-        result = await createRestaurant(formData);
-      }
-
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(
-          `Restaurant ${isEditing ? "updated" : "created"} successfully`
-        );
-        
-        // Reset form after successful creation (not for editing)
-        if (!isEditing && formRef.current) {
-          formRef.current.reset();
-          // Reset state variables that aren't form inputs
-          setCurrentImageUrl(null);
-          setSelectedCuisines([]);
-          setSelectedNeighborhood("");
-          setNameValidation({ isChecking: false, isValid: null, error: null });
-          setAddressValidation({ isChecking: false, coordinates: null, formattedAddress: null, error: null });
-          setVerified(false);
-          setSelectedAmbienceTags([]);
-          setSelectedServiceOptions([]);
-          setSelectedSustainabilityTags([]);
-          setSelectedBestFor([]);
-          setWaitTimes({ seating: "short", food: "normal" });
-          setPriceFrom("");
-          setPriceTo("");
-          setCurrency("EUR");
-          setCalculatedPriceSign(null);
-          setHiddenGemFlag(false);
+    startTransition(async () => {
+      try {
+        let result;
+        if (isEditing) {
+          result = await updateRestaurant(restaurant.id, formData);
+        } else {
+          result = await createRestaurant(formData);
         }
-        
-        setOpen(false);
+
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success(
+            `Restaurant ${isEditing ? "updated" : "created"} successfully`
+          );
+          
+          // Reset form after successful creation (not for editing)
+          if (!isEditing && formRef.current) {
+            formRef.current.reset();
+            // Reset state variables that aren't form inputs
+            setCurrentImageUrl(null);
+            setSelectedCuisines([]);
+            setSelectedNeighborhood("");
+            setNameValidation({ isChecking: false, isValid: null, error: null });
+            setAddressValidation({ isChecking: false, coordinates: null, formattedAddress: null, error: null });
+            setVerified(false);
+            setSelectedAmbienceTags([]);
+            setSelectedServiceOptions([]);
+            setSelectedSustainabilityTags([]);
+            setSelectedBestFor([]);
+            setWaitTimes({ seating: "short", food: "normal" });
+            setPriceFrom("");
+            setPriceTo("");
+            setCurrency("EUR");
+            setCalculatedPriceSign(null);
+            setHiddenGemFlag(false);
+          }
+          
+          setOpen(false);
+        }
+      } catch {
+        toast.error("Something went wrong");
       }
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    });
   }
 
   return (
@@ -1200,8 +1198,8 @@ export default function RestaurantDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : isEditing ? "Update" : "Create"}
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Saving..." : isEditing ? "Update" : "Create"}
             </Button>
           </DialogFooter>
         </form>

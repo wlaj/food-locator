@@ -6,8 +6,8 @@ import { verifyOtp } from '@/lib/auth-actions'
 import { OTPInputComponent } from './otp-input'
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export function OTPVerificationForm({
   className,
@@ -65,9 +65,9 @@ export function OTPVerificationForm({
               maxLength={6}
             />
             
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full" pendingText="Verifying...">
               Verify Code
-            </Button>
+            </SubmitButton>
           </div>
 
           <div className="text-center text-sm">

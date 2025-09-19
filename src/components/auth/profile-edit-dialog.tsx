@@ -7,6 +7,7 @@ import Image from "next/image"
 
 import { useCharacterLimit } from "@/hooks/use-character-limit"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/ui/submit-button"
 import {
   Dialog,
   DialogClose,
@@ -163,7 +164,7 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit">Save changes</Button>
+                <SubmitButton pendingText="Saving...">Save changes</SubmitButton>
               </DialogFooter>
             </form>
         </div>

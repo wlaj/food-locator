@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export function LoginForm({
   className,
@@ -47,9 +48,9 @@ export function LoginForm({
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full" pendingText="Sending OTP...">
               Send OTP
-            </Button>
+            </SubmitButton>
           </div>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">

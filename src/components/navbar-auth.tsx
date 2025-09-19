@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { SignOutButton } from '@/components/auth/sign-out-button'
 import Link from 'next/link'
 
 export default async function NavbarAuth() {
@@ -59,9 +60,7 @@ export default async function NavbarAuth() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <form action={signOut} className="w-full">
-            <button type="submit" className="w-full text-left">
-              Sign out
-            </button>
+            <SignOutButton variant="text" />
           </form>
         </DropdownMenuItem>
       </DropdownMenuContent>
