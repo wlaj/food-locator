@@ -422,10 +422,14 @@ export default function RestaurantDialog({
       return;
     }
 
-    // Add coordinates to form data if available from address validation
+    // Add coordinates to form data if available from address validation or existing restaurant
     if (addressValidation.coordinates) {
       formData.set("location_lat", addressValidation.coordinates.lat.toString());
       formData.set("location_lng", addressValidation.coordinates.lng.toString());
+    } else if (isEditing && restaurant?.location_lat && restaurant?.location_lng) {
+      // Preserve existing coordinates when editing if no new address validation
+      formData.set("location_lat", restaurant.location_lat.toString());
+      formData.set("location_lng", restaurant.location_lng.toString());
     }
     
     // Handle cuisine array
