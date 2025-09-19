@@ -10,19 +10,16 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { IconLocationFilled } from "@tabler/icons-react";
 import RestaurantCard from "./restaurant/restaurant-card";
 
 interface GalleryProps {
   heading?: string;
-  demoUrl?: string;
   demoTitle?: string;
   restaurants?: Restaurant[];
 }
 
 const Gallery = ({
   heading = "Gallery",
-  demoUrl = "https://www.shadcnblocks.com",
   demoTitle = "Book a demo",
   restaurants,
 }: GalleryProps) => {
@@ -44,19 +41,17 @@ const Gallery = ({
     };
   }, [carouselApi]);
   return (
-    <section className="py-32">
-        <div className="mb-8 flex flex-col justify-between md:mb-14 md:flex-row md:items-end lg:mb-16">
+    <section className="py-24">
+        <div className="mb-8 flex flex-col justify-between md:mb-10 md:flex-row md:items-end lg:mb-12">
           <div>
-            <h2 className="mb-3 text-3xl font-semibold md:mb-4 md:text-4xl lg:mb-6">
+            <h2 className="mb-1 text-xl font-semibold md:mb-4 md:text-2xl lg:mb-3">
               {heading}
             </h2>
-            <a
-              href={demoUrl}
-              className="group flex items-center gap-1 text-sm font-medium md:text-base lg:text-lg"
+            <p
+              className="group flex items-center gap-1 text-sm font-medium md:text-base lg:text-md"
             >
               {demoTitle}
-              <IconLocationFilled className="size-4 transition-transform group-hover:translate-x-1" />
-            </a>
+            </p>
           </div>
           <div className="mt-8 flex shrink-0 items-center justify-start gap-2">
             <Button
@@ -97,7 +92,7 @@ const Gallery = ({
         >
           <CarouselContent className="hide-scrollbar w-full max-w-full">
             {restaurants?.map((restaurant) => (
-              <CarouselItem key={restaurant.id} className="md:max-w-[452px]">
+              <CarouselItem key={restaurant.id} className="md:max-w-[325px]">
                 <RestaurantCard restaurant={restaurant} />
               </CarouselItem>
             ))}

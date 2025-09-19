@@ -137,7 +137,7 @@ test.describe('User Authentication', () => {
     }
   });
 
-  test('should handle logout functionality when authenticated', async ({ page, context }) => {
+  test('should handle logout functionality when authenticated', async ({ page }) => {
     // Note: This test assumes we can programmatically set authentication state
     // In a real scenario, you might need to login first or mock authentication
     

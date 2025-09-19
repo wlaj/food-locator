@@ -78,7 +78,6 @@ test.describe('Main User Flows', () => {
         
         // Should redirect to login or show login dialog
         const isOnLoginPage = page.url().includes('/login');
-        const hasLoginDialog = await page.locator('[role="dialog"], .modal').isVisible();
         
         if (isOnLoginPage) {
           // Verify login form
@@ -270,7 +269,7 @@ test.describe('Main User Flows', () => {
     }
   });
 
-  test('cross-browser compatibility basics', async ({ page, browserName }) => {
+  test('cross-browser compatibility basics', async ({ page }) => {
     // Test basic functionality across browsers
     await page.goto('/');
     

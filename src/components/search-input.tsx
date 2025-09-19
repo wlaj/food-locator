@@ -335,7 +335,7 @@ function SearchInputContent({
           role="combobox"
           aria-expanded={mobileLocationOpen}
           className={cn(
-            "w-full justify-between bg-background hover:bg-muted/50",
+            "w-full justify-between bg-background hover:bg-muted/50 rounded-full",
             sizeClasses[size]
           )}
           onClick={() => setMobileLocationOpen(!mobileLocationOpen)}
@@ -528,7 +528,7 @@ function SearchInputContent({
       <form
         onSubmit={handleSearchSubmit}
         className={cn(
-          "relative w-full flex rounded-lg border shadow-sm",
+          "relative w-full flex rounded-full border shadow-sm",
           className
         )}
       >
@@ -541,7 +541,7 @@ function SearchInputContent({
                 role="combobox"
                 aria-expanded={locationOpen}
                 className={cn(
-                  "justify-between border-0 rounded-r-none border-r bg-background hover:bg-muted/50",
+                  "justify-between border-0 rounded-r-none rounded-l-full border-r bg-background hover:bg-muted/50",
                   sizeClasses[size]
                 )}
               >
@@ -735,13 +735,13 @@ function SearchInputContent({
             setActiveTagIndex={setActiveTagIndex}
             className={cn(
               "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0",
-              "md:rounded-l-none", // Only remove left border radius on desktop
+              "md:rounded-l-none rounded-full", // Only remove left border radius on desktop
               sizeClasses[size]
             )}
             styleClasses={{
               inlineTagsContainer: cn(
                 "border-0 shadow-none focus-within:ring-0 p-1 gap-1 pl-4 flex-wrap",
-                "md:rounded-l-none bg-background", // Only remove left border radius on desktop
+                "md:rounded-l-none rounded-full bg-background", // Only remove left border radius on desktop
                 selectedTags.length > 2 ? "items-start" : "items-center", // Use items-start only when many tags
                 sizeClasses[size]
               ),
@@ -765,7 +765,7 @@ function SearchInputContent({
           <Button
             type="submit"
             className={cn(
-              "absolute top-0.5 right-0.5 bottom-0.5 flex justify-center w-10 hover:opacity-90 transition-colors",
+              "absolute top-0.5 rounded-full right-0.5 bottom-0.5 flex justify-center w-10 hover:opacity-90 transition-colors",
               selectedTags.length > 2 ? "items-start pt-2" : "items-center"
             )}
             aria-label="Search"
@@ -894,7 +894,7 @@ export default function SearchInput(props: SearchInputProps) {
   return (
     <React.Suspense
       fallback={
-        <div className="h-10 w-full bg-muted/50 animate-pulse rounded-lg" />
+        <div className="h-10 w-full bg-muted/50 animate-pulse rounded-full" />
       }
     >
       <SearchInputContent {...props} />

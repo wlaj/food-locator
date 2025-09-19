@@ -28,16 +28,20 @@
   "howItWorks": {
     "heading": "Hoe het werkt",
     "step1": {
-      "title": "Zoek op locatie of voeg je locatie toe",
-      "description": "Vul je postcode in om restaurants in jouw buurt te vinden."
+      "title": "Ontdek plekken bij jou in de buurt",
+      "description": "Swipe door foto’s, menu’s en de sfeer, allemaal in één feed. Zie waar locals en reizigers enthousiast over zijn."
     },
     "step2": {
-      "title": "Ontdek lokale restaurants",
-      "description": "Bekijk een overzicht van alle restaurants bij jou in de buurt."
+      "title": "Weet wat echt de moeite waard is",
+      "description": "Check wachttijden, prijsklassen en de vibe (date night, vrienden, familie, solo). Nooit meer gokken."
     },
     "step3": {
-      "title": "Bestel en geniet",
-      "description": "Kies je favoriete gerecht en plaats eenvoudig je bestelling."
+      "title": "Vertrouw op de community",
+      "description": "Echte foto’s, korte reviews en snelle clips van mensen zoals jij. Minder bla bla, meer eerlijke food talk."
+    },
+    "step4": {
+      "title": "Doe mee aan het gesprek",
+      "description": "Deel je ervaring, beoordeel gerechten en drop tips, help anderen nieuwe hidden gems te ontdekken."
     }
   },
   "search": {
@@ -55,8 +59,8 @@
     "with": "met"
   },
   "gallery": {
-    "restaurants": "Restaurants",
-    "viewBasedOnLocation": "Weergave op basis van locatie"
+    "restaurants": "Around the World",
+    "viewBasedOnLocation": "Reis met je vork, jij wilt het, wij hebben het."
   },
   "auth": {
     "loginTitle": "Inloggen",

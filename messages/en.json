@@ -28,16 +28,20 @@
   "howItWorks": {
     "heading": "How it works",
     "step1": {
-      "title": "Search by location or add your location",
-      "description": "Enter your postal code to find restaurants in your area."
+      "title": "Discover spots near you",
+      "description": "Swipe through photos, menus, and vibes, all in one feed. Find what locals and travelers are raving about."
     },
     "step2": {
-      "title": "Discover local restaurants",
-      "description": "View an overview of all restaurants near you."
+      "title": "See what’s actually worth it",
+      "description": "Check wait times, price ranges, and crowd vibes (date night, friends, family, solo). No more guessing."
     },
     "step3": {
-      "title": "Order and enjoy",
-      "description": "Choose your favorite dish and easily place your order."
+      "title": "Trust the community",
+      "description": "Real photos, quick reviews, and short clips from people like you. Less fluff, more honest food talk."
+    },
+    "step4": {
+      "title": "Join the conversation",
+      "description": "Post your experience, rate dishes, and drop tips. Help others discover hidden gems."
     }
   },
   "search": {
@@ -55,8 +59,8 @@
     "with": "with"
   },
   "gallery": {
-    "restaurants": "Restaurants",
-    "viewBasedOnLocation": "View based on location"
+    "restaurants": "Around the World",
+    "viewBasedOnLocation": "Travel with your fork, you want it, we got it."
   },
   "auth": {
     "loginTitle": "Login",

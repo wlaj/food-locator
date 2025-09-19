@@ -12,8 +12,8 @@ export default async function Home() {
 
   return (
     <div>
-      <Hero className="bg-black" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <Hero className="mt-30" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Gallery
           heading={t("gallery.restaurants")}
           demoTitle={t("gallery.viewBasedOnLocation")}

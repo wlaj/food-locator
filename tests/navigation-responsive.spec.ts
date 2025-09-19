@@ -236,10 +236,6 @@ test.describe('Navigation & Responsive Design', () => {
       await page.goto(link);
       await page.waitForLoadState('networkidle');
       
-      // Page should load without major errors
-      const errorText = page.getByText('error', { exact: false });
-      const notFoundText = page.getByText('not found', { exact: false });
-      
       // If these are visible, it's okay for non-existent resources
       // But the page should at least load
       const hasContent = await page.locator('h1, h2, main').first().isVisible();
