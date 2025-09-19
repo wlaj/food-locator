@@ -238,6 +238,10 @@ export async function createRestaurant(formData: FormData) {
   const address = formData.get('address') as string || null
   const location_lat = formData.get('location_lat') ? parseFloat(formData.get('location_lat') as string) : null
   const location_lng = formData.get('location_lng') ? parseFloat(formData.get('location_lng') as string) : null
+  const ambience_tags = formData.getAll('ambience_tags') as string[]
+  const service_options = formData.getAll('service_options') as string[]
+  const sustainability = formData.getAll('sustainability') as string[]
+  const best_for = formData.getAll('best_for') as string[]
 
   const supabase = await createClient();
 
@@ -270,7 +274,11 @@ export async function createRestaurant(formData: FormData) {
     specialties,
     address,
     location_lat,
-    location_lng
+    location_lng,
+    ambience_tags: ambience_tags.length > 0 ? ambience_tags : null,
+    service_options: service_options.length > 0 ? service_options : null,
+    sustainability: sustainability.length > 0 ? sustainability : null,
+    best_for: best_for.length > 0 ? best_for : null
   }
 
   const { data, error } = await supabase
@@ -306,6 +314,10 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const address = formData.get('address') as string || null
   const location_lat = formData.get('location_lat') ? parseFloat(formData.get('location_lat') as string) : null
   const location_lng = formData.get('location_lng') ? parseFloat(formData.get('location_lng') as string) : null
+  const ambience_tags = formData.getAll('ambience_tags') as string[]
+  const service_options = formData.getAll('service_options') as string[]
+  const sustainability = formData.getAll('sustainability') as string[]
+  const best_for = formData.getAll('best_for') as string[]
 
   const supabase = await createClient();
 
@@ -338,7 +350,11 @@ export async function updateRestaurant(id: string, formData: FormData) {
     specialties,
     address,
     location_lat,
-    location_lng
+    location_lng,
+    ambience_tags: ambience_tags.length > 0 ? ambience_tags : null,
+    service_options: service_options.length > 0 ? service_options : null,
+    sustainability: sustainability.length > 0 ? sustainability : null,
+    best_for: best_for.length > 0 ? best_for : null
   }
 
   const { data, error } = await supabase
