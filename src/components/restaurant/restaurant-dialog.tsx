@@ -141,21 +141,6 @@ export default function RestaurantDialog({
   const [currency, setCurrency] = useState(restaurant?.currency || "EUR");
   const [calculatedPriceSign, setCalculatedPriceSign] = useState(restaurant?.price_sign || null);
   const [hiddenGemFlag, setHiddenGemFlag] = useState(restaurant?.hidden_gem_flag || false);
-  const [seatingCapacity, setSeatingCapacity] = useState(
-    (restaurant?.seating_info as { capacity?: number })?.capacity?.toString() || ""
-  );
-  const [outdoorSeating, setOutdoorSeating] = useState(
-    (restaurant?.seating_info as { outdoor?: boolean })?.outdoor || false
-  );
-  const [reservations, setReservations] = useState(
-    (restaurant?.seating_info as { reservations?: boolean })?.reservations || false
-  );
-  const [wheelchairAccessible, setWheelchairAccessible] = useState(
-    (restaurant?.accessibility as { wheelchair?: boolean })?.wheelchair || false
-  );
-  const [petFriendly, setPetFriendly] = useState(
-    (restaurant?.accessibility as { pet_friendly?: boolean })?.pet_friendly || false
-  );
   const ambienceId = useId();
   const serviceId = useId();
   const sustainabilityId = useId();
@@ -477,20 +462,6 @@ export default function RestaurantDialog({
       formData.set("hidden_gem_flag", hiddenGemFlag.toString());
     }
 
-    // Handle JSON fields - accessibility for all users
-    formData.set("accessibility", JSON.stringify({
-      wheelchair: wheelchairAccessible,
-      pet_friendly: petFriendly
-    }));
-
-    // Handle admin-only JSON fields
-    if (userRole === 'admin') {
-      formData.set("seating_info", JSON.stringify({
-        capacity: seatingCapacity ? parseInt(seatingCapacity) : null,
-        outdoor: outdoorSeating,
-        reservations: reservations
-      }));
-    }
     formData.set("wait_times", JSON.stringify(waitTimes));
     if (calculatedPriceSign) formData.set("price_sign", calculatedPriceSign.toString());
     formData.set("price_range", getFormattedPriceRange());
@@ -533,11 +504,6 @@ export default function RestaurantDialog({
           setCurrency("EUR");
           setCalculatedPriceSign(null);
           setHiddenGemFlag(false);
-          setSeatingCapacity("");
-          setOutdoorSeating(false);
-          setReservations(false);
-          setWheelchairAccessible(false);
-          setPetFriendly(false);
         }
         
         setOpen(false);
@@ -849,11 +815,9 @@ export default function RestaurantDialog({
                       persona_scores: null,
                       updated_at: null,
                       updated_by: null,
-                      accessibility: null,
                       ambience_tags: null,
                       best_for: null,
                       hidden_gem_flag: null,
-                      seating_info: null,
                       service_options: null,
                       sustainability: null,
                       verified: null

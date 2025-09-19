@@ -501,7 +501,6 @@ export type Database = {
       }
       restaurants: {
         Row: {
-          accessibility: Json | null
           address: string | null
           ambience_tags: string[] | null
           atmosphere_score: number | null
@@ -525,7 +524,6 @@ export type Database = {
           photos: string[] | null
           price_range: string | null
           price_sign: number | null
-          seating_info: Json | null
           service_options: string[] | null
           specialties: string[] | null
           sustainability: string[] | null
@@ -535,7 +533,6 @@ export type Database = {
           wait_times: Json | null
         }
         Insert: {
-          accessibility?: Json | null
           address?: string | null
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
@@ -559,7 +556,6 @@ export type Database = {
           photos?: string[] | null
           price_range?: string | null
           price_sign?: number | null
-          seating_info?: Json | null
           service_options?: string[] | null
           specialties?: string[] | null
           sustainability?: string[] | null
@@ -569,7 +565,6 @@ export type Database = {
           wait_times?: Json | null
         }
         Update: {
-          accessibility?: Json | null
           address?: string | null
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
@@ -593,7 +588,6 @@ export type Database = {
           photos?: string[] | null
           price_range?: string | null
           price_sign?: number | null
-          seating_info?: Json | null
           service_options?: string[] | null
           specialties?: string[] | null
           sustainability?: string[] | null
@@ -787,7 +781,7 @@ export type Database = {
         Returns: {
           atmosphere_score: number
           authenticity_score: number
-          food_quality: number
+          average_rating: number
           created_at: string
           created_by: string
           cuisine: string[]
@@ -810,7 +804,7 @@ export type Database = {
       get_user_restaurants: {
         Args: { user_uuid?: string }
         Returns: {
-          food_quality: number
+          average_rating: number
           created_at: string
           cuisine: string[]
           id: string
