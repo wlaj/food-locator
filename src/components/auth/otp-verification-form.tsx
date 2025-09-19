@@ -63,6 +63,7 @@ export function OTPVerificationForm({
               name="token"
               label="Enter verification code"
               maxLength={6}
+              slotClassName="size-16"
             />
             
             <SubmitButton className="w-full" pendingText="Verifying...">

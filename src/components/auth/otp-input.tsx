@@ -11,6 +11,7 @@ interface OTPInputComponentProps {
   maxLength?: number
   label?: string
   className?: string
+  slotClassName?: string
   disabled?: boolean
 }
 
@@ -19,6 +20,7 @@ export function OTPInputComponent({
   maxLength = 6,
   label = "Enter verification code",
   className,
+  slotClassName,
   disabled = false
 }: OTPInputComponentProps) {
   const id = useId()
@@ -35,7 +37,7 @@ export function OTPInputComponent({
         render={({ slots }) => (
           <div className="flex">
             {slots.map((slot, idx) => (
-              <Slot key={idx} {...slot} />
+              <Slot key={idx} {...slot} slotClassName={slotClassName} />
             ))}
           </div>
         )}
@@ -44,12 +46,17 @@ export function OTPInputComponent({
   )
 }
 
-function Slot(props: SlotProps) {
+interface SlotComponentProps extends SlotProps {
+  slotClassName?: string
+}
+
+function Slot({ slotClassName, ...props }: SlotComponentProps) {
   return (
     <div
       className={cn(
         "border-input bg-background text-foreground relative -ms-px flex size-9 items-center justify-center border font-medium shadow-xs transition-[color,box-shadow] first:ms-0 first:rounded-s-md last:rounded-e-md",
-        { "border-ring ring-ring/50 z-10 ring-[3px]": props.isActive }
+        { "border-ring ring-ring/50 z-10 ring-[3px]": props.isActive },
+        slotClassName
       )}
     >
       {props.char !== null && <div>{props.char}</div>}
