@@ -68,6 +68,7 @@ import {
   ShoppingBag,
   Truck
 } from "lucide-react";
+import { IconCurrencyDollar, IconMoodSilence } from "@tabler/icons-react";
 
 
 interface RestaurantDialogProps {
@@ -116,6 +117,9 @@ export default function RestaurantDialog({
   const [selectedSustainabilityTags, setSelectedSustainabilityTags] = useState<string[]>(
     restaurant?.sustainability || []
   );
+  const [selectedBestFor, setSelectedBestFor] = useState<string[]>(
+    restaurant?.best_for || []
+  );
   const [waitTimes, setWaitTimes] = useState<WaitTimes>({
     seating: ((restaurant?.wait_times as unknown as WaitTimes) || {})?.seating || "short",
     food: ((restaurant?.wait_times as unknown as WaitTimes) || {})?.food || "normal"
@@ -155,6 +159,7 @@ export default function RestaurantDialog({
   const ambienceId = useId();
   const serviceId = useId();
   const sustainabilityId = useId();
+  const bestForId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
@@ -461,6 +466,11 @@ export default function RestaurantDialog({
       formData.append("sustainability", tag);
     });
 
+    formData.delete("best_for");
+    selectedBestFor.forEach(bestFor => {
+      formData.append("best_for", bestFor);
+    });
+
     // Handle boolean fields (admin only)
     if (userRole === 'admin') {
       formData.set("verified", verified.toString());
@@ -516,6 +526,7 @@ export default function RestaurantDialog({
           setSelectedAmbienceTags([]);
           setSelectedServiceOptions([]);
           setSelectedSustainabilityTags([]);
+          setSelectedBestFor([]);
           setWaitTimes({ seating: "short", food: "normal" });
           setPriceFrom("");
           setPriceTo("");
@@ -840,6 +851,7 @@ export default function RestaurantDialog({
                       updated_by: null,
                       accessibility: null,
                       ambience_tags: null,
+                      best_for: null,
                       hidden_gem_flag: null,
                       seating_info: null,
                       service_options: null,
@@ -1025,17 +1037,14 @@ export default function RestaurantDialog({
             <Label>Ambience</Label>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "Romantic", icon: Heart },
-                { label: "Family-friendly", icon: Users },
                 { label: "Casual", icon: Coffee },
-                { label: "Upscale", icon: Building2 },
+                { label: "Upscale", icon: IconCurrencyDollar },
                 { label: "Cozy", icon: HomeIcon },
                 { label: "Trendy", icon: Star },
                 { label: "Traditional", icon: Calendar },
                 { label: "Modern", icon: Wifi },
-                { label: "Quiet", icon: Calendar },
+                { label: "Quiet", icon: IconMoodSilence },
                 { label: "Lively", icon: Music },
-                { label: "Intimate", icon: Heart },
                 { label: "Spacious", icon: Building2 }
               ].map(({ label, icon: Icon }, index) => {
                 const id = `${ambienceId}-${index}`;
@@ -1054,6 +1063,89 @@ export default function RestaurantDialog({
                             setSelectedAmbienceTags(prev => [...prev, label]);
                           } else {
                             setSelectedAmbienceTags(prev => prev.filter(t => t !== label));
+                          }
+                        }}
+                      />
+                      <Icon className="opacity-60" size={16} aria-hidden="true" />
+                    </div>
+                    <Label htmlFor={id} className="text-sm">{label}</Label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Best For */}
+          <div className="space-y-2">
+            <Label>Best For</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "date", displayLabel: "Date", description: "romantic, intimate", icon: Heart },
+                { label: "family", displayLabel: "Family", description: "kids friendly, casual", icon: Users },
+                { label: "parents", displayLabel: "Parents", description: "relaxed, safe, traditional", icon: HomeIcon },
+                { label: "friends", displayLabel: "Friends", description: "casual, fun, social", icon: Coffee },
+                { label: "coworkers", displayLabel: "Coworkers", description: "professional, group dining", icon: Building2 },
+                { label: "solo", displayLabel: "Solo", description: "cozy, laptop/safe for one", icon: Coffee }
+              ].map(({ label, displayLabel, description, icon: Icon }, index) => {
+                const id = `${bestForId}-${index}`;
+                return (
+                  <div
+                    key={label}
+                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-2 rounded-md border p-4 shadow-xs outline-none"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <Checkbox
+                        id={id}
+                        className="order-1 after:absolute after:inset-0"
+                        checked={selectedBestFor.includes(label)}
+                        onCheckedChange={(checked: boolean) => {
+                          if (checked) {
+                            setSelectedBestFor(prev => [...prev, label]);
+                          } else {
+                            setSelectedBestFor(prev => prev.filter(bf => bf !== label));
+                          }
+                        }}
+                      />
+                      <Icon className="opacity-60" size={16} aria-hidden="true" />
+                    </div>
+                    <Label htmlFor={id} className="text-sm font-medium">{displayLabel}</Label>
+                    <p className="text-xs text-muted-foreground">{description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sustainability Tags */}
+          <div className="space-y-2">
+            <Label>Sustainability</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Organic", icon: Leaf },
+                { label: "Local Sourcing", icon: Building2 },
+                { label: "Waste Reduction", icon: Leaf },
+                { label: "Energy Efficient", icon: Leaf },
+                { label: "Vegan Options", icon: Utensils },
+                { label: "Sustainable Packaging", icon: Leaf },
+                { label: "Fair Trade", icon: Star },
+                { label: "Zero Waste", icon: Leaf }
+              ].map(({ label, icon: Icon }, index) => {
+                const id = `${sustainabilityId}-${index}`;
+                return (
+                  <div
+                    key={label}
+                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <Checkbox
+                        id={id}
+                        className="order-1 after:absolute after:inset-0"
+                        checked={selectedSustainabilityTags.includes(label)}
+                        onCheckedChange={(checked: boolean) => {
+                          if (checked) {
+                            setSelectedSustainabilityTags(prev => [...prev, label]);
+                          } else {
+                            setSelectedSustainabilityTags(prev => prev.filter(t => t !== label));
                           }
                         }}
                       />
@@ -1091,48 +1183,6 @@ export default function RestaurantDialog({
                             setSelectedServiceOptions(prev => [...prev, label]);
                           } else {
                             setSelectedServiceOptions(prev => prev.filter(o => o !== label));
-                          }
-                        }}
-                      />
-                      <Icon className="opacity-60" size={16} aria-hidden="true" />
-                    </div>
-                    <Label htmlFor={id} className="text-sm">{label}</Label>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Sustainability Tags */}
-          <div className="space-y-2">
-            <Label>Sustainability</Label>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Organic", icon: Leaf },
-                { label: "Local Sourcing", icon: Building2 },
-                { label: "Waste Reduction", icon: Leaf },
-                { label: "Energy Efficient", icon: Leaf },
-                { label: "Vegan Options", icon: Utensils },
-                { label: "Sustainable Packaging", icon: Leaf },
-                { label: "Fair Trade", icon: Star },
-                { label: "Zero Waste", icon: Leaf }
-              ].map(({ label, icon: Icon }, index) => {
-                const id = `${sustainabilityId}-${index}`;
-                return (
-                  <div
-                    key={label}
-                    className="border-input has-data-[state=checked]:border-primary/50 relative flex cursor-pointer flex-col gap-4 rounded-md border p-4 shadow-xs outline-none"
-                  >
-                    <div className="flex justify-between gap-2">
-                      <Checkbox
-                        id={id}
-                        className="order-1 after:absolute after:inset-0"
-                        checked={selectedSustainabilityTags.includes(label)}
-                        onCheckedChange={(checked: boolean) => {
-                          if (checked) {
-                            setSelectedSustainabilityTags(prev => [...prev, label]);
-                          } else {
-                            setSelectedSustainabilityTags(prev => prev.filter(t => t !== label));
                           }
                         }}
                       />

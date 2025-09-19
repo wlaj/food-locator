@@ -506,13 +506,14 @@ export type Database = {
           ambience_tags: string[] | null
           atmosphere_score: number | null
           authenticity_score: number | null
-          food_quality: number | null
+          best_for: string[] | null
           created_at: string | null
           created_by: string | null
           cuisine: string[] | null
           currency: string | null
           description: string | null
           dietary_tags: string[] | null
+          food_quality: number | null
           hidden_gem_flag: boolean | null
           id: string
           like_count: number | null
@@ -539,13 +540,14 @@ export type Database = {
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
           authenticity_score?: number | null
-          food_quality?: number | null
+          best_for?: string[] | null
           created_at?: string | null
           created_by?: string | null
           cuisine?: string[] | null
           currency?: string | null
           description?: string | null
           dietary_tags?: string[] | null
+          food_quality?: number | null
           hidden_gem_flag?: boolean | null
           id: string
           like_count?: number | null
@@ -572,13 +574,14 @@ export type Database = {
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
           authenticity_score?: number | null
-          food_quality?: number | null
+          best_for?: string[] | null
           created_at?: string | null
           created_by?: string | null
           cuisine?: string[] | null
           currency?: string | null
           description?: string | null
           dietary_tags?: string[] | null
+          food_quality?: number | null
           hidden_gem_flag?: boolean | null
           id?: string
           like_count?: number | null
