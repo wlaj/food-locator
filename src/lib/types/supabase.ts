@@ -781,13 +781,13 @@ export type Database = {
         Returns: {
           atmosphere_score: number
           authenticity_score: number
-          average_rating: number
           created_at: string
           created_by: string
           cuisine: string[]
           description: string
           dietary_tags: string[]
           distance_km: number
+          food_quality: number
           id: string
           location_lat: number
           location_lng: number
@@ -804,9 +804,9 @@ export type Database = {
       get_user_restaurants: {
         Args: { user_uuid?: string }
         Returns: {
-          average_rating: number
           created_at: string
           cuisine: string[]
+          food_quality: number
           id: string
           name: string
           neighborhood: string
