@@ -616,6 +616,16 @@ export default function RestaurantDialog({
             </div>
 
             <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              rows={3}
+              defaultValue={restaurant?.description || ""}
+            />
+          </div>
+
+            <div className="space-y-2">
               <Label>Cuisine</Label>
               <Popover open={cuisineOpen} onOpenChange={setCuisineOpen}>
                 <PopoverTrigger asChild>
@@ -990,16 +1000,6 @@ export default function RestaurantDialog({
                 <p>Authentic ✨</p>
               </div>
             </fieldset>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              rows={3}
-              defaultValue={restaurant?.description || ""}
-            />
           </div>
 
           <DietaryTagSelector
