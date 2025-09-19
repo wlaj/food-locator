@@ -41,7 +41,7 @@ const Gallery = ({
     };
   }, [carouselApi]);
   return (
-    <section className="py-24">
+    <section className="py-12">
         <div className="mb-8 flex flex-col justify-between md:mb-10 md:flex-row md:items-end lg:mb-12">
           <div>
             <h2 className="mb-1 text-xl font-semibold md:mb-4 md:text-2xl lg:mb-3">

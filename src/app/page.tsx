@@ -19,6 +19,11 @@ export default async function Home() {
           demoTitle={t("gallery.viewBasedOnLocation")}
           restaurants={restaurants || []}
         />
+        <Gallery
+          heading={t("gallery.restaurants2")}
+          demoTitle={t("gallery.viewBasedOnLocation2")}
+          restaurants={restaurants?.filter(restaurant => restaurant.price_sign === 1) || []}
+        />
         <HowItWorks heading={t("howItWorks.heading")} />
       </div>
     </div>

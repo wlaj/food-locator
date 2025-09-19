@@ -60,7 +60,9 @@
   },
   "gallery": {
     "restaurants": "Around the World",
-    "viewBasedOnLocation": "Reis met je vork, jij wilt het, wij hebben het."
+    "viewBasedOnLocation": "Reis met je vork, jij wilt het, wij hebben het.",
+    "restaurants2": "Cheap eats",
+    "viewBasedOnLocation2": "De beste gerechten onder de €15. Grote smaak, kleine prijs."
   },
   "auth": {
     "loginTitle": "Inloggen",

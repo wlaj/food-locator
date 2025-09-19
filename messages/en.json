@@ -60,7 +60,9 @@
   },
   "gallery": {
     "restaurants": "Around the World",
-    "viewBasedOnLocation": "Travel with your fork, you want it, we got it."
+    "viewBasedOnLocation": "Travel with your fork, you want it, we got it.",
+    "restaurants2": "Cheap eats",
+    "viewBasedOnLocation2": "The best eats under €15. Big flavor, small price."
   },
   "auth": {
     "loginTitle": "Login",
