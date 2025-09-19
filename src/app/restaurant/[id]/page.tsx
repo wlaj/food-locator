@@ -42,8 +42,8 @@ export async function generateMetadata({
   const description = restaurant.description
     ? `${restaurant.description} Located in ${restaurant.neighborhood}. ${
         restaurant.cuisine?.[0] || "Restaurant"
-      } cuisine with a rating of ${
-        restaurant.average_rating?.toFixed(1) || "unrated"
+      } cuisine with food quality of ${
+        restaurant.food_quality?.toFixed(1) || "unrated"
       }.`
     : `Discover ${restaurant.name}, a ${
         restaurant.cuisine?.[0] || "restaurant"
@@ -223,12 +223,12 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
                   </div>
                 </div>
 
-                {restaurant.average_rating && (
+                {restaurant.food_quality && (
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-muted-foreground">Rating</div>
+                    <div className="text-sm text-muted-foreground">Food Quality</div>
                     <div className="font-medium flex items-center justify-center">
                       <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                      {formatRating(restaurant.average_rating)}
+                      {formatRating(restaurant.food_quality)}/10
                     </div>
                   </div>
                 )}

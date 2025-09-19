@@ -58,7 +58,7 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
               <TableHead>Cuisine</TableHead>
               <TableHead>Neighborhood</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead>Rating</TableHead>
+              <TableHead>Food Quality</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -79,7 +79,7 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                     <div>
                       {restaurant.name || "Unnamed Restaurant"}
                       {restaurant.description && (
-                        <div className="text-sm text-muted-foreground mt-1 max-w-xs truncate">
+                        <div className="text-sm text-muted-foreground mt-1 max-w-[250px] truncate">
                           {restaurant.description}
                         </div>
                       )}
@@ -94,8 +94,8 @@ export default function RestaurantTable({ restaurants }: RestaurantTableProps) {
                        "-"}
                   </TableCell>
                   <TableCell>
-                    {restaurant.average_rating
-                      ? `${restaurant.average_rating}/5`
+                    {restaurant.food_quality
+                      ? `${restaurant.food_quality}/10`
                       : "-"}
                   </TableCell>
                   <TableCell>

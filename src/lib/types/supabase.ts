@@ -506,7 +506,7 @@ export type Database = {
           ambience_tags: string[] | null
           atmosphere_score: number | null
           authenticity_score: number | null
-          average_rating: number | null
+          food_quality: number | null
           created_at: string | null
           created_by: string | null
           cuisine: string[] | null
@@ -539,7 +539,7 @@ export type Database = {
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
           authenticity_score?: number | null
-          average_rating?: number | null
+          food_quality?: number | null
           created_at?: string | null
           created_by?: string | null
           cuisine?: string[] | null
@@ -572,7 +572,7 @@ export type Database = {
           ambience_tags?: string[] | null
           atmosphere_score?: number | null
           authenticity_score?: number | null
-          average_rating?: number | null
+          food_quality?: number | null
           created_at?: string | null
           created_by?: string | null
           cuisine?: string[] | null
@@ -784,7 +784,7 @@ export type Database = {
         Returns: {
           atmosphere_score: number
           authenticity_score: number
-          average_rating: number
+          food_quality: number
           created_at: string
           created_by: string
           cuisine: string[]
@@ -807,7 +807,7 @@ export type Database = {
       get_user_restaurants: {
         Args: { user_uuid?: string }
         Returns: {
-          average_rating: number
+          food_quality: number
           created_at: string
           cuisine: string[]
           id: string

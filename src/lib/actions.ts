@@ -229,7 +229,7 @@ export async function createRestaurant(formData: FormData) {
   const price_range = formData.get('price_range') as string || null
   const currency = formData.get('currency') as string || null
   const wait_times = formData.get('wait_times') ? JSON.parse(formData.get('wait_times') as string) : null
-  const average_rating = formData.get('average_rating') ? parseFloat(formData.get('average_rating') as string) : null
+  const food_quality = formData.get('food_quality') ? parseFloat(formData.get('food_quality') as string) : null
   const atmosphere_score = formData.get('atmosphere_score') ? parseFloat(formData.get('atmosphere_score') as string) : null
   const authenticity_score = formData.get('authenticity_score') ? parseFloat(formData.get('authenticity_score') as string) : null
   const image_url = formData.get('image_url') as string || null
@@ -262,7 +262,7 @@ export async function createRestaurant(formData: FormData) {
     price_range,
     currency,
     wait_times,
-    average_rating,
+    food_quality,
     atmosphere_score,
     authenticity_score,
     photos: image_url ? [image_url] : null,
@@ -297,7 +297,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const price_range = formData.get('price_range') as string || null
   const currency = formData.get('currency') as string || null
   const wait_times = formData.get('wait_times') ? JSON.parse(formData.get('wait_times') as string) : null
-  const average_rating = formData.get('average_rating') ? parseFloat(formData.get('average_rating') as string) : null
+  const food_quality = formData.get('food_quality') ? parseFloat(formData.get('food_quality') as string) : null
   const atmosphere_score = formData.get('atmosphere_score') ? parseFloat(formData.get('atmosphere_score') as string) : null
   const authenticity_score = formData.get('authenticity_score') ? parseFloat(formData.get('authenticity_score') as string) : null
   const image_url = formData.get('image_url') as string || null
@@ -330,7 +330,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
     price_range,
     currency,
     wait_times,
-    average_rating,
+    food_quality,
     atmosphere_score,
     authenticity_score,
     photos: image_url ? [image_url] : null,

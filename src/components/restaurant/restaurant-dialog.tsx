@@ -811,7 +811,7 @@ export default function RestaurantDialog({
                       address: addressValidation.formattedAddress,
                       cuisine: selectedCuisines.length > 0 ? selectedCuisines : null,
                       neighborhood: selectedNeighborhood || null,
-                      average_rating: null,
+                      food_quality: null,
                       price_range: null,
                       price_sign: null,
                       currency: null,
@@ -905,14 +905,14 @@ export default function RestaurantDialog({
 
             <fieldset className="space-y-4">
               <legend className="text-foreground text-sm leading-none font-medium">
-                Rate your experience (1-5)
+                Food Quality (1-10)
               </legend>
               <RadioGroup
                 className="flex gap-0 -space-x-px rounded-md shadow-xs"
-                name="average_rating"
-                defaultValue={restaurant?.average_rating?.toString() || ""}
+                name="food_quality"
+                defaultValue={restaurant?.food_quality?.toString() || ""}
               >
-                {["1", "2", "3", "4", "5"].map((value) => (
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].map((value) => (
                   <label
                     key={value}
                     className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex size-9 flex-1 cursor-pointer flex-col items-center justify-center gap-3 border text-center text-sm font-medium transition-[color,box-shadow] outline-none first:rounded-s-md last:rounded-e-md has-focus-visible:ring-[3px] has-data-disabled:cursor-not-allowed has-data-disabled:opacity-50 has-data-[state=checked]:z-10"
@@ -926,8 +926,8 @@ export default function RestaurantDialog({
                 ))}
               </RadioGroup>
               <div className="mt-1 flex justify-between text-xs font-medium">
-                <p>😠 Terrible</p>
-                <p>Amazing 😀</p>
+                <p>🤢 Poor</p>
+                <p>Excellent 🤤</p>
               </div>
             </fieldset>
 
