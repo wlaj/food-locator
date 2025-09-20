@@ -8,6 +8,7 @@ import Image from "next/image"
 import { useCharacterLimit } from "@/hooks/use-character-limit"
 import { Button } from "@/components/ui/button"
 import { SubmitButton } from "@/components/ui/submit-button"
+import { compressImage, avatarCompressionOptions } from "@/lib/image-compression"
 import {
   Dialog,
   DialogClose,
@@ -232,12 +233,29 @@ function Avatar({ user }: { user: User | null }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(
     user?.user_metadata?.avatar_url || null
   )
+  const [compressedFile, setCompressedFile] = useState<File | null>(null)
   
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const url = URL.createObjectURL(file)
-      setSelectedImage(url)
+      try {
+        const compressed = await compressImage(file, avatarCompressionOptions)
+        const url = URL.createObjectURL(compressed)
+        setSelectedImage(url)
+        setCompressedFile(compressed)
+        
+        // Update the file input with the compressed file
+        const dt = new DataTransfer()
+        dt.items.add(compressed)
+        if (event.target) {
+          event.target.files = dt.files
+        }
+      } catch (error) {
+        console.error('Error compressing image:', error)
+        const url = URL.createObjectURL(file)
+        setSelectedImage(url)
+        setCompressedFile(file)
+      }
     }
   }
   

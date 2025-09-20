@@ -7,6 +7,7 @@ import Image from "next/image"
 import { useFileUpload } from "@/hooks/use-file-upload"
 import { Button } from "@/components/ui/button"
 import { uploadRestaurantImage, deleteRestaurantImage } from "@/lib/actions"
+import { compressImage, restaurantImageCompressionOptions } from "@/lib/image-compression"
 
 interface RestaurantImageUploadProps {
   defaultImageUrl?: string
@@ -19,8 +20,8 @@ export default function RestaurantImageUpload({
   name = "image_url",
   onImageChange 
 }: RestaurantImageUploadProps) {
-  const maxSizeMB = 5
-  const maxSize = maxSizeMB * 1024 * 1024 // 5MB limit
+  const maxSizeMB = 20
+  const maxSize = maxSizeMB * 1024 * 1024 // 20MB limit before compression
   
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(defaultImageUrl || null)
   const [isUploading, setIsUploading] = useState(false)
@@ -48,7 +49,8 @@ export default function RestaurantImageUpload({
   const handleFileUpload = useCallback(async (file: File) => {
     setIsUploading(true)
     try {
-      const result = await uploadRestaurantImage(file)
+      const compressedFile = await compressImage(file, restaurantImageCompressionOptions)
+      const result = await uploadRestaurantImage(compressedFile)
       if (result.url) {
         setUploadedImageUrl(result.url)
         onImageChange?.(result.url)
@@ -140,7 +142,7 @@ export default function RestaurantImageUpload({
               </div>
               <p className="mb-1.5 text-sm font-medium">Drop your restaurant image here</p>
               <p className="text-muted-foreground text-xs">
-                SVG, PNG, JPG, GIF or WebP (max. {maxSizeMB}MB)
+                SVG, PNG, JPG, GIF or WebP (images will be compressed)
               </p>
               <Button
                 type="button"

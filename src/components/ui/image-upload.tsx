@@ -7,6 +7,7 @@ import Image from "next/image"
 import { useFileUpload } from "@/hooks/use-file-upload"
 import { Button } from "@/components/ui/button"
 import { uploadRestaurantImage, deleteRestaurantImage, uploadDishImage, deleteDishImage } from "@/lib/actions"
+import { compressImage, restaurantImageCompressionOptions, dishImageCompressionOptions } from "@/lib/image-compression"
 
 type ImageType = 'restaurant' | 'dish'
 
@@ -23,7 +24,7 @@ export default function ImageUpload({
   name = "image_url",
   onImageChange 
 }: ImageUploadProps) {
-  const maxSizeMB = type === 'restaurant' ? 5 : 5 // 5MB limit for both
+  const maxSizeMB = type === 'restaurant' ? 20 : 20 // 20MB limit before compression
   const maxSize = maxSizeMB * 1024 * 1024
   
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(defaultImageUrl || null)
@@ -55,7 +56,9 @@ export default function ImageUpload({
   const handleFileUpload = useCallback(async (file: File) => {
     setIsUploading(true)
     try {
-      const result = await uploadFunction(file)
+      const compressionOptions = type === 'restaurant' ? restaurantImageCompressionOptions : dishImageCompressionOptions
+      const compressedFile = await compressImage(file, compressionOptions)
+      const result = await uploadFunction(compressedFile)
       if (result.url) {
         setUploadedImageUrl(result.url)
         onImageChange?.(result.url)
@@ -69,7 +72,7 @@ export default function ImageUpload({
     } finally {
       setIsUploading(false)
     }
-  }, [onImageChange, files, removeFile, uploadFunction])
+  }, [onImageChange, files, removeFile, uploadFunction, type])
 
   const handleRemoveImage = async () => {
     if (uploadedImageUrl && !files[0]) {
@@ -149,7 +152,7 @@ export default function ImageUpload({
               </div>
               <p className="mb-1.5 text-sm font-medium">Drop your {entityName} image here</p>
               <p className="text-muted-foreground text-xs">
-                SVG, PNG, JPG, GIF or WebP (max. {maxSizeMB}MB)
+                SVG, PNG, JPG, GIF or WebP (images will be compressed)
               </p>
               <Button
                 type="button"
