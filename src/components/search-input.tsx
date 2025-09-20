@@ -23,6 +23,7 @@ import { IconLocation } from "@tabler/icons-react";
 import type { Tables } from "@/lib/types/supabase";
 import { TagInput, type Tag } from "emblor";
 import { useCuisines, useDietaryOptions, useUsers } from "@/lib/queries";
+import { useSearchStore } from "@/stores/search-store";
 
 type Location = Tables<"locations">;
 
@@ -64,21 +65,36 @@ function SearchInputContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [searchQuery, setSearchQuery] = React.useState("");
+  
+  // Local state for UI-only elements (dropdowns, search values)
   const [locationOpen, setLocationOpen] = React.useState(false);
   const [mobileLocationOpen, setMobileLocationOpen] = React.useState(false);
-  const [selectedLocation, setSelectedLocation] = React.useState("amsterdam");
   const [searchValue, setSearchValue] = React.useState("");
   const [mobileSearchValue, setMobileSearchValue] = React.useState("");
-  const [showUserDropdown, setShowUserDropdown] = React.useState(false);
-  const [userSearchTerm, setUserSearchTerm] = React.useState("");
-  // New state for tags and hashtag functionality
-  const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
-  const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(
-    null
-  );
-  const [showHashtagDropdown, setShowHashtagDropdown] = React.useState(false);
-  const [hashtagSearchTerm, setHashtagSearchTerm] = React.useState("");
+  const [activeTagIndex, setActiveTagIndex] = React.useState<number | null>(null);
+  
+  // Zustand store state
+  const {
+    searchQuery,
+    setSearchQuery,
+    showUserDropdown,
+    setShowUserDropdown,
+    showHashtagDropdown,
+    setShowHashtagDropdown,
+    userSearchTerm,
+    setUserSearchTerm,
+    hashtagSearchTerm,
+    setHashtagSearchTerm,
+    selectedTags,
+    setSelectedTags,
+    selectedLocation,
+    setSelectedLocation,
+    justSelectedUser,
+    setJustSelectedUser,
+    isUpdatingFromUrl,
+    setIsUpdatingFromUrl,
+    closeAllDropdowns,
+  } = useSearchStore();
   
   // Use cached queries
   const { data: users = [], isLoading: isLoadingUsers } = useUsers();
@@ -135,6 +151,10 @@ function SearchInputContent({
     const urlQuery = searchParams.get("q");
     const urlLocation = searchParams.get("location");
 
+    setIsUpdatingFromUrl(true);
+    // Close all dropdowns first when updating from URL
+    closeAllDropdowns();
+    
     // Update search query from URL (but not if it's the wildcard "*")
     if (urlQuery && urlQuery !== "*") {
       setSearchQuery(urlQuery);
@@ -142,6 +162,9 @@ function SearchInputContent({
       // Clear search query if not on search page
       setSearchQuery("");
     }
+    
+    // Reset the flag after a longer delay to ensure all effects complete
+    setTimeout(() => setIsUpdatingFromUrl(false), 500);
 
     // Handle tags from URL parameters
     const urlTags = searchParams.get("tags");
@@ -165,10 +188,21 @@ function SearchInputContent({
         setSelectedLocation(matchingLocation.value);
       }
     }
-  }, [searchParams, pathname, locations]);
+  }, [searchParams, pathname, locations, closeAllDropdowns, setIsUpdatingFromUrl, setSearchQuery, setSelectedTags, setSelectedLocation]);
 
   // Handle user search when @ is typed
   React.useEffect(() => {
+    // Don't show dropdown if user was just selected or if updating from URL
+    if (justSelectedUser || isUpdatingFromUrl) {
+      setJustSelectedUser(false);
+      return;
+    }
+
+    // Don't show dropdown on search page when query comes from URL
+    if (pathname === "/search" && searchParams.get("q")) {
+      return;
+    }
+
     const query = searchQuery.trim();
     const atIndex = query.lastIndexOf("@");
 
@@ -185,7 +219,12 @@ function SearchInputContent({
     } else {
       setShowUserDropdown(false);
     }
-  }, [searchQuery, pathname]);
+  }, [searchQuery, pathname, justSelectedUser, isUpdatingFromUrl, searchParams]);
+
+  // Close dropdowns when pathname changes
+  React.useEffect(() => {
+    closeAllDropdowns();
+  }, [pathname, closeAllDropdowns]);
 
   // Handle hashtag search when # is typed
   React.useEffect(() => {
@@ -210,8 +249,7 @@ function SearchInputContent({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowUserDropdown(false);
-    setShowHashtagDropdown(false);
+    closeAllDropdowns();
     const selectedLocationData = locations.find(
       (loc) => loc.value === selectedLocation
     );
@@ -266,6 +304,7 @@ function SearchInputContent({
       newQuery = beforeAt + "@" + user.username;
     }
 
+    setJustSelectedUser(true);
     setSearchQuery(newQuery);
     setShowUserDropdown(false);
     // Don't automatically navigate - let user submit when ready
