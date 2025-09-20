@@ -55,8 +55,8 @@ export default function EditDishDialog({
 
     // Handle image updates
     if (imageUrl && imageUrl !== dish.image_url) {
-      // New image was uploaded
-      formData.append('imageUrl', imageUrl);
+      // New image was uploaded - signal that we have a new URL
+      formData.append('newImageUrl', imageUrl);
     } else if (!imageUrl && dish.image_url) {
       // Image was removed
       formData.append('removeImage', 'true');

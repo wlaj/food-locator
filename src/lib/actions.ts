@@ -838,6 +838,7 @@ export async function updateDishPost(dishId: string, postId: string, formData: F
   const price = formData.get('price') ? parseFloat(formData.get('price') as string) : null;
   const content = formData.get('content') as string;
   const imageFile = formData.get('image') as File | null;
+  const newImageUrl = formData.get('newImageUrl') as string | null;
   const removeImage = formData.get('removeImage') === 'true';
   
   let imageUrl = null;
@@ -876,6 +877,29 @@ export async function updateDishPost(dishId: string, postId: string, formData: F
       return { error: 'You can only edit your own posts' };
     }
 
+    // Get current dish data to access existing image info
+    const { data: currentDish, error: currentDishError } = await supabase
+      .from('dishes')
+      .select('image_url, image_path, restaurant_id')
+      .eq('id', dishId)
+      .single();
+
+    if (currentDishError) {
+      return { error: 'Failed to fetch current dish data' };
+    }
+
+    // Only clean up the current dish's old image if we're updating with a new one
+    if ((imageFile || newImageUrl) && currentDish.image_path) {
+      try {
+        await supabase.storage
+          .from('restaurant-images')
+          .remove([currentDish.image_path])
+      } catch (error) {
+        console.error('Error removing old dish image:', error)
+        // Don't fail the update if cleanup fails
+      }
+    }
+
     // Handle image upload if new image provided
     if (imageFile && imageFile.size > 0) {
       const uploadResult = await uploadDishImage(imageFile);
@@ -887,6 +911,19 @@ export async function updateDishPost(dishId: string, postId: string, formData: F
       fileName = imageFile.name;
       fileSize = imageFile.size;
       mimeType = imageFile.type;
+    } else if (newImageUrl && newImageUrl !== currentDish.image_url) {
+      // New image URL provided (already uploaded by ImageUpload component)
+      // Extract path from the new URL for storage reference
+      try {
+        const url = new URL(newImageUrl);
+        const pathParts = url.pathname.split('/');
+        imagePath = pathParts.slice(-2).join('/'); // gets "dishes/filename.ext"
+      } catch (error) {
+        console.error('Error parsing new image URL:', error);
+      }
+      
+      imageUrl = newImageUrl;
+      // We don't have file metadata for pre-uploaded images, so leave them null
     }
 
     // Prepare dish update object
@@ -916,7 +953,18 @@ export async function updateDishPost(dishId: string, postId: string, formData: F
       dishUpdates.file_size = fileSize;
       dishUpdates.mime_type = mimeType;
     } else if (removeImage) {
-      // Image was removed
+      // Image was removed - delete from storage and clear DB fields
+      if (currentDish.image_path) {
+        try {
+          await supabase.storage
+            .from('restaurant-images')
+            .remove([currentDish.image_path]);
+        } catch (error) {
+          console.error('Error removing dish image:', error);
+          // Don't fail the update if cleanup fails
+        }
+      }
+      
       dishUpdates.image_url = null;
       dishUpdates.image_path = null;
       dishUpdates.file_name = null;
