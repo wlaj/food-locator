@@ -13,7 +13,7 @@ export default function NavbarClient({
 }: {
   locations: Array<Location> | null;
 }) {
-  const { isAtTop } = useScroll();
+  const { isAtTop } = useScroll(250);
   const pathname = usePathname();
   const isSearchPage = pathname === "/search";
   const isCommunityPage = pathname === "/community";

@@ -16,13 +16,14 @@ function getCuisineIcon(cuisine: string[] | null): string {
     // Asian cuisines
     'chinese': '🥢',
     'japanese': '🍣',
+    'korean': '🍜',
     'sushi': '🍣',
-    'korean': '🍲',
     'thai': '🌶️',
     'vietnamese': '🍜',
     'indian': '🍛',
     'asian': '🥢',
     'indonesian': '🍲',
+    'surinamese': '🍲',
     'malaysian': '🍲',
     'filipino': '🍲',
     
@@ -46,7 +47,8 @@ function getCuisineIcon(cuisine: string[] | null): string {
     'southern': '🔥',
     
     // Middle Eastern & African
-    'middle eastern': '🥙',
+    'middle-eastern': '🥙',
+    'syrian': '🥙',
     'moroccan': '🍖',
     'turkish': '🥙',
     'lebanese': '🥗',
