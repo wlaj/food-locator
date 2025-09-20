@@ -60,7 +60,7 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline">Edit profile</Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 overflow-y-visible p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
+      <DialogContent className="flex flex-col gap-0 max-h-[90vh] p-0 sm:max-w-lg [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
             Edit profile
@@ -70,8 +70,8 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
           Make changes to your profile here. You can change your photo and set a
           username.
         </DialogDescription>
-        <div className="overflow-y-auto">
-          <form className="space-y-4" action={updateUserProfile}>
+        <form className="flex flex-col flex-1 min-h-0" action={updateUserProfile}>
+          <div className="overflow-y-auto flex-1">
             {/* <ProfileBg /> */}
             <Avatar user={user} />
             <div className="px-6 pt-4 pb-6">
@@ -157,18 +157,17 @@ export default function ProfileEditDialog({ user }: ProfileEditDialogProps) {
                   characters left
                 </p>
               </div>
-              
-              </div>
-              <DialogFooter className="border-t px-6 py-4">
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </DialogClose>
-                <SubmitButton pendingText="Saving...">Save changes</SubmitButton>
-              </DialogFooter>
-            </form>
-        </div>
+            </div>
+          </div>
+          <DialogFooter className="border-t px-6 py-4">
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <SubmitButton pendingText="Saving...">Save changes</SubmitButton>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
