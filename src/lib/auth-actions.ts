@@ -105,6 +105,23 @@ export async function updateUserProfile(formData: FormData) {
       redirect('/dashboard?error=' + encodeURIComponent('Authentication error'))
     }
     
+    // Remove all existing avatar files for this user before uploading new one
+    try {
+      const { data: existingFiles } = await supabase.storage
+        .from('avatars')
+        .list(user.id)
+      
+      if (existingFiles && existingFiles.length > 0) {
+        const filesToRemove = existingFiles.map(file => `${user.id}/${file.name}`)
+        await supabase.storage
+          .from('avatars')
+          .remove(filesToRemove)
+      }
+    } catch (error) {
+      console.error('Error cleaning up previous avatar files:', error)
+      // Don't fail the upload if cleanup fails
+    }
+    
     // Create file path that matches RLS policy: userId/filename
     const fileExt = avatarFile.name.split('.').pop()
     const fileName = `${user.id}/${Date.now()}.${fileExt}`

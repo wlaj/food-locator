@@ -233,6 +233,7 @@ function Avatar({ user }: { user: User | null }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(
     user?.user_metadata?.avatar_url || null
   )
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [compressedFile, setCompressedFile] = useState<File | null>(null)
   
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
